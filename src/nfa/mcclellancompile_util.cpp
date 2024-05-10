@@ -210,20 +210,30 @@ set<ReportID> all_reports(const raw_dfa &rdfa) {
 }
 
 bool has_eod_accepts(const raw_dfa &rdfa) {
-    for (const auto &ds : rdfa.states) {
-        if (!ds.reports_eod.empty()) {
-            return true;
-        }
+
+    auto isempty = [](const dstate &d) { return !d.reports_eod.empty(); };
+    if (auto d = std::find_if(begin(rdfa.states), end(rdfa.states), isempty); d != std::end(rdfa.states)){
+         return true;
     }
+
+    // for (const auto &ds : rdfa.states) {
+    //     if (!ds.reports_eod.empty()) {
+    //         return true;
+    //     }
+    // }
     return false;
 }
 
 bool has_non_eod_accepts(const raw_dfa &rdfa) {
-    for (const auto &ds : rdfa.states) {
-        if (!ds.reports.empty()) {
-            return true;
-        }
+    auto isempty = [](const dstate &d) { return !d.reports.empty(); };
+    if (auto d = std::find_if(begin(rdfa.states), end(rdfa.states), isempty); d != std::end(rdfa.states)){
+         return true;
     }
+    // for (const auto &ds : rdfa.states) {
+    //     if (!ds.reports.empty()) {
+    //         return true;
+    //     }
+    // }
     return false;
 }
 
