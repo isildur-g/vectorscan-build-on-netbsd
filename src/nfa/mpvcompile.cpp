@@ -104,12 +104,19 @@ void writeSentinel(mpv_puffette *out) {
 
 static
 void writeDeadPoint(mpv_kilopuff *out, const vector<raw_puff> &puffs) {
-    for (const auto &puff : puffs) {
-        if (puff.unbounded) { /* mpv can never die */
-            out->dead_point = MPV_DEAD_VALUE;
-            return;
-        }
+
+    auto punb = [](const raw_puff &p) { return p.unbounded; };
+
+    if (std::any_of(puffs.cbegin(), puffs.cend(), punb)){
+        out->dead_point = MPV_DEAD_VALUE;
+        return;
     }
+    // for (const auto &puff : puffs) {
+    //     if (puff.unbounded) { /* mpv can never die */
+    //         out->dead_point = MPV_DEAD_VALUE;
+    //         return;
+    //     }
+    // }
 
     out->dead_point = puffs.back().repeats + 1;
 }
@@ -310,11 +317,22 @@ void fillCounterInfos(vector<mpv_counter_info> *out, u32 *curr_decomp_offset,
 static
 const mpv_counter_info &findCounter(const vector<mpv_counter_info> &counters,
                                     u32 i) {
-    for (const auto &counter : counters) {
-        if (i >= counter.kilo_begin && i < counter.kilo_end) {
-            return counter;
+    struct fcount {
+        const u32 i;
+        fcount(u32 n) : i(n) {}
+        bool operator()(const mpv_counter_info &c) {
+            return (i >= c.kilo_begin && i < c.kilo_end);
         }
+    };
+    if (auto c = std::find_if(begin(counters), end(counters), fcount(i)); c != end(counters)){
+        return *c;
     }
+
+    // for (const auto &counter : counters) {
+    //     if (i >= counter.kilo_begin && i < counter.kilo_end) {
+    //         return counter;
+    //     }
+    // }
     assert(0);
     return counters.front();
 }
