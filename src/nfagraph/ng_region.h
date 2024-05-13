@@ -115,10 +115,11 @@ bool isRegionEntry(const Graph &g, NFAVertex v,
                    const std::unordered_map<NFAVertex, u32> &region_map) {
     // Note that some graph types do not have inv_adjacent_vertices, so we must
     // use in_edges here.
-    for (const auto &e : in_edges_range(v, g)) {
-        if (!inSameRegion(g, v, source(e, g), region_map)) {
-            return true;
-        }
+
+    auto samr = [&g=g, &v=v, &region_map=region_map](const NFAEdge &e) { return !inSameRegion(g, v, source(e, g), region_map); };
+    const auto r = in_edges_range(v, g);
+    if (std::any_of(r.begin(), r.end(), samr)) {
+        return true;
     }
 
     return false;
@@ -128,10 +129,11 @@ bool isRegionEntry(const Graph &g, NFAVertex v,
 template <class Graph>
 bool isRegionExit(const Graph &g, NFAVertex v,
                   const std::unordered_map<NFAVertex, u32> &region_map) {
-    for (auto w : adjacent_vertices_range(v, g)) {
-        if (!inSameRegion(g, v, w, region_map)) {
-            return true;
-        }
+
+    auto samr = [&g=g, &v=v, &region_map=region_map](const NFAVertex &w) { return !inSameRegion(g, v, w, region_map); };
+    const auto w = adjacent_vertices_range(v, g);
+    if (std::any_of(w.begin(), w.end(), samr)) {
+        return true;
     }
 
     return false;
@@ -141,6 +143,7 @@ bool isRegionExit(const Graph &g, NFAVertex v,
 template <class Graph>
 bool isSingletonRegion(const Graph &g, NFAVertex v,
                        const std::unordered_map<NFAVertex, u32> &region_map) {
+
     for (const auto &e : in_edges_range(v, g)) {
         auto u = source(e, g);
         if (u != v && inSameRegion(g, v, u, region_map)) {
@@ -202,12 +205,15 @@ bool isOptionalRegion(const Graph &g, NFAVertex v,
 
         assert(inEarlierRegion(g, v, u, region_map));
 
-        for (auto w : adjacent_vertices_range(u, g)) {
+        auto inlr = [&g=g, &v=v, &region_map=region_map](const NFAVertex &w) {
             DEBUG_PRINTF("    searching to w=%zu\n", g[w].index);
-            if (inLaterRegion(g, v, w, region_map)) {
-                return true;
-            }
+            return inLaterRegion(g, v, w, region_map);
+        };
+        const auto w = adjacent_vertices_range(u, g);
+        if (std::any_of(w.begin(), w.end(), inlr)) {
+            return true;
         }
+
         return false;
     }
 
