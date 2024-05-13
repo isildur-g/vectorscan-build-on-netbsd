@@ -111,12 +111,6 @@ void writeDeadPoint(mpv_kilopuff *out, const vector<raw_puff> &puffs) {
         out->dead_point = MPV_DEAD_VALUE;
         return;
     }
-    // for (const auto &puff : puffs) {
-    //     if (puff.unbounded) { /* mpv can never die */
-    //         out->dead_point = MPV_DEAD_VALUE;
-    //         return;
-    //     }
-    // }
 
     out->dead_point = puffs.back().repeats + 1;
 }
