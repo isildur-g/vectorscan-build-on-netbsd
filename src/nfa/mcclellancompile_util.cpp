@@ -215,12 +215,6 @@ bool has_eod_accepts(const raw_dfa &rdfa) {
     if (auto d = std::find_if(begin(rdfa.states), end(rdfa.states), isempty); d != std::end(rdfa.states)){
          return true;
     }
-
-    // for (const auto &ds : rdfa.states) {
-    //     if (!ds.reports_eod.empty()) {
-    //         return true;
-    //     }
-    // }
     return false;
 }
 
@@ -229,11 +223,6 @@ bool has_non_eod_accepts(const raw_dfa &rdfa) {
     if (auto d = std::find_if(begin(rdfa.states), end(rdfa.states), isempty); d != std::end(rdfa.states)){
          return true;
     }
-    // for (const auto &ds : rdfa.states) {
-    //     if (!ds.reports.empty()) {
-    //         return true;
-    //     }
-    // }
     return false;
 }
 
