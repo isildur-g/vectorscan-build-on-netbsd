@@ -44,10 +44,9 @@ void raw_dfa::stripExtraEodReports(void) {
 }
 
 bool raw_dfa::hasEodReports(void) const {
-    for (const dstate &ds : states) {
-        if (!ds.reports_eod.empty()) {
-            return true;
-        }
+    auto rempt = [](const dstate &d) { return !d.reports_eod.empty(); };
+    if (std::any_of(states.cbegin(), states.cend(), rempt)){
+        return true;
     }
     return false;
 }
