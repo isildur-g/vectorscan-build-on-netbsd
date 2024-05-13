@@ -322,11 +322,6 @@ const mpv_counter_info &findCounter(const vector<mpv_counter_info> &counters,
         return *c;
     }
 
-    // for (const auto &counter : counters) {
-    //     if (i >= counter.kilo_begin && i < counter.kilo_end) {
-    //         return counter;
-    //     }
-    // }
     assert(0);
     return counters.front();
 }
