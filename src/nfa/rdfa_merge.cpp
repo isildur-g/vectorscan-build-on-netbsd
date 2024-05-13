@@ -232,10 +232,16 @@ public:
 
         // Must all be external reports.
         assert(rm);
-        for (const auto &report_id : test_reports) {
-            if (!isExternalReport(rm->getReport(report_id))) {
-                return false;
+
+        struct getr {
+            const ReportManager *rm;
+            getr(const ReportManager *r) : rm(r) {}
+            bool operator()(const ReportID &id) {
+                return (!isExternalReport(rm->getReport(id)));
             }
+        };
+        if (std::any_of(begin(test_reports), end(test_reports), getr(rm))) {
+            return false;
         }
 
         return true;
@@ -245,12 +251,19 @@ public:
     bool shouldMinimize() const {
         // We only need to run minimization if our merged DFAs shared a report.
         flat_set<ReportID> seen_reports;
+        struct seenr {
+            flat_set<ReportID> &sr;
+            seenr(flat_set<ReportID> &s) : sr(s) {}
+            bool operator()(const ReportID &id) {
+                DEBUG_PRINTF("report %u in several dfas\n", id);
+                return (!sr.insert(id).second);
+            }
+        };
+
         for (const auto &rdfa : nfas) {
-            for (const auto &report_id : all_reports(*rdfa)) {
-                if (!seen_reports.insert(report_id).second) {
-                    DEBUG_PRINTF("report %u in several dfas\n", report_id);
-                    return true;
-                }
+            const auto &allrep = all_reports(*rdfa);
+            if (std::any_of(begin(allrep), end(allrep), seenr(seen_reports))) {
+                return true;
             }
         }
 
