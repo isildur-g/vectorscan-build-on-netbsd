@@ -1505,6 +1505,21 @@ hwlm_error_t confirm_teddy_64_simple(m128 var, int bucket, int offset, int reaso
     }
     return HWLM_SUCCESS;
 }
+
+#define confirm_teddy_128_f confirm_teddy_64_simple
+
+#define CONFIRM_TEDDY_128(var, bucket, offset, reason, ptr)             \
+do {                                                                        \
+    if (unlikely(diff128(var, ones128()))) {                                \
+        u64a __attribute__((aligned(16))) vec[2];                           \
+        store128(vec, var);                                                 \
+        u64a lo = vec[0];                                                   \
+        u64a hi = vec[1];                                                   \
+        CONF_CHUNK_64(lo, bucket, offset, reason, ptr);                 \
+        CONF_CHUNK_64(hi, bucket, offset + 8, reason, ptr);             \
+    }                                                                       \
+} while(0)
+
 #else // 32/64
 hwlm_error_t confirm_teddy_32_simple(m128 var, int bucket, int offset, int reason,
                              const struct FDR_Runtime_Args *a,
@@ -1522,15 +1537,27 @@ hwlm_error_t confirm_teddy_32_simple(m128 var, int bucket, int offset, int reaso
     }
     return HWLM_SUCCESS;
 }
-#endif
-
-#ifdef ARCH_64_BIT
-#define confirm_teddy_128_f confirm_teddy_64_simple
-#else
 #define confirm_teddy_128_f confirm_teddy_32_simple
+
+#define CONFIRM_TEDDY_128(var, bucket, offset, reason, ptr)             \
+do {                                                                        \
+    if (unlikely(diff128(var, ones128()))) {                                \
+        u32 part1 = movd(var);                                              \
+        u32 part2 = movd(rshiftbyte_m128(var, 4));                          \
+        u32 part3 = movd(rshiftbyte_m128(var, 8));                          \
+        u32 part4 = movd(rshiftbyte_m128(var, 12));                         \
+        CONF_CHUNK_32(part1, bucket, offset, reason);              \
+        CONF_CHUNK_32(part2, bucket, offset + 4, reason, ptr);          \
+        CONF_CHUNK_32(part3, bucket, offset + 8, reason, ptr);          \
+        CONF_CHUNK_32(part4, bucket, offset + 12, reason, ptr);         \
+    }                                                                       \
+} while(0)
+
 #endif
 
-#define confirm_teddy_128(...) if(confirm_teddy_128_f(__VA_ARGS__) == HWLM_TERMINATED)return HWLM_TERMINATED;
+
+//#define confirm_teddy_128(...) if(confirm_teddy_128_f(__VA_ARGS__) == HWLM_TERMINATED)return HWLM_TERMINATED;
+#define confirm_teddy_128(var, bucket, offset, reason, ptr) CONFIRM_TEDDY_128(var, bucket, offset, reason, ptr)
 
 static really_inline
 m128 prep_conf_teddy_m1(const m128 *maskBase, m128 val) {
@@ -1649,14 +1676,16 @@ hwlm_error_t fdr_exec_teddy_128_1( const struct FDR *fdr,
         m128 r_0 = PREP_CONF_FN(maskBase, val_0, 1);
         // m128 r_0 = prep_conf_interim(maskBase, res_old_1, res_old_2, res_old_3, val_0, n_msk);
         r_0 = or128(r_0, p_mask);
-        confirm_teddy_128(r_0, 8, 0, VECTORING, a, confBase, control, last_match, ptr);
+        // confirm_teddy_128(r_0, 8, 0, VECTORING, a, confBase, control, last_match, ptr);
+        confirm_teddy_128(r_0, 8, 0, VECTORING, ptr);
         ptr += 16;
     }
 
     if (ptr + 16 <= buf_end) {
         m128 r_0 = PREP_CONF_FN(maskBase, load128(ptr), 1);
         // m128 r_0 = prep_conf_interim(maskBase, res_old_1, res_old_2, res_old_3, load128(ptr), n_msk);
-        confirm_teddy_128(r_0, 8, 0, VECTORING, a, confBase, control, last_match, ptr);
+        // confirm_teddy_128(r_0, 8, 0, VECTORING, a, confBase, control, last_match, ptr);
+        confirm_teddy_128(r_0, 8, 0, VECTORING, ptr);
         ptr += 16;
     }
 
@@ -1665,16 +1694,19 @@ hwlm_error_t fdr_exec_teddy_128_1( const struct FDR *fdr,
         CHECK_FLOOD;
         m128 r_0 = PREP_CONF_FN(maskBase, load128(ptr), 1);
         // m128 r_0 = prep_conf_interim(maskBase, res_old_1, res_old_2, res_old_3, load128(ptr), n_msk);
-        confirm_teddy_128(r_0, 8, 0, NOT_CAUTIOUS, a, confBase, control, last_match, ptr);
+        // confirm_teddy_128(r_0, 8, 0, NOT_CAUTIOUS, a, confBase, control, last_match, ptr);
+        confirm_teddy_128(r_0, 8, 0, VECTORING, ptr);
         m128 r_1 = PREP_CONF_FN(maskBase, load128(ptr + 16), 1);
         // m128 r_1 = prep_conf_interim(maskBase, res_old_1, res_old_2, res_old_3, load128(ptr+16), n_msk);
-        confirm_teddy_128(r_1, 8, 16, NOT_CAUTIOUS, a, confBase, control, last_match, ptr);
+        // confirm_teddy_128(r_1, 8, 16, NOT_CAUTIOUS, a, confBase, control, last_match, ptr);
+        confirm_teddy_128(r_1, 8, 0, VECTORING, ptr);
     }
 
     if (ptr + 16 <= buf_end) {
         m128 r_0 = PREP_CONF_FN(maskBase, load128(ptr), 1);
         // m128 r_0 = prep_conf_interim(maskBase, res_old_1, res_old_2, res_old_3, load128(ptr), n_msk);
-        confirm_teddy_128(r_0, 8, 0, NOT_CAUTIOUS, a, confBase, control, last_match, ptr);
+        // confirm_teddy_128(r_0, 8, 0, NOT_CAUTIOUS, a, confBase, control, last_match, ptr);
+        confirm_teddy_128(r_0, 8, 0, VECTORING, ptr);
         ptr += 16;
     }
 
@@ -1686,7 +1718,8 @@ hwlm_error_t fdr_exec_teddy_128_1( const struct FDR *fdr,
         m128 r_0 = PREP_CONF_FN(maskBase, val_0, 1);
         // m128 r_0 = prep_conf_interim(maskBase, res_old_1, res_old_2, res_old_3, val_0, n_msk);
         r_0 = or128(r_0, p_mask);
-        confirm_teddy_128(r_0, 8, 0, VECTORING, a, confBase, control, last_match, ptr);
+        // confirm_teddy_128(r_0, 8, 0, VECTORING, a, confBase, control, last_match, ptr);
+        confirm_teddy_128(r_0, 8, 0, VECTORING, ptr);
     }
 
     return HWLM_SUCCESS;
@@ -1721,14 +1754,16 @@ hwlm_error_t fdr_exec_teddy_128_2( const struct FDR *fdr,
         m128 r_0 = PREP_CONF_FN(maskBase, val_0, 2);
         // m128 r_0 = prep_conf_interim(maskBase, res_old_1, res_old_2, res_old_3, val_0, n_msk);
         r_0 = or128(r_0, p_mask);
-        confirm_teddy_128(r_0, 8, 0, VECTORING, a, confBase, control, last_match, ptr);
+        // confirm_teddy_128(r_0, 8, 0, VECTORING, a, confBase, control, last_match, ptr);
+        confirm_teddy_128(r_0, 8, 0, VECTORING, ptr);
         ptr += 16;
     }
 
     if (ptr + 16 <= buf_end) {
         m128 r_0 = PREP_CONF_FN(maskBase, load128(ptr), 2);
         // m128 r_0 = prep_conf_interim(maskBase, res_old_1, res_old_2, res_old_3, load128(ptr), n_msk);
-        confirm_teddy_128(r_0, 8, 0, VECTORING, a, confBase, control, last_match, ptr);
+        // confirm_teddy_128(r_0, 8, 0, VECTORING, a, confBase, control, last_match, ptr);
+        confirm_teddy_128(r_0, 8, 0, VECTORING, ptr);
         ptr += 16;
     }
 
@@ -1737,16 +1772,19 @@ hwlm_error_t fdr_exec_teddy_128_2( const struct FDR *fdr,
         CHECK_FLOOD;
         m128 r_0 = PREP_CONF_FN(maskBase, load128(ptr), 2);
         // m128 r_0 = prep_conf_interim(maskBase, res_old_1, res_old_2, res_old_3, load128(ptr), n_msk);
-        confirm_teddy_128(r_0, 8, 0, NOT_CAUTIOUS, a, confBase, control, last_match, ptr);
+        // confirm_teddy_128(r_0, 8, 0, NOT_CAUTIOUS, a, confBase, control, last_match, ptr);
+        confirm_teddy_128(r_0, 8, 0, VECTORING, ptr);
         m128 r_1 = PREP_CONF_FN(maskBase, load128(ptr + 16), 2);
         // m128 r_1 = prep_conf_interim(maskBase, res_old_1, res_old_2, res_old_3, load128(ptr+16), n_msk);
-        confirm_teddy_128(r_1, 8, 16, NOT_CAUTIOUS, a, confBase, control, last_match, ptr);
+        // confirm_teddy_128(r_1, 8, 16, NOT_CAUTIOUS, a, confBase, control, last_match, ptr);
+        confirm_teddy_128(r_1, 8, 0, VECTORING, ptr);
     }
 
     if (ptr + 16 <= buf_end) {
         m128 r_0 = PREP_CONF_FN(maskBase, load128(ptr), 2);
         // m128 r_0 = prep_conf_interim(maskBase, res_old_1, res_old_2, res_old_3, load128(ptr), n_msk);
-        confirm_teddy_128(r_0, 8, 0, NOT_CAUTIOUS, a, confBase, control, last_match, ptr);
+        // confirm_teddy_128(r_0, 8, 0, NOT_CAUTIOUS, a, confBase, control, last_match, ptr);
+        confirm_teddy_128(r_0, 8, 0, VECTORING, ptr);
         ptr += 16;
     }
 
@@ -1758,7 +1796,8 @@ hwlm_error_t fdr_exec_teddy_128_2( const struct FDR *fdr,
         m128 r_0 = PREP_CONF_FN(maskBase, val_0, 2);
         // m128 r_0 = prep_conf_interim(maskBase, res_old_1, res_old_2, res_old_3, val_0, n_msk);
         r_0 = or128(r_0, p_mask);
-        confirm_teddy_128(r_0, 8, 0, VECTORING, a, confBase, control, last_match, ptr);
+        // confirm_teddy_128(r_0, 8, 0, VECTORING, a, confBase, control, last_match, ptr);
+        confirm_teddy_128(r_0, 8, 0, VECTORING, ptr);
     }
 
     return HWLM_SUCCESS;
@@ -1793,14 +1832,16 @@ hwlm_error_t fdr_exec_teddy_128_3( const struct FDR *fdr,
         m128 r_0 = PREP_CONF_FN(maskBase, val_0, 3);
         // m128 r_0 = prep_conf_interim(maskBase, res_old_1, res_old_2, res_old_3, val_0, n_msk);
         r_0 = or128(r_0, p_mask);
-        confirm_teddy_128(r_0, 8, 0, VECTORING, a, confBase, control, last_match, ptr);
+        // confirm_teddy_128(r_0, 8, 0, VECTORING, a, confBase, control, last_match, ptr);
+        confirm_teddy_128(r_0, 8, 0, VECTORING, ptr);
         ptr += 16;
     }
 
     if (ptr + 16 <= buf_end) {
         m128 r_0 = PREP_CONF_FN(maskBase, load128(ptr), 3);
         // m128 r_0 = prep_conf_interim(maskBase, res_old_1, res_old_2, res_old_3, load128(ptr), n_msk);
-        confirm_teddy_128(r_0, 8, 0, VECTORING, a, confBase, control, last_match, ptr);
+        // confirm_teddy_128(r_0, 8, 0, VECTORING, a, confBase, control, last_match, ptr);
+        confirm_teddy_128(r_0, 8, 0, VECTORING, ptr);
         ptr += 16;
     }
 
@@ -1809,16 +1850,19 @@ hwlm_error_t fdr_exec_teddy_128_3( const struct FDR *fdr,
         CHECK_FLOOD;
         m128 r_0 = PREP_CONF_FN(maskBase, load128(ptr), 3);
         // m128 r_0 = prep_conf_interim(maskBase, res_old_1, res_old_2, res_old_3, load128(ptr), n_msk);
-        confirm_teddy_128(r_0, 8, 0, NOT_CAUTIOUS, a, confBase, control, last_match, ptr);
+        // confirm_teddy_128(r_0, 8, 0, NOT_CAUTIOUS, a, confBase, control, last_match, ptr);
+        confirm_teddy_128(r_0, 8, 0, VECTORING, ptr);
         m128 r_1 = PREP_CONF_FN(maskBase, load128(ptr + 16), 3);
         // m128 r_1 = prep_conf_interim(maskBase, res_old_1, res_old_2, res_old_3, load128(ptr+16), n_msk);
-        confirm_teddy_128(r_1, 8, 16, NOT_CAUTIOUS, a, confBase, control, last_match, ptr);
+        // confirm_teddy_128(r_1, 8, 16, NOT_CAUTIOUS, a, confBase, control, last_match, ptr);
+        confirm_teddy_128(r_1, 8, 0, VECTORING, ptr);
     }
 
     if (ptr + 16 <= buf_end) {
         m128 r_0 = PREP_CONF_FN(maskBase, load128(ptr), 3);
         // m128 r_0 = prep_conf_interim(maskBase, res_old_1, res_old_2, res_old_3, load128(ptr), n_msk);
-        confirm_teddy_128(r_0, 8, 0, NOT_CAUTIOUS, a, confBase, control, last_match, ptr);
+        // confirm_teddy_128(r_0, 8, 0, NOT_CAUTIOUS, a, confBase, control, last_match, ptr);
+        confirm_teddy_128(r_0, 8, 0, VECTORING, ptr);
         ptr += 16;
     }
 
@@ -1830,7 +1874,8 @@ hwlm_error_t fdr_exec_teddy_128_3( const struct FDR *fdr,
         m128 r_0 = PREP_CONF_FN(maskBase, val_0, 3);
         // m128 r_0 = prep_conf_interim(maskBase, res_old_1, res_old_2, res_old_3, val_0, n_msk);
         r_0 = or128(r_0, p_mask);
-        confirm_teddy_128(r_0, 8, 0, VECTORING, a, confBase, control, last_match, ptr);
+        // confirm_teddy_128(r_0, 8, 0, VECTORING, a, confBase, control, last_match, ptr);
+        confirm_teddy_128(r_0, 8, 0, VECTORING, ptr);
     }
 
     return HWLM_SUCCESS;
@@ -1865,14 +1910,16 @@ hwlm_error_t fdr_exec_teddy_128_4( const struct FDR *fdr,
         m128 r_0 = PREP_CONF_FN(maskBase, val_0, 4);
         // m128 r_0 = prep_conf_interim(maskBase, res_old_1, res_old_2, res_old_3, val_0, n_msk);
         r_0 = or128(r_0, p_mask);
-        confirm_teddy_128(r_0, 8, 0, VECTORING, a, confBase, control, last_match, ptr);
+        // confirm_teddy_128(r_0, 8, 0, VECTORING, a, confBase, control, last_match, ptr);
+        confirm_teddy_128(r_0, 8, 0, VECTORING, ptr);
         ptr += 16;
     }
 
     if (ptr + 16 <= buf_end) {
         m128 r_0 = PREP_CONF_FN(maskBase, load128(ptr), 4);
         // m128 r_0 = prep_conf_interim(maskBase, res_old_1, res_old_2, res_old_3, load128(ptr), n_msk);
-        confirm_teddy_128(r_0, 8, 0, VECTORING, a, confBase, control, last_match, ptr);
+        // confirm_teddy_128(r_0, 8, 0, VECTORING, a, confBase, control, last_match, ptr);
+        confirm_teddy_128(r_0, 8, 0, VECTORING, ptr);
         ptr += 16;
     }
 
@@ -1881,16 +1928,19 @@ hwlm_error_t fdr_exec_teddy_128_4( const struct FDR *fdr,
         CHECK_FLOOD;
         m128 r_0 = PREP_CONF_FN(maskBase, load128(ptr), 4);
         // m128 r_0 = prep_conf_interim(maskBase, res_old_1, res_old_2, res_old_3, load128(ptr), n_msk);
-        confirm_teddy_128(r_0, 8, 0, NOT_CAUTIOUS, a, confBase, control, last_match, ptr);
+        // confirm_teddy_128(r_0, 8, 0, NOT_CAUTIOUS, a, confBase, control, last_match, ptr);
+        confirm_teddy_128(r_0, 8, 0, VECTORING, ptr);
         m128 r_1 = PREP_CONF_FN(maskBase, load128(ptr + 16), 4);
         // m128 r_1 = prep_conf_interim(maskBase, res_old_1, res_old_2, res_old_3, load128(ptr+16), n_msk);
-        confirm_teddy_128(r_1, 8, 16, NOT_CAUTIOUS, a, confBase, control, last_match, ptr);
+        // confirm_teddy_128(r_1, 8, 16, NOT_CAUTIOUS, a, confBase, control, last_match, ptr);
+        confirm_teddy_128(r_1, 8, 0, VECTORING, ptr);
     }
 
     if (ptr + 16 <= buf_end) {
         m128 r_0 = PREP_CONF_FN(maskBase, load128(ptr), 4);
         // m128 r_0 = prep_conf_interim(maskBase, res_old_1, res_old_2, res_old_3, load128(ptr), n_msk);
-        confirm_teddy_128(r_0, 8, 0, NOT_CAUTIOUS, a, confBase, control, last_match, ptr);
+        // confirm_teddy_128(r_0, 8, 0, NOT_CAUTIOUS, a, confBase, control, last_match, ptr);
+        confirm_teddy_128(r_0, 8, 0, VECTORING, ptr);
         ptr += 16;
     }
 
@@ -1902,7 +1952,8 @@ hwlm_error_t fdr_exec_teddy_128_4( const struct FDR *fdr,
         m128 r_0 = PREP_CONF_FN(maskBase, val_0, 4);
         // m128 r_0 = prep_conf_interim(maskBase, res_old_1, res_old_2, res_old_3, val_0, n_msk);
         r_0 = or128(r_0, p_mask);
-        confirm_teddy_128(r_0, 8, 0, VECTORING, a, confBase, control, last_match, ptr);
+        // confirm_teddy_128(r_0, 8, 0, VECTORING, a, confBase, control, last_match, ptr);
+        confirm_teddy_128(r_0, 8, 0, VECTORING, ptr);
     }
 
     return HWLM_SUCCESS;
