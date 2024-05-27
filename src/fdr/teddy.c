@@ -130,32 +130,6 @@ hwlm_error_t confirm_teddy_64_512(m512 var, int bucket, int offset,
     return HWLM_SUCCESS;
 }
 
-#define CONFIRM_TEDDY_64_512(var, bucket, offset, reason, pt)         \
-do {                                                                        \
-    if (unlikely(diff512(var, ones512()))) {                                \
-        m128 p128_0 = extract128from512(var, 0);                            \
-        m128 p128_1 = extract128from512(var, 1);                            \
-        m128 p128_2 = extract128from512(var, 2);                            \
-        m128 p128_3 = extract128from512(var, 3);                            \
-        u64a part1 = movq(p128_0);                                          \
-        u64a part2 = movq(rshiftbyte_m128(p128_0, 8));                      \
-        u64a part3 = movq(p128_1);                                          \
-        u64a part4 = movq(rshiftbyte_m128(p128_1, 8));                      \
-        u64a part5 = movq(p128_2);                                          \
-        u64a part6 = movq(rshiftbyte_m128(p128_2, 8));                      \
-        u64a part7 = movq(p128_3);                                          \
-        u64a part8 = movq(rshiftbyte_m128(p128_3, 8));                      \
-        CONF_CHUNK_64(part1, bucket, offset, reason, pt);          \
-        CONF_CHUNK_64(part2, bucket, offset + 8, reason, pt);      \
-        CONF_CHUNK_64(part3, bucket, offset + 16, reason, pt);     \
-        CONF_CHUNK_64(part4, bucket, offset + 24, reason, pt);     \
-        CONF_CHUNK_64(part5, bucket, offset + 32, reason, pt);     \
-        CONF_CHUNK_64(part6, bucket, offset + 40, reason, pt);     \
-        CONF_CHUNK_64(part7, bucket, offset + 48, reason, pt);     \
-        CONF_CHUNK_64(part8, bucket, offset + 56, reason, pt);     \
-    }                                                                       \
-} while(0)
-
 #define confirm_teddy_512_f confirm_teddy_64_512
 
 #else // 32/64
@@ -204,48 +178,6 @@ hwlm_error_t confirm_teddy_32_512(m512 var, int bucket, int offset,
     }                                                         
     return HWLM_SUCCESS;
 }
-
-#define CONFIRM_TEDDY_32_512(var, bucket, offset, reason, pt)         \
-do {                                                                        \
-    if (unlikely(diff512(var, ones512()))) {                                \
-        m128 p128_0 = extract128from512(var, 0);                            \
-        m128 p128_1 = extract128from512(var, 1);                            \
-        m128 p128_2 = extract128from512(var, 2);                            \
-        m128 p128_3 = extract128from512(var, 3);                            \
-        u32 part1 = movd(p128_0);                                           \
-        u32 part2 = movd(rshiftbyte_m128(p128_0, 4));                       \
-        u32 part3 = movd(rshiftbyte_m128(p128_0, 8));                       \
-        u32 part4 = movd(rshiftbyte_m128(p128_0, 12));                      \
-        u32 part5 = movd(p128_1);                                           \
-        u32 part6 = movd(rshiftbyte_m128(p128_1, 4));                       \
-        u32 part7 = movd(rshiftbyte_m128(p128_1, 8));                       \
-        u32 part8 = movd(rshiftbyte_m128(p128_1, 12));                      \
-        u32 part9 = movd(p128_2);                                           \
-        u32 part10 = movd(rshiftbyte_m128(p128_2, 4));                      \
-        u32 part11 = movd(rshiftbyte_m128(p128_2, 8));                      \
-        u32 part12 = movd(rshiftbyte_m128(p128_2, 12));                     \
-        u32 part13 = movd(p128_3);                                          \
-        u32 part14 = movd(rshiftbyte_m128(p128_3, 4));                      \
-        u32 part15 = movd(rshiftbyte_m128(p128_3, 8));                      \
-        u32 part16 = movd(rshiftbyte_m128(p128_3, 12));                     \
-        CONF_CHUNK_32(part1, bucket, offset, reason, pt);          \
-        CONF_CHUNK_32(part2, bucket, offset + 4, reason, pt);      \
-        CONF_CHUNK_32(part3, bucket, offset + 8, reason, pt);      \
-        CONF_CHUNK_32(part4, bucket, offset + 12, reason, pt);     \
-        CONF_CHUNK_32(part5, bucket, offset + 16, reason, pt);     \
-        CONF_CHUNK_32(part6, bucket, offset + 20, reason, pt);     \
-        CONF_CHUNK_32(part7, bucket, offset + 24, reason, pt);     \
-        CONF_CHUNK_32(part8, bucket, offset + 28, reason, pt);     \
-        CONF_CHUNK_32(part9, bucket, offset + 32, reason, pt);     \
-        CONF_CHUNK_32(part10, bucket, offset + 36, reason, pt);    \
-        CONF_CHUNK_32(part11, bucket, offset + 40, reason, pt);    \
-        CONF_CHUNK_32(part12, bucket, offset + 44, reason, pt);    \
-        CONF_CHUNK_32(part13, bucket, offset + 48, reason, pt);    \
-        CONF_CHUNK_32(part14, bucket, offset + 52, reason, pt);    \
-        CONF_CHUNK_32(part15, bucket, offset + 56, reason, pt);    \
-        CONF_CHUNK_32(part16, bucket, offset + 60, reason, pt);    \
-    }                                                                       \
-} while(0)
 
 #define confirm_teddy_512_f confirm_teddy_32_512
 
@@ -1064,22 +996,6 @@ hwlm_error_t confirm_teddy_64_256(m256 var, int bucket, int offset,
     return HWLM_SUCCESS;
 }
 
-#define CONFIRM_TEDDY_64_256(var, bucket, offset, reason, pt)             \
-do {                                                                        \
-    if (unlikely(diff256(var, ones256()))) {                                \
-        m128 lo = movdq_lo(var);                                            \
-        m128 hi = movdq_hi(var);                                            \
-        u64a part1 = movq(lo);                                              \
-        u64a part2 = movq(rshiftbyte_m128(lo, 8));                          \
-        u64a part3 = movq(hi);                                              \
-        u64a part4 = movq(rshiftbyte_m128(hi, 8));                          \
-        CONF_CHUNK_64(part1, bucket, offset, reason, pt);          \
-        CONF_CHUNK_64(part2, bucket, offset + 8, reason, pt);      \
-        CONF_CHUNK_64(part3, bucket, offset + 16, reason, pt);     \
-        CONF_CHUNK_64(part4, bucket, offset + 24, reason, pt);     \
-    }                                                                       \
-} while(0)
-
 #define confirm_teddy_256_f confirm_teddy_64_256
 
 #else
@@ -1113,29 +1029,6 @@ hwlm_error_t confirm_teddy_32_256(m256 var, int bucket, int offset,
 
 #define confirm_teddy_256_f confirm_teddy_32_256
 
-#define CONFIRM_TEDDY_32_256(var, bucket, offset, reason, pt)             \
-do {                                                                        \
-    if (unlikely(diff256(var, ones256()))) {                                \
-        m128 lo = movdq_lo(var);                                            \
-        m128 hi = movdq_hi(var);                                            \
-        u32 part1 = movd(lo);                                               \
-        u32 part2 = movd(rshiftbyte_m128(lo, 4));                           \
-        u32 part3 = movd(rshiftbyte_m128(lo, 8));                           \
-        u32 part4 = movd(rshiftbyte_m128(lo, 12));                          \
-        u32 part5 = movd(hi);                                               \
-        u32 part6 = movd(rshiftbyte_m128(hi, 4));                           \
-        u32 part7 = movd(rshiftbyte_m128(hi, 8));                           \
-        u32 part8 = movd(rshiftbyte_m128(hi, 12));                          \
-        CONF_CHUNK_32(part1, bucket, offset, reason, pt);          \
-        CONF_CHUNK_32(part2, bucket, offset + 4, reason, pt);      \
-        CONF_CHUNK_32(part3, bucket, offset + 8, reason, pt);      \
-        CONF_CHUNK_32(part4, bucket, offset + 12, reason, pt);     \
-        CONF_CHUNK_32(part5, bucket, offset + 16, reason, pt);     \
-        CONF_CHUNK_32(part6, bucket, offset + 20, reason, pt);     \
-        CONF_CHUNK_32(part7, bucket, offset + 24, reason, pt);     \
-        CONF_CHUNK_32(part8, bucket, offset + 28, reason, pt);     \
-    }                                                                       \
-} while(0)
 #endif
 
 #define CONFIRM_TEDDY_256(...) if(confirm_teddy_256_f(__VA_ARGS__, a, confBase, &control, &last_match) == HWLM_TERMINATED)return HWLM_TERMINATED;
@@ -1562,19 +1455,6 @@ hwlm_error_t confirm_teddy_64_128(m128 var, int bucket, int offset,
 
 #define confirm_teddy_128_f confirm_teddy_64_128
 
-
-
-#define CONFIRM_TEDDY_64_128(var, bucket, offset, reason, pt)             \
-do {                                                                        \
-    if (unlikely(diff128(var, ones128()))) {                                \
-        u64a __attribute__((aligned(16))) vec[2];                           \
-        store128(vec, var);                                                 \
-        u64a lo = vec[0];                                                   \
-        u64a hi = vec[1];                                                   \
-        CONF_CHUNK_64(lo, bucket, offset, reason, pt);             \
-        CONF_CHUNK_64(hi, bucket, offset + 8, reason, pt);         \
-    }                                                                       \
-} while(0)
 #else
 
 /* functionized version */
@@ -1597,20 +1477,6 @@ hwlm_error_t confirm_teddy_32_128(m128 var, int bucket, int offset,
 }
 #define confirm_teddy_128_f confirm_teddy_32_128
 
-
-#define CONFIRM_TEDDY_32_128(var, bucket, offset, reason, pt)             \
-do {                                                                        \
-    if (unlikely(diff128(var, ones128()))) {                                \
-        u32 part1 = movd(var);                                              \
-        u32 part2 = movd(rshiftbyte_m128(var, 4));                          \
-        u32 part3 = movd(rshiftbyte_m128(var, 8));                          \
-        u32 part4 = movd(rshiftbyte_m128(var, 12));                         \
-        CONF_CHUNK_32(part1, bucket, offset, reason, pt);          \
-        CONF_CHUNK_32(part2, bucket, offset + 4, reason, pt);      \
-        CONF_CHUNK_32(part3, bucket, offset + 8, reason, pt);      \
-        CONF_CHUNK_32(part4, bucket, offset + 12, reason, pt);     \
-    }                                                                       \
-} while(0)
 #endif
 
 #define CONFIRM_TEDDY_128(...) if(confirm_teddy_128_f(__VA_ARGS__, a, confBase, &control, &last_match) == HWLM_TERMINATED)return HWLM_TERMINATED;
