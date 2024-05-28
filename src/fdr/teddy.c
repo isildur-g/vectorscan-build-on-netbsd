@@ -285,52 +285,13 @@ m512 prep_conf_teddy_m4(const m512 *lo_mask, const m512 *dup_mask,
 #define TEDDY_VBMI_SL2_POS    14
 #define TEDDY_VBMI_SL3_POS    13
 
-#define TEDDY_VBMI_LOAD_SHIFT_MASK_M1
-
-#define TEDDY_VBMI_LOAD_SHIFT_MASK_M2    \
-    TEDDY_VBMI_LOAD_SHIFT_MASK_M1        \
-    sl_msk[0] = loadu512(p_sh_mask_arr + TEDDY_VBMI_SL1_POS);
-
-#define TEDDY_VBMI_LOAD_SHIFT_MASK_M3    \
-    TEDDY_VBMI_LOAD_SHIFT_MASK_M2        \
-    sl_msk[1] = loadu512(p_sh_mask_arr + TEDDY_VBMI_SL2_POS);
-
-#define TEDDY_VBMI_LOAD_SHIFT_MASK_M4    \
-    TEDDY_VBMI_LOAD_SHIFT_MASK_M3        \
-    sl_msk[2] = loadu512(p_sh_mask_arr + TEDDY_VBMI_SL3_POS);
-
-#define PREPARE_MASKS_1                                                       \
-    dup_mask[0] = set1_4x128(maskBase[0]);                                      \
-    dup_mask[1] = set1_4x128(maskBase[1]);
-
-#define PREPARE_MASKS_2                                                       \
-    PREPARE_MASKS_1                                                           \
-    dup_mask[2] = set1_4x128(maskBase[2]);                                      \
-    dup_mask[3] = set1_4x128(maskBase[3]);
-
-#define PREPARE_MASKS_3                                                       \
-    PREPARE_MASKS_2                                                           \
-    dup_mask[4] = set1_4x128(maskBase[4]);                                      \
-    dup_mask[5] = set1_4x128(maskBase[5]);
-
-#define PREPARE_MASKS_4                                                       \
-    PREPARE_MASKS_3                                                           \
-    dup_mask[6] = set1_4x128(maskBase[6]);                                      \
-    dup_mask[7] = set1_4x128(maskBase[7]);
-
-#define PREPARE_MASKS(n)                                                      \
-    m512 lo_mask = set1_64x8(0xf);                                              \
-    m512 dup_mask[n * 2];                                                     \
-    m512 sl_msk[n - 1];                                                       \
-    PREPARE_MASKS_##n                                                         \
-    TEDDY_VBMI_LOAD_SHIFT_MASK_M##n
-
 #define TEDDY_VBMI_CONF_MASK_HEAD   (0xffffffffffffffffULL >> n_sh)
 #define TEDDY_VBMI_CONF_MASK_FULL   (0xffffffffffffffffULL << n_sh)
 #define TEDDY_VBMI_CONF_MASK_VAR(n) (0xffffffffffffffffULL >> (64 - n) << overlap)
 #define TEDDY_VBMI_LOAD_MASK_PATCH  (0xffffffffffffffffULL >> (64 - n_sh))
 
 // n_msk 1
+#define N_MSK_VAL 1
 hwlm_error_t fdr_exec_teddy_512vbmi_1(const struct FDR *fdr,
                                       const struct FDR_Runtime_Args *a,
                                       hwlm_group_t control) {
@@ -347,7 +308,28 @@ hwlm_error_t fdr_exec_teddy_512vbmi_1(const struct FDR *fdr,
                  a->buf, a->len, a->start_offset);
 
     const m128 *maskBase = getMaskBase(teddy);
-    PREPARE_MASKS(1);
+    //PREPARE_MASKS_512VBMI;
+
+    m512 lo_mask = set1_64x8(0xf);            
+    m512 dup_mask[N_MSK_VAL * 2];            
+    m512 sl_msk[N_MSK_VAL - 1];             
+    dup_mask[0] = set1_4x128(maskBase[0]); 
+    dup_mask[1] = set1_4x128(maskBase[1]);
+#if N_MSK_VAL > 1                        
+    dup_mask[2] = set1_4x128(maskBase[2]);                
+    dup_mask[3] = set1_4x128(maskBase[3]);               
+    sl_msk[0] = loadu512(p_sh_mask_arr + TEDDY_VBMI_SL1_POS); 
+#endif                                                       
+#if N_MSK_VAL > 2                                           
+    dup_mask[4] = set1_4x128(maskBase[4]);                 
+    dup_mask[5] = set1_4x128(maskBase[5]);                
+    sl_msk[1] = loadu512(p_sh_mask_arr + TEDDY_VBMI_SL2_POS);
+#endif                                                      
+#if N_MSK_VAL > 3                                          
+    dup_mask[6] = set1_4x128(maskBase[6]);                
+    dup_mask[7] = set1_4x128(maskBase[7]);               
+    sl_msk[2] = loadu512(p_sh_mask_arr + TEDDY_VBMI_SL3_POS);   
+#endif                                                         
     const u32 *confBase = getConfBase(teddy);
 
     u64a k = TEDDY_VBMI_CONF_MASK_FULL;
@@ -387,6 +369,8 @@ hwlm_error_t fdr_exec_teddy_512vbmi_1(const struct FDR *fdr,
 }
 
 // n_msk 2
+#undef N_MSK_VAL
+#define N_MSK_VAL 2
 hwlm_error_t fdr_exec_teddy_512vbmi_2(const struct FDR *fdr,
                                       const struct FDR_Runtime_Args *a,
                                       hwlm_group_t control) {
@@ -403,7 +387,28 @@ hwlm_error_t fdr_exec_teddy_512vbmi_2(const struct FDR *fdr,
                  a->buf, a->len, a->start_offset);
 
     const m128 *maskBase = getMaskBase(teddy);
-    PREPARE_MASKS(2);
+    //PREPARE_MASKS_512VBMI;
+
+    m512 lo_mask = set1_64x8(0xf);            
+    m512 dup_mask[N_MSK_VAL * 2];            
+    m512 sl_msk[N_MSK_VAL - 1];             
+    dup_mask[0] = set1_4x128(maskBase[0]); 
+    dup_mask[1] = set1_4x128(maskBase[1]);
+#if N_MSK_VAL > 1                        
+    dup_mask[2] = set1_4x128(maskBase[2]);                
+    dup_mask[3] = set1_4x128(maskBase[3]);               
+    sl_msk[0] = loadu512(p_sh_mask_arr + TEDDY_VBMI_SL1_POS); 
+#endif                                                       
+#if N_MSK_VAL > 2                                           
+    dup_mask[4] = set1_4x128(maskBase[4]);                 
+    dup_mask[5] = set1_4x128(maskBase[5]);                
+    sl_msk[1] = loadu512(p_sh_mask_arr + TEDDY_VBMI_SL2_POS);
+#endif                                                      
+#if N_MSK_VAL > 3                                          
+    dup_mask[6] = set1_4x128(maskBase[6]);                
+    dup_mask[7] = set1_4x128(maskBase[7]);               
+    sl_msk[2] = loadu512(p_sh_mask_arr + TEDDY_VBMI_SL3_POS);   
+#endif                                                         
     const u32 *confBase = getConfBase(teddy);
 
     u64a k = TEDDY_VBMI_CONF_MASK_FULL;
@@ -442,6 +447,8 @@ hwlm_error_t fdr_exec_teddy_512vbmi_2(const struct FDR *fdr,
     return HWLM_SUCCESS;
 }
 // n_msk 3
+#undef N_MSK_VAL
+#define N_MSK_VAL 3
 hwlm_error_t fdr_exec_teddy_512vbmi_3(const struct FDR *fdr,
                                       const struct FDR_Runtime_Args *a,
                                       hwlm_group_t control) {
@@ -458,7 +465,28 @@ hwlm_error_t fdr_exec_teddy_512vbmi_3(const struct FDR *fdr,
                  a->buf, a->len, a->start_offset);
 
     const m128 *maskBase = getMaskBase(teddy);
-    PREPARE_MASKS(3);
+    //PREPARE_MASKS_512VBMI;
+
+    m512 lo_mask = set1_64x8(0xf);            
+    m512 dup_mask[N_MSK_VAL * 2];            
+    m512 sl_msk[N_MSK_VAL - 1];             
+    dup_mask[0] = set1_4x128(maskBase[0]); 
+    dup_mask[1] = set1_4x128(maskBase[1]);
+#if N_MSK_VAL > 1                        
+    dup_mask[2] = set1_4x128(maskBase[2]);                
+    dup_mask[3] = set1_4x128(maskBase[3]);               
+    sl_msk[0] = loadu512(p_sh_mask_arr + TEDDY_VBMI_SL1_POS); 
+#endif                                                       
+#if N_MSK_VAL > 2                                           
+    dup_mask[4] = set1_4x128(maskBase[4]);                 
+    dup_mask[5] = set1_4x128(maskBase[5]);                
+    sl_msk[1] = loadu512(p_sh_mask_arr + TEDDY_VBMI_SL2_POS);
+#endif                                                      
+#if N_MSK_VAL > 3                                          
+    dup_mask[6] = set1_4x128(maskBase[6]);                
+    dup_mask[7] = set1_4x128(maskBase[7]);               
+    sl_msk[2] = loadu512(p_sh_mask_arr + TEDDY_VBMI_SL3_POS);   
+#endif                                                         
     const u32 *confBase = getConfBase(teddy);
 
     u64a k = TEDDY_VBMI_CONF_MASK_FULL;
@@ -497,6 +525,8 @@ hwlm_error_t fdr_exec_teddy_512vbmi_3(const struct FDR *fdr,
     return HWLM_SUCCESS;
 }
 // n_msk 4
+#undef N_MSK_VAL
+#define N_MSK_VAL 4
 hwlm_error_t fdr_exec_teddy_512vbmi_4(const struct FDR *fdr,
                                       const struct FDR_Runtime_Args *a,
                                       hwlm_group_t control) {
@@ -513,7 +543,28 @@ hwlm_error_t fdr_exec_teddy_512vbmi_4(const struct FDR *fdr,
                  a->buf, a->len, a->start_offset);
 
     const m128 *maskBase = getMaskBase(teddy);
-    PREPARE_MASKS(4);
+    //PREPARE_MASKS_512VBMI;
+
+    m512 lo_mask = set1_64x8(0xf);            
+    m512 dup_mask[N_MSK_VAL * 2];            
+    m512 sl_msk[N_MSK_VAL - 1];             
+    dup_mask[0] = set1_4x128(maskBase[0]); 
+    dup_mask[1] = set1_4x128(maskBase[1]);
+#if N_MSK_VAL > 1                        
+    dup_mask[2] = set1_4x128(maskBase[2]);                
+    dup_mask[3] = set1_4x128(maskBase[3]);               
+    sl_msk[0] = loadu512(p_sh_mask_arr + TEDDY_VBMI_SL1_POS); 
+#endif                                                       
+#if N_MSK_VAL > 2                                           
+    dup_mask[4] = set1_4x128(maskBase[4]);                 
+    dup_mask[5] = set1_4x128(maskBase[5]);                
+    sl_msk[1] = loadu512(p_sh_mask_arr + TEDDY_VBMI_SL2_POS);
+#endif                                                      
+#if N_MSK_VAL > 3                                          
+    dup_mask[6] = set1_4x128(maskBase[6]);                
+    dup_mask[7] = set1_4x128(maskBase[7]);               
+    sl_msk[2] = loadu512(p_sh_mask_arr + TEDDY_VBMI_SL3_POS);   
+#endif                                                         
     const u32 *confBase = getConfBase(teddy);
 
     u64a k = TEDDY_VBMI_CONF_MASK_FULL;
@@ -662,31 +713,10 @@ m512 prep_conf_teddy_m4(const m512 *lo_mask, const m512 *dup_mask,
     prep_conf_teddy_m##n(&lo_mask, dup_mask, ptr, r_msk_base,                 \
                          &c_0, &c_16, &c_32, &c_48)
 
-#define PREPARE_MASKS_1                                                       \
-    dup_mask[0] = set1_4x128(maskBase[0]);                                      \
-    dup_mask[1] = set1_4x128(maskBase[1]);
-
-#define PREPARE_MASKS_2                                                       \
-    PREPARE_MASKS_1                                                           \
-    dup_mask[2] = set1_4x128(maskBase[2]);                                      \
-    dup_mask[3] = set1_4x128(maskBase[3]);
-
-#define PREPARE_MASKS_3                                                       \
-    PREPARE_MASKS_2                                                           \
-    dup_mask[4] = set1_4x128(maskBase[4]);                                      \
-    dup_mask[5] = set1_4x128(maskBase[5]);
-
-#define PREPARE_MASKS_4                                                       \
-    PREPARE_MASKS_3                                                           \
-    dup_mask[6] = set1_4x128(maskBase[6]);                                      \
-    dup_mask[7] = set1_4x128(maskBase[7]);
-
-#define PREPARE_MASKS(n)                                                      \
-    m512 lo_mask = set1_64x8(0xf);                                              \
-    m512 dup_mask[n * 2];                                                     \
-    PREPARE_MASKS_##n
 
 // n_msk 1
+#undef N_MSK_VAL
+#define N_MSK_VAL 1
 hwlm_error_t fdr_exec_teddy_512_1(const struct FDR *fdr,
                                   const struct FDR_Runtime_Args *a,
                                   hwlm_group_t control) {
@@ -701,7 +731,24 @@ hwlm_error_t fdr_exec_teddy_512_1(const struct FDR *fdr,
                  a->buf, a->len, a->start_offset);
 
     const m128 *maskBase = getMaskBase(teddy);
-    PREPARE_MASKS(1);
+    //PREPARE_MASKS_512;
+
+    m512 lo_mask = set1_64x8(0xf); 
+    m512 dup_mask[N_MSK_VAL * 2]; 
+    dup_mask[0] = set1_4x128(maskBase[0]);        
+    dup_mask[1] = set1_4x128(maskBase[1]);       
+#if N_MSK_VAL > 1                               
+    dup_mask[2] = set1_4x128(maskBase[2]);     
+    dup_mask[3] = set1_4x128(maskBase[3]);    
+#endif                                       
+#if N_MSK_VAL > 2                           
+    dup_mask[4] = set1_4x128(maskBase[4]); 
+    dup_mask[5] = set1_4x128(maskBase[5]);
+#endif                                   
+#if N_MSK_VAL > 3                       
+    dup_mask[6] = set1_4x128(maskBase[6]);     
+    dup_mask[7] = set1_4x128(maskBase[7]);    
+#endif
     const u32 *confBase = getConfBase(teddy);
 
     const u64a *r_msk_base = getReinforcedMaskBase(teddy, 1);
@@ -758,6 +805,8 @@ hwlm_error_t fdr_exec_teddy_512_1(const struct FDR *fdr,
 }
 
 // n_msk 2
+#undef N_MSK_VAL
+#define N_MSK_VAL 2
 hwlm_error_t fdr_exec_teddy_512_2(const struct FDR *fdr,
                                   const struct FDR_Runtime_Args *a,
                                   hwlm_group_t control) {
@@ -772,7 +821,24 @@ hwlm_error_t fdr_exec_teddy_512_2(const struct FDR *fdr,
                  a->buf, a->len, a->start_offset);
 
     const m128 *maskBase = getMaskBase(teddy);
-    PREPARE_MASKS(2);
+    //PREPARE_MASKS_512;
+
+    m512 lo_mask = set1_64x8(0xf); 
+    m512 dup_mask[N_MSK_VAL * 2]; 
+    dup_mask[0] = set1_4x128(maskBase[0]);        
+    dup_mask[1] = set1_4x128(maskBase[1]);       
+#if N_MSK_VAL > 1                               
+    dup_mask[2] = set1_4x128(maskBase[2]);     
+    dup_mask[3] = set1_4x128(maskBase[3]);    
+#endif                                       
+#if N_MSK_VAL > 2                           
+    dup_mask[4] = set1_4x128(maskBase[4]); 
+    dup_mask[5] = set1_4x128(maskBase[5]);
+#endif                                   
+#if N_MSK_VAL > 3                       
+    dup_mask[6] = set1_4x128(maskBase[6]);     
+    dup_mask[7] = set1_4x128(maskBase[7]);    
+#endif
     const u32 *confBase = getConfBase(teddy);
 
     const u64a *r_msk_base = getReinforcedMaskBase(teddy, 2);
@@ -828,6 +894,8 @@ hwlm_error_t fdr_exec_teddy_512_2(const struct FDR *fdr,
     return HWLM_SUCCESS;
 }
 // n_msk 3
+#undef N_MSK_VAL
+#define N_MSK_VAL 3
 hwlm_error_t fdr_exec_teddy_512_3(const struct FDR *fdr,
                                   const struct FDR_Runtime_Args *a,
                                   hwlm_group_t control) {
@@ -842,7 +910,24 @@ hwlm_error_t fdr_exec_teddy_512_3(const struct FDR *fdr,
                  a->buf, a->len, a->start_offset);
 
     const m128 *maskBase = getMaskBase(teddy);
-    PREPARE_MASKS(3);
+    //PREPARE_MASKS_512;
+
+    m512 lo_mask = set1_64x8(0xf); 
+    m512 dup_mask[N_MSK_VAL * 2]; 
+    dup_mask[0] = set1_4x128(maskBase[0]);        
+    dup_mask[1] = set1_4x128(maskBase[1]);       
+#if N_MSK_VAL > 1                               
+    dup_mask[2] = set1_4x128(maskBase[2]);     
+    dup_mask[3] = set1_4x128(maskBase[3]);    
+#endif                                       
+#if N_MSK_VAL > 2                           
+    dup_mask[4] = set1_4x128(maskBase[4]); 
+    dup_mask[5] = set1_4x128(maskBase[5]);
+#endif                                   
+#if N_MSK_VAL > 3                       
+    dup_mask[6] = set1_4x128(maskBase[6]);     
+    dup_mask[7] = set1_4x128(maskBase[7]);    
+#endif
     const u32 *confBase = getConfBase(teddy);
 
     const u64a *r_msk_base = getReinforcedMaskBase(teddy, 3);
@@ -898,6 +983,8 @@ hwlm_error_t fdr_exec_teddy_512_3(const struct FDR *fdr,
     return HWLM_SUCCESS;
 }
 // n_msk 4
+#undef N_MSK_VAL
+#define N_MSK_VAL 4
 hwlm_error_t fdr_exec_teddy_512_4(const struct FDR *fdr,
                                   const struct FDR_Runtime_Args *a,
                                   hwlm_group_t control) {
@@ -912,7 +999,24 @@ hwlm_error_t fdr_exec_teddy_512_4(const struct FDR *fdr,
                  a->buf, a->len, a->start_offset);
 
     const m128 *maskBase = getMaskBase(teddy);
-    PREPARE_MASKS(4);
+    //PREPARE_MASKS_512;
+
+    m512 lo_mask = set1_64x8(0xf); 
+    m512 dup_mask[N_MSK_VAL * 2]; 
+    dup_mask[0] = set1_4x128(maskBase[0]);        
+    dup_mask[1] = set1_4x128(maskBase[1]);       
+#if N_MSK_VAL > 1                               
+    dup_mask[2] = set1_4x128(maskBase[2]);     
+    dup_mask[3] = set1_4x128(maskBase[3]);    
+#endif                                       
+#if N_MSK_VAL > 2                           
+    dup_mask[4] = set1_4x128(maskBase[4]); 
+    dup_mask[5] = set1_4x128(maskBase[5]);
+#endif                                   
+#if N_MSK_VAL > 3                       
+    dup_mask[6] = set1_4x128(maskBase[6]);     
+    dup_mask[7] = set1_4x128(maskBase[7]);    
+#endif
     const u32 *confBase = getConfBase(teddy);
 
     const u64a *r_msk_base = getReinforcedMaskBase(teddy, 4);
@@ -1132,31 +1236,10 @@ m256 prep_conf_teddy_m4(const m256 *lo_mask, const m256 *dup_mask,
 #define PREP_CONF_FN(ptr, n)                                                  \
     prep_conf_teddy_m##n(&lo_mask, dup_mask, ptr, r_msk_base, &c_0, &c_128)
 
-#define PREPARE_MASKS_1                                                       \
-    dup_mask[0] = set1_2x128(maskBase[0]);                                      \
-    dup_mask[1] = set1_2x128(maskBase[1]);
-
-#define PREPARE_MASKS_2                                                       \
-    PREPARE_MASKS_1                                                           \
-    dup_mask[2] = set1_2x128(maskBase[2]);                                      \
-    dup_mask[3] = set1_2x128(maskBase[3]);
-
-#define PREPARE_MASKS_3                                                       \
-    PREPARE_MASKS_2                                                           \
-    dup_mask[4] = set1_2x128(maskBase[4]);                                      \
-    dup_mask[5] = set1_2x128(maskBase[5]);
-
-#define PREPARE_MASKS_4                                                       \
-    PREPARE_MASKS_3                                                           \
-    dup_mask[6] = set1_2x128(maskBase[6]);                                      \
-    dup_mask[7] = set1_2x128(maskBase[7]);
-
-#define PREPARE_MASKS(n)                                                      \
-    m256 lo_mask = set1_32x8(0xf);                                              \
-    m256 dup_mask[n * 2];                                                     \
-    PREPARE_MASKS_##n
 
 // n_msk 1
+#undef N_MSK_VAL
+#define N_MSK_VAL 1
 hwlm_error_t fdr_exec_teddy_256_1(const struct FDR *fdr,
                                   const struct FDR_Runtime_Args *a,
                                   hwlm_group_t control) {
@@ -1171,7 +1254,24 @@ hwlm_error_t fdr_exec_teddy_256_1(const struct FDR *fdr,
                  a->buf, a->len, a->start_offset);
 
     const m128 *maskBase = getMaskBase(teddy);
-    PREPARE_MASKS(1);
+    //PREPARE_MASKS_256;
+
+    m256 lo_mask = set1_32x8(0xf); 
+    m256 dup_mask[N_MSK_VAL * 2]; 
+    dup_mask[0] = set1_2x128(maskBase[0]);    
+    dup_mask[1] = set1_2x128(maskBase[1]);   
+#if N_MSK_VAL > 1                           
+    dup_mask[2] = set1_2x128(maskBase[2]); 
+    dup_mask[3] = set1_2x128(maskBase[3]);
+#endif                                   
+#if N_MSK_VAL > 2                       
+    dup_mask[4] = set1_2x128(maskBase[4]);    
+    dup_mask[5] = set1_2x128(maskBase[5]);   
+#endif                                      
+#if N_MSK_VAL > 3                          
+    dup_mask[6] = set1_2x128(maskBase[6]);
+    dup_mask[7] = set1_2x128(maskBase[7]);
+#endif
     const u32 *confBase = getConfBase(teddy);
 
     const u64a *r_msk_base = getReinforcedMaskBase(teddy, 1);
@@ -1226,6 +1326,8 @@ hwlm_error_t fdr_exec_teddy_256_1(const struct FDR *fdr,
 }
 
 // n_msk 2
+#undef N_MSK_VAL
+#define N_MSK_VAL 2
 hwlm_error_t fdr_exec_teddy_256_2(const struct FDR *fdr,
                                   const struct FDR_Runtime_Args *a,
                                   hwlm_group_t control) {
@@ -1240,7 +1342,24 @@ hwlm_error_t fdr_exec_teddy_256_2(const struct FDR *fdr,
                  a->buf, a->len, a->start_offset);
 
     const m128 *maskBase = getMaskBase(teddy);
-    PREPARE_MASKS(2);
+    //PREPARE_MASKS_256;
+
+    m256 lo_mask = set1_32x8(0xf); 
+    m256 dup_mask[N_MSK_VAL * 2]; 
+    dup_mask[0] = set1_2x128(maskBase[0]);    
+    dup_mask[1] = set1_2x128(maskBase[1]);   
+#if N_MSK_VAL > 1                           
+    dup_mask[2] = set1_2x128(maskBase[2]); 
+    dup_mask[3] = set1_2x128(maskBase[3]);
+#endif                                   
+#if N_MSK_VAL > 2                       
+    dup_mask[4] = set1_2x128(maskBase[4]);    
+    dup_mask[5] = set1_2x128(maskBase[5]);   
+#endif                                      
+#if N_MSK_VAL > 3                          
+    dup_mask[6] = set1_2x128(maskBase[6]);
+    dup_mask[7] = set1_2x128(maskBase[7]);
+#endif
     const u32 *confBase = getConfBase(teddy);
 
     const u64a *r_msk_base = getReinforcedMaskBase(teddy, 2);
@@ -1294,6 +1413,8 @@ hwlm_error_t fdr_exec_teddy_256_2(const struct FDR *fdr,
     return HWLM_SUCCESS;
 }
 // n_msk 3
+#undef N_MSK_VAL
+#define N_MSK_VAL 3
 hwlm_error_t fdr_exec_teddy_256_3(const struct FDR *fdr,
                                   const struct FDR_Runtime_Args *a,
                                   hwlm_group_t control) {
@@ -1308,7 +1429,24 @@ hwlm_error_t fdr_exec_teddy_256_3(const struct FDR *fdr,
                  a->buf, a->len, a->start_offset);
 
     const m128 *maskBase = getMaskBase(teddy);
-    PREPARE_MASKS(3);
+    //PREPARE_MASKS_256;
+
+    m256 lo_mask = set1_32x8(0xf); 
+    m256 dup_mask[N_MSK_VAL * 2]; 
+    dup_mask[0] = set1_2x128(maskBase[0]);    
+    dup_mask[1] = set1_2x128(maskBase[1]);   
+#if N_MSK_VAL > 1                           
+    dup_mask[2] = set1_2x128(maskBase[2]); 
+    dup_mask[3] = set1_2x128(maskBase[3]);
+#endif                                   
+#if N_MSK_VAL > 2                       
+    dup_mask[4] = set1_2x128(maskBase[4]);    
+    dup_mask[5] = set1_2x128(maskBase[5]);   
+#endif                                      
+#if N_MSK_VAL > 3                          
+    dup_mask[6] = set1_2x128(maskBase[6]);
+    dup_mask[7] = set1_2x128(maskBase[7]);
+#endif
     const u32 *confBase = getConfBase(teddy);
 
     const u64a *r_msk_base = getReinforcedMaskBase(teddy, 3);
@@ -1362,6 +1500,8 @@ hwlm_error_t fdr_exec_teddy_256_3(const struct FDR *fdr,
     return HWLM_SUCCESS;
 }
 // n_msk 4
+#undef N_MSK_VAL
+#define N_MSK_VAL 4
 hwlm_error_t fdr_exec_teddy_256_4(const struct FDR *fdr,
                                   const struct FDR_Runtime_Args *a,
                                   hwlm_group_t control) {
@@ -1376,7 +1516,24 @@ hwlm_error_t fdr_exec_teddy_256_4(const struct FDR *fdr,
                  a->buf, a->len, a->start_offset);
 
     const m128 *maskBase = getMaskBase(teddy);
-    PREPARE_MASKS(4);
+    //PREPARE_MASKS_256;
+
+    m256 lo_mask = set1_32x8(0xf); 
+    m256 dup_mask[N_MSK_VAL * 2]; 
+    dup_mask[0] = set1_2x128(maskBase[0]);    
+    dup_mask[1] = set1_2x128(maskBase[1]);   
+#if N_MSK_VAL > 1                           
+    dup_mask[2] = set1_2x128(maskBase[2]); 
+    dup_mask[3] = set1_2x128(maskBase[3]);
+#endif                                   
+#if N_MSK_VAL > 2                       
+    dup_mask[4] = set1_2x128(maskBase[4]);    
+    dup_mask[5] = set1_2x128(maskBase[5]);   
+#endif                                      
+#if N_MSK_VAL > 3                          
+    dup_mask[6] = set1_2x128(maskBase[6]);
+    dup_mask[7] = set1_2x128(maskBase[7]);
+#endif
     const u32 *confBase = getConfBase(teddy);
 
     const u64a *r_msk_base = getReinforcedMaskBase(teddy, 4);
