@@ -105,28 +105,28 @@ hwlm_error_t confirm_teddy_64_512(m512 var, int bucket, int offset,
                                   const struct FDR_Runtime_Args *a,
                                   const u32* confBase, hwlm_group_t *control,
                                   u32 *last_match) {
-    if (unlikely(diff512(var, ones512()))) {               
-        m128 p128_0 = extract128from512(var, 0);          
-        m128 p128_1 = extract128from512(var, 1);         
-        m128 p128_2 = extract128from512(var, 2);        
-        m128 p128_3 = extract128from512(var, 3);       
-        u64a part1 = movq(p128_0);                    
-        u64a part2 = movq(rshiftbyte_m128(p128_0, 8));            
-        u64a part3 = movq(p128_1);                               
-        u64a part4 = movq(rshiftbyte_m128(p128_1, 8));          
-        u64a part5 = movq(p128_2);                             
-        u64a part6 = movq(rshiftbyte_m128(p128_2, 8));        
-        u64a part7 = movq(p128_3);                           
-        u64a part8 = movq(rshiftbyte_m128(p128_3, 8));      
-        CONF_CHUNK_64(part1, bucket, offset, reason, ptr);  
-        CONF_CHUNK_64(part2, bucket, offset + 8, reason, ptr);    
-        CONF_CHUNK_64(part3, bucket, offset + 16, reason, ptr);  
-        CONF_CHUNK_64(part4, bucket, offset + 24, reason, ptr); 
-        CONF_CHUNK_64(part5, bucket, offset + 32, reason, ptr);    
-        CONF_CHUNK_64(part6, bucket, offset + 40, reason, ptr);   
-        CONF_CHUNK_64(part7, bucket, offset + 48, reason, ptr);  
-        CONF_CHUNK_64(part8, bucket, offset + 56, reason, ptr); 
-    }                                                         
+    if (unlikely(diff512(var, ones512()))) {
+        m128 p128_0 = extract128from512(var, 0);
+        m128 p128_1 = extract128from512(var, 1);
+        m128 p128_2 = extract128from512(var, 2);
+        m128 p128_3 = extract128from512(var, 3);
+        u64a part1 = movq(p128_0);
+        u64a part2 = movq(rshiftbyte_m128(p128_0, 8));
+        u64a part3 = movq(p128_1);
+        u64a part4 = movq(rshiftbyte_m128(p128_1, 8));
+        u64a part5 = movq(p128_2);
+        u64a part6 = movq(rshiftbyte_m128(p128_2, 8));
+        u64a part7 = movq(p128_3);
+        u64a part8 = movq(rshiftbyte_m128(p128_3, 8));
+        CONF_CHUNK_64(part1, bucket, offset, reason, ptr);
+        CONF_CHUNK_64(part2, bucket, offset + 8, reason, ptr);
+        CONF_CHUNK_64(part3, bucket, offset + 16, reason, ptr);
+        CONF_CHUNK_64(part4, bucket, offset + 24, reason, ptr);
+        CONF_CHUNK_64(part5, bucket, offset + 32, reason, ptr);
+        CONF_CHUNK_64(part6, bucket, offset + 40, reason, ptr);
+        CONF_CHUNK_64(part7, bucket, offset + 48, reason, ptr);
+        CONF_CHUNK_64(part8, bucket, offset + 56, reason, ptr);
+    }
     return HWLM_SUCCESS;
 }
 
@@ -139,43 +139,43 @@ hwlm_error_t confirm_teddy_32_512(m512 var, int bucket, int offset,
                                   const u32* confBase, hwlm_group_t *control,
                                   u32 *last_match) {
     if (unlikely(diff512(var, ones512()))) {
-        m128 p128_0 = extract128from512(var, 0);        
-        m128 p128_1 = extract128from512(var, 1);       
-        m128 p128_2 = extract128from512(var, 2);      
-        m128 p128_3 = extract128from512(var, 3);     
-        u32 part1 = movd(p128_0);                   
-        u32 part2 = movd(rshiftbyte_m128(p128_0, 4));                  
-        u32 part3 = movd(rshiftbyte_m128(p128_0, 8));                 
-        u32 part4 = movd(rshiftbyte_m128(p128_0, 12));               
-        u32 part5 = movd(p128_1);                                   
-        u32 part6 = movd(rshiftbyte_m128(p128_1, 4));              
-        u32 part7 = movd(rshiftbyte_m128(p128_1, 8));             
-        u32 part8 = movd(rshiftbyte_m128(p128_1, 12));           
-        u32 part9 = movd(p128_2);                               
-        u32 part10 = movd(rshiftbyte_m128(p128_2, 4));         
-        u32 part11 = movd(rshiftbyte_m128(p128_2, 8));        
-        u32 part12 = movd(rshiftbyte_m128(p128_2, 12));      
-        u32 part13 = movd(p128_3);                          
-        u32 part14 = movd(rshiftbyte_m128(p128_3, 4));     
-        u32 part15 = movd(rshiftbyte_m128(p128_3, 8));    
-        u32 part16 = movd(rshiftbyte_m128(p128_3, 12));  
-        CONF_CHUNK_32(part1, bucket, offset, reason, ptr);        
-        CONF_CHUNK_32(part2, bucket, offset + 4, reason, ptr);   
-        CONF_CHUNK_32(part3, bucket, offset + 8, reason, ptr);  
-        CONF_CHUNK_32(part4, bucket, offset + 12, reason, ptr);    
-        CONF_CHUNK_32(part5, bucket, offset + 16, reason, ptr);   
-        CONF_CHUNK_32(part6, bucket, offset + 20, reason, ptr);  
-        CONF_CHUNK_32(part7, bucket, offset + 24, reason, ptr); 
-        CONF_CHUNK_32(part8, bucket, offset + 28, reason, ptr);    
-        CONF_CHUNK_32(part9, bucket, offset + 32, reason, ptr);   
-        CONF_CHUNK_32(part10, bucket, offset + 36, reason, ptr); 
-        CONF_CHUNK_32(part11, bucket, offset + 40, reason, ptr);   
-        CONF_CHUNK_32(part12, bucket, offset + 44, reason, ptr);  
-        CONF_CHUNK_32(part13, bucket, offset + 48, reason, ptr); 
-        CONF_CHUNK_32(part14, bucket, offset + 52, reason, ptr);  
-        CONF_CHUNK_32(part15, bucket, offset + 56, reason, ptr); 
+        m128 p128_0 = extract128from512(var, 0);
+        m128 p128_1 = extract128from512(var, 1);
+        m128 p128_2 = extract128from512(var, 2);
+        m128 p128_3 = extract128from512(var, 3);
+        u32 part1 = movd(p128_0);
+        u32 part2 = movd(rshiftbyte_m128(p128_0, 4));
+        u32 part3 = movd(rshiftbyte_m128(p128_0, 8));
+        u32 part4 = movd(rshiftbyte_m128(p128_0, 12));
+        u32 part5 = movd(p128_1);
+        u32 part6 = movd(rshiftbyte_m128(p128_1, 4));
+        u32 part7 = movd(rshiftbyte_m128(p128_1, 8));
+        u32 part8 = movd(rshiftbyte_m128(p128_1, 12));
+        u32 part9 = movd(p128_2);
+        u32 part10 = movd(rshiftbyte_m128(p128_2, 4));
+        u32 part11 = movd(rshiftbyte_m128(p128_2, 8));
+        u32 part12 = movd(rshiftbyte_m128(p128_2, 12));
+        u32 part13 = movd(p128_3);
+        u32 part14 = movd(rshiftbyte_m128(p128_3, 4));
+        u32 part15 = movd(rshiftbyte_m128(p128_3, 8));
+        u32 part16 = movd(rshiftbyte_m128(p128_3, 12));
+        CONF_CHUNK_32(part1, bucket, offset, reason, ptr);
+        CONF_CHUNK_32(part2, bucket, offset + 4, reason, ptr);
+        CONF_CHUNK_32(part3, bucket, offset + 8, reason, ptr);
+        CONF_CHUNK_32(part4, bucket, offset + 12, reason, ptr);
+        CONF_CHUNK_32(part5, bucket, offset + 16, reason, ptr);
+        CONF_CHUNK_32(part6, bucket, offset + 20, reason, ptr);
+        CONF_CHUNK_32(part7, bucket, offset + 24, reason, ptr);
+        CONF_CHUNK_32(part8, bucket, offset + 28, reason, ptr);
+        CONF_CHUNK_32(part9, bucket, offset + 32, reason, ptr);
+        CONF_CHUNK_32(part10, bucket, offset + 36, reason, ptr);
+        CONF_CHUNK_32(part11, bucket, offset + 40, reason, ptr);
+        CONF_CHUNK_32(part12, bucket, offset + 44, reason, ptr);
+        CONF_CHUNK_32(part13, bucket, offset + 48, reason, ptr);
+        CONF_CHUNK_32(part14, bucket, offset + 52, reason, ptr);
+        CONF_CHUNK_32(part15, bucket, offset + 56, reason, ptr);
         CONF_CHUNK_32(part16, bucket, offset + 60, reason, ptr);
-    }                                                         
+    }
     return HWLM_SUCCESS;
 }
 
@@ -334,222 +334,222 @@ m512 prep_conf_teddy_m4(const m512 *lo_mask, const m512 *dup_mask,
 hwlm_error_t fdr_exec_teddy_512vbmi_1(const struct FDR *fdr,
                                       const struct FDR_Runtime_Args *a,
                                       hwlm_group_t control) {
-    const u8 *buf_end = a->buf + a->len;                    
-    const u8 *ptr = a->buf + a->start_offset;              
-    u32 floodBackoff = FLOOD_BACKOFF_START;               
-    const u8 *tryFloodDetect = a->firstFloodDetect;      
-    u32 last_match = ones_u32;                          
-    const struct Teddy *teddy = (const struct Teddy *)fdr; 
-    const size_t iterBytes = 64;                          
-    u32 n_sh = 1 - 1;                                
-    const size_t loopBytes = 64 - n_sh;                 
-    DEBUG_PRINTF("params: buf %p len %zu start_offset %zu\n",      
-                 a->buf, a->len, a->start_offset);                
-                                                                 
-    const m128 *maskBase = getMaskBase(teddy);                  
-    PREPARE_MASKS(1);                                      
-    const u32 *confBase = getConfBase(teddy);                 
-                                                             
-    u64a k = TEDDY_VBMI_CONF_MASK_FULL;                     
-    m512 p_mask = set_mask_m512(~k);                       
-    u32 overlap = 0;                                      
-    u64a patch = 0;                                                      
-    if (likely(ptr + loopBytes <= buf_end)) {                           
-        m512 p_mask0 = set_mask_m512(~TEDDY_VBMI_CONF_MASK_HEAD);      
-        m512 r_0 = PREP_CONF_FN(loadu512(ptr), 1);                
-        r_0 = or512(r_0, p_mask0);                                   
-        CONFIRM_TEDDY_512(r_0, 8, 0, VECTORING, ptr);          
-        ptr += loopBytes;                                          
-        overlap = n_sh;                                           
-        patch = TEDDY_VBMI_LOAD_MASK_PATCH;                      
-    }                                                           
-                                                               
-    for (; ptr + loopBytes <= buf_end; ptr += loopBytes) {    
-        __builtin_prefetch(ptr - n_sh + (64 * 2));           
-        CHECK_FLOOD;                                        
-        m512 r_0 = PREP_CONF_FN(loadu512(ptr - n_sh), 1);              
-        r_0 = or512(r_0, p_mask);                                         
-        CONFIRM_TEDDY_512(r_0, 8, 0, NOT_CAUTIOUS, ptr - n_sh);     
-    }                                                                   
-                                                                       
-    assert(ptr + loopBytes > buf_end);                                
-    if (ptr < buf_end) {                                             
-        u32 left = (u32)(buf_end - ptr);                            
-        u64a k1 = TEDDY_VBMI_CONF_MASK_VAR(left);                  
-        m512 p_mask1 = set_mask_m512(~k1);                        
+    const u8 *buf_end = a->buf + a->len;
+    const u8 *ptr = a->buf + a->start_offset;
+    u32 floodBackoff = FLOOD_BACKOFF_START;
+    const u8 *tryFloodDetect = a->firstFloodDetect;
+    u32 last_match = ones_u32;
+    const struct Teddy *teddy = (const struct Teddy *)fdr;
+    const size_t iterBytes = 64;
+    u32 n_sh = 1 - 1;
+    const size_t loopBytes = 64 - n_sh;
+    DEBUG_PRINTF("params: buf %p len %zu start_offset %zu\n",
+                 a->buf, a->len, a->start_offset);
+
+    const m128 *maskBase = getMaskBase(teddy);
+    PREPARE_MASKS(1);
+    const u32 *confBase = getConfBase(teddy);
+
+    u64a k = TEDDY_VBMI_CONF_MASK_FULL;
+    m512 p_mask = set_mask_m512(~k);
+    u32 overlap = 0;
+    u64a patch = 0;
+    if (likely(ptr + loopBytes <= buf_end)) {
+        m512 p_mask0 = set_mask_m512(~TEDDY_VBMI_CONF_MASK_HEAD);
+        m512 r_0 = PREP_CONF_FN(loadu512(ptr), 1);
+        r_0 = or512(r_0, p_mask0);
+        CONFIRM_TEDDY_512(r_0, 8, 0, VECTORING, ptr);
+        ptr += loopBytes;
+        overlap = n_sh;
+        patch = TEDDY_VBMI_LOAD_MASK_PATCH;
+    }
+
+    for (; ptr + loopBytes <= buf_end; ptr += loopBytes) {
+        __builtin_prefetch(ptr - n_sh + (64 * 2));
+        CHECK_FLOOD;
+        m512 r_0 = PREP_CONF_FN(loadu512(ptr - n_sh), 1);
+        r_0 = or512(r_0, p_mask);
+        CONFIRM_TEDDY_512(r_0, 8, 0, NOT_CAUTIOUS, ptr - n_sh);
+    }
+
+    assert(ptr + loopBytes > buf_end);
+    if (ptr < buf_end) {
+        u32 left = (u32)(buf_end - ptr);
+        u64a k1 = TEDDY_VBMI_CONF_MASK_VAR(left);
+        m512 p_mask1 = set_mask_m512(~k1);
         m512 val_0 = loadu_maskz_m512(k1 | patch, ptr - overlap);
-        m512 r_0 = PREP_CONF_FN(val_0, 1);                  
-        r_0 = or512(r_0, p_mask1);                                     
-        CONFIRM_TEDDY_512(r_0, 8, 0, VECTORING, ptr - overlap);  
-    }                                                                
-                                                                    
-    return HWLM_SUCCESS;                                           
+        m512 r_0 = PREP_CONF_FN(val_0, 1);
+        r_0 = or512(r_0, p_mask1);
+        CONFIRM_TEDDY_512(r_0, 8, 0, VECTORING, ptr - overlap);
+    }
+
+    return HWLM_SUCCESS;
 }
 
 // n_msk 2
 hwlm_error_t fdr_exec_teddy_512vbmi_2(const struct FDR *fdr,
                                       const struct FDR_Runtime_Args *a,
                                       hwlm_group_t control) {
-    const u8 *buf_end = a->buf + a->len;                    
-    const u8 *ptr = a->buf + a->start_offset;              
-    u32 floodBackoff = FLOOD_BACKOFF_START;               
-    const u8 *tryFloodDetect = a->firstFloodDetect;      
-    u32 last_match = ones_u32;                          
-    const struct Teddy *teddy = (const struct Teddy *)fdr; 
-    const size_t iterBytes = 64;                          
-    u32 n_sh = 2 - 1;                                
-    const size_t loopBytes = 64 - n_sh;                 
-    DEBUG_PRINTF("params: buf %p len %zu start_offset %zu\n",      
-                 a->buf, a->len, a->start_offset);                
-                                                                 
-    const m128 *maskBase = getMaskBase(teddy);                  
-    PREPARE_MASKS(2);                                      
-    const u32 *confBase = getConfBase(teddy);                 
-                                                             
-    u64a k = TEDDY_VBMI_CONF_MASK_FULL;                     
-    m512 p_mask = set_mask_m512(~k);                       
-    u32 overlap = 0;                                      
-    u64a patch = 0;                                                      
-    if (likely(ptr + loopBytes <= buf_end)) {                           
-        m512 p_mask0 = set_mask_m512(~TEDDY_VBMI_CONF_MASK_HEAD);      
-        m512 r_0 = PREP_CONF_FN(loadu512(ptr), 2);                
-        r_0 = or512(r_0, p_mask0);                                   
-        CONFIRM_TEDDY_512(r_0, 8, 0, VECTORING, ptr);          
-        ptr += loopBytes;                                          
-        overlap = n_sh;                                           
-        patch = TEDDY_VBMI_LOAD_MASK_PATCH;                      
-    }                                                           
-                                                               
-    for (; ptr + loopBytes <= buf_end; ptr += loopBytes) {    
-        __builtin_prefetch(ptr - n_sh + (64 * 2));           
-        CHECK_FLOOD;                                        
-        m512 r_0 = PREP_CONF_FN(loadu512(ptr - n_sh), 2);              
-        r_0 = or512(r_0, p_mask);                                         
-        CONFIRM_TEDDY_512(r_0, 8, 0, NOT_CAUTIOUS, ptr - n_sh);     
-    }                                                                   
-                                                                       
-    assert(ptr + loopBytes > buf_end);                                
-    if (ptr < buf_end) {                                             
-        u32 left = (u32)(buf_end - ptr);                            
-        u64a k1 = TEDDY_VBMI_CONF_MASK_VAR(left);                  
-        m512 p_mask1 = set_mask_m512(~k1);                        
+    const u8 *buf_end = a->buf + a->len;
+    const u8 *ptr = a->buf + a->start_offset;
+    u32 floodBackoff = FLOOD_BACKOFF_START;
+    const u8 *tryFloodDetect = a->firstFloodDetect;
+    u32 last_match = ones_u32;
+    const struct Teddy *teddy = (const struct Teddy *)fdr;
+    const size_t iterBytes = 64;
+    u32 n_sh = 2 - 1;
+    const size_t loopBytes = 64 - n_sh;
+    DEBUG_PRINTF("params: buf %p len %zu start_offset %zu\n",
+                 a->buf, a->len, a->start_offset);
+
+    const m128 *maskBase = getMaskBase(teddy);
+    PREPARE_MASKS(2);
+    const u32 *confBase = getConfBase(teddy);
+
+    u64a k = TEDDY_VBMI_CONF_MASK_FULL;
+    m512 p_mask = set_mask_m512(~k);
+    u32 overlap = 0;
+    u64a patch = 0;
+    if (likely(ptr + loopBytes <= buf_end)) {
+        m512 p_mask0 = set_mask_m512(~TEDDY_VBMI_CONF_MASK_HEAD);
+        m512 r_0 = PREP_CONF_FN(loadu512(ptr), 2);
+        r_0 = or512(r_0, p_mask0);
+        CONFIRM_TEDDY_512(r_0, 8, 0, VECTORING, ptr);
+        ptr += loopBytes;
+        overlap = n_sh;
+        patch = TEDDY_VBMI_LOAD_MASK_PATCH;
+    }
+
+    for (; ptr + loopBytes <= buf_end; ptr += loopBytes) {
+        __builtin_prefetch(ptr - n_sh + (64 * 2));
+        CHECK_FLOOD;
+        m512 r_0 = PREP_CONF_FN(loadu512(ptr - n_sh), 2);
+        r_0 = or512(r_0, p_mask);
+        CONFIRM_TEDDY_512(r_0, 8, 0, NOT_CAUTIOUS, ptr - n_sh);
+    }
+
+    assert(ptr + loopBytes > buf_end);
+    if (ptr < buf_end) {
+        u32 left = (u32)(buf_end - ptr);
+        u64a k1 = TEDDY_VBMI_CONF_MASK_VAR(left);
+        m512 p_mask1 = set_mask_m512(~k1);
         m512 val_0 = loadu_maskz_m512(k1 | patch, ptr - overlap);
-        m512 r_0 = PREP_CONF_FN(val_0, 2);                  
-        r_0 = or512(r_0, p_mask1);                                     
-        CONFIRM_TEDDY_512(r_0, 8, 0, VECTORING, ptr - overlap);  
-    }                                                                
-                                                                    
-    return HWLM_SUCCESS;                                           
+        m512 r_0 = PREP_CONF_FN(val_0, 2);
+        r_0 = or512(r_0, p_mask1);
+        CONFIRM_TEDDY_512(r_0, 8, 0, VECTORING, ptr - overlap);
+    }
+
+    return HWLM_SUCCESS;
 }
 // n_msk 3
 hwlm_error_t fdr_exec_teddy_512vbmi_3(const struct FDR *fdr,
                                       const struct FDR_Runtime_Args *a,
                                       hwlm_group_t control) {
-    const u8 *buf_end = a->buf + a->len;                    
-    const u8 *ptr = a->buf + a->start_offset;              
-    u32 floodBackoff = FLOOD_BACKOFF_START;               
-    const u8 *tryFloodDetect = a->firstFloodDetect;      
-    u32 last_match = ones_u32;                          
-    const struct Teddy *teddy = (const struct Teddy *)fdr; 
-    const size_t iterBytes = 64;                          
-    u32 n_sh = 3 - 1;                                
-    const size_t loopBytes = 64 - n_sh;                 
-    DEBUG_PRINTF("params: buf %p len %zu start_offset %zu\n",      
-                 a->buf, a->len, a->start_offset);                
-                                                                 
-    const m128 *maskBase = getMaskBase(teddy);                  
-    PREPARE_MASKS(3);                                      
-    const u32 *confBase = getConfBase(teddy);                 
-                                                             
-    u64a k = TEDDY_VBMI_CONF_MASK_FULL;                     
-    m512 p_mask = set_mask_m512(~k);                       
-    u32 overlap = 0;                                      
-    u64a patch = 0;                                                      
-    if (likely(ptr + loopBytes <= buf_end)) {                           
-        m512 p_mask0 = set_mask_m512(~TEDDY_VBMI_CONF_MASK_HEAD);      
-        m512 r_0 = PREP_CONF_FN(loadu512(ptr), 3);                
-        r_0 = or512(r_0, p_mask0);                                   
-        CONFIRM_TEDDY_512(r_0, 8, 0, VECTORING, ptr);          
-        ptr += loopBytes;                                          
-        overlap = n_sh;                                           
-        patch = TEDDY_VBMI_LOAD_MASK_PATCH;                      
-    }                                                           
-                                                               
-    for (; ptr + loopBytes <= buf_end; ptr += loopBytes) {    
-        __builtin_prefetch(ptr - n_sh + (64 * 2));           
-        CHECK_FLOOD;                                        
-        m512 r_0 = PREP_CONF_FN(loadu512(ptr - n_sh), 3);              
-        r_0 = or512(r_0, p_mask);                                         
-        CONFIRM_TEDDY_512(r_0, 8, 0, NOT_CAUTIOUS, ptr - n_sh);     
-    }                                                                   
-                                                                       
-    assert(ptr + loopBytes > buf_end);                                
-    if (ptr < buf_end) {                                             
-        u32 left = (u32)(buf_end - ptr);                            
-        u64a k1 = TEDDY_VBMI_CONF_MASK_VAR(left);                  
-        m512 p_mask1 = set_mask_m512(~k1);                        
+    const u8 *buf_end = a->buf + a->len;
+    const u8 *ptr = a->buf + a->start_offset;
+    u32 floodBackoff = FLOOD_BACKOFF_START;
+    const u8 *tryFloodDetect = a->firstFloodDetect;
+    u32 last_match = ones_u32;
+    const struct Teddy *teddy = (const struct Teddy *)fdr;
+    const size_t iterBytes = 64;
+    u32 n_sh = 3 - 1;
+    const size_t loopBytes = 64 - n_sh;
+    DEBUG_PRINTF("params: buf %p len %zu start_offset %zu\n",
+                 a->buf, a->len, a->start_offset);
+
+    const m128 *maskBase = getMaskBase(teddy);
+    PREPARE_MASKS(3);
+    const u32 *confBase = getConfBase(teddy);
+
+    u64a k = TEDDY_VBMI_CONF_MASK_FULL;
+    m512 p_mask = set_mask_m512(~k);
+    u32 overlap = 0;
+    u64a patch = 0;
+    if (likely(ptr + loopBytes <= buf_end)) {
+        m512 p_mask0 = set_mask_m512(~TEDDY_VBMI_CONF_MASK_HEAD);
+        m512 r_0 = PREP_CONF_FN(loadu512(ptr), 3);
+        r_0 = or512(r_0, p_mask0);
+        CONFIRM_TEDDY_512(r_0, 8, 0, VECTORING, ptr);
+        ptr += loopBytes;
+        overlap = n_sh;
+        patch = TEDDY_VBMI_LOAD_MASK_PATCH;
+    }
+
+    for (; ptr + loopBytes <= buf_end; ptr += loopBytes) {
+        __builtin_prefetch(ptr - n_sh + (64 * 2));
+        CHECK_FLOOD;
+        m512 r_0 = PREP_CONF_FN(loadu512(ptr - n_sh), 3);
+        r_0 = or512(r_0, p_mask);
+        CONFIRM_TEDDY_512(r_0, 8, 0, NOT_CAUTIOUS, ptr - n_sh);
+    }
+
+    assert(ptr + loopBytes > buf_end);
+    if (ptr < buf_end) {
+        u32 left = (u32)(buf_end - ptr);
+        u64a k1 = TEDDY_VBMI_CONF_MASK_VAR(left);
+        m512 p_mask1 = set_mask_m512(~k1);
         m512 val_0 = loadu_maskz_m512(k1 | patch, ptr - overlap);
-        m512 r_0 = PREP_CONF_FN(val_0, 3);                  
-        r_0 = or512(r_0, p_mask1);                                     
-        CONFIRM_TEDDY_512(r_0, 8, 0, VECTORING, ptr - overlap);  
-    }                                                                
-                                                                    
-    return HWLM_SUCCESS;                                           
+        m512 r_0 = PREP_CONF_FN(val_0, 3);
+        r_0 = or512(r_0, p_mask1);
+        CONFIRM_TEDDY_512(r_0, 8, 0, VECTORING, ptr - overlap);
+    }
+
+    return HWLM_SUCCESS;
 }
 // n_msk 4
 hwlm_error_t fdr_exec_teddy_512vbmi_4(const struct FDR *fdr,
                                       const struct FDR_Runtime_Args *a,
                                       hwlm_group_t control) {
-    const u8 *buf_end = a->buf + a->len;                    
-    const u8 *ptr = a->buf + a->start_offset;              
-    u32 floodBackoff = FLOOD_BACKOFF_START;               
-    const u8 *tryFloodDetect = a->firstFloodDetect;      
-    u32 last_match = ones_u32;                          
-    const struct Teddy *teddy = (const struct Teddy *)fdr; 
-    const size_t iterBytes = 64;                          
-    u32 n_sh = 4 - 1;                                
-    const size_t loopBytes = 64 - n_sh;                 
-    DEBUG_PRINTF("params: buf %p len %zu start_offset %zu\n",      
-                 a->buf, a->len, a->start_offset);                
-                                                                 
-    const m128 *maskBase = getMaskBase(teddy);                  
-    PREPARE_MASKS(4);                                      
-    const u32 *confBase = getConfBase(teddy);                 
-                                                             
-    u64a k = TEDDY_VBMI_CONF_MASK_FULL;                     
-    m512 p_mask = set_mask_m512(~k);                       
-    u32 overlap = 0;                                      
-    u64a patch = 0;                                                      
-    if (likely(ptr + loopBytes <= buf_end)) {                           
-        m512 p_mask0 = set_mask_m512(~TEDDY_VBMI_CONF_MASK_HEAD);      
-        m512 r_0 = PREP_CONF_FN(loadu512(ptr), 4);                
-        r_0 = or512(r_0, p_mask0);                                   
-        CONFIRM_TEDDY_512(r_0, 8, 0, VECTORING, ptr);          
-        ptr += loopBytes;                                          
-        overlap = n_sh;                                           
-        patch = TEDDY_VBMI_LOAD_MASK_PATCH;                      
-    }                                                           
-                                                               
-    for (; ptr + loopBytes <= buf_end; ptr += loopBytes) {    
-        __builtin_prefetch(ptr - n_sh + (64 * 2));           
-        CHECK_FLOOD;                                        
-        m512 r_0 = PREP_CONF_FN(loadu512(ptr - n_sh), 4);              
-        r_0 = or512(r_0, p_mask);                                         
-        CONFIRM_TEDDY_512(r_0, 8, 0, NOT_CAUTIOUS, ptr - n_sh);     
-    }                                                                   
-                                                                       
-    assert(ptr + loopBytes > buf_end);                                
-    if (ptr < buf_end) {                                             
-        u32 left = (u32)(buf_end - ptr);                            
-        u64a k1 = TEDDY_VBMI_CONF_MASK_VAR(left);                  
-        m512 p_mask1 = set_mask_m512(~k1);                        
+    const u8 *buf_end = a->buf + a->len;
+    const u8 *ptr = a->buf + a->start_offset;
+    u32 floodBackoff = FLOOD_BACKOFF_START;
+    const u8 *tryFloodDetect = a->firstFloodDetect;
+    u32 last_match = ones_u32;
+    const struct Teddy *teddy = (const struct Teddy *)fdr;
+    const size_t iterBytes = 64;
+    u32 n_sh = 4 - 1;
+    const size_t loopBytes = 64 - n_sh;
+    DEBUG_PRINTF("params: buf %p len %zu start_offset %zu\n",
+                 a->buf, a->len, a->start_offset);
+
+    const m128 *maskBase = getMaskBase(teddy);
+    PREPARE_MASKS(4);
+    const u32 *confBase = getConfBase(teddy);
+
+    u64a k = TEDDY_VBMI_CONF_MASK_FULL;
+    m512 p_mask = set_mask_m512(~k);
+    u32 overlap = 0;
+    u64a patch = 0;
+    if (likely(ptr + loopBytes <= buf_end)) {
+        m512 p_mask0 = set_mask_m512(~TEDDY_VBMI_CONF_MASK_HEAD);
+        m512 r_0 = PREP_CONF_FN(loadu512(ptr), 4);
+        r_0 = or512(r_0, p_mask0);
+        CONFIRM_TEDDY_512(r_0, 8, 0, VECTORING, ptr);
+        ptr += loopBytes;
+        overlap = n_sh;
+        patch = TEDDY_VBMI_LOAD_MASK_PATCH;
+    }
+
+    for (; ptr + loopBytes <= buf_end; ptr += loopBytes) {
+        __builtin_prefetch(ptr - n_sh + (64 * 2));
+        CHECK_FLOOD;
+        m512 r_0 = PREP_CONF_FN(loadu512(ptr - n_sh), 4);
+        r_0 = or512(r_0, p_mask);
+        CONFIRM_TEDDY_512(r_0, 8, 0, NOT_CAUTIOUS, ptr - n_sh);
+    }
+
+    assert(ptr + loopBytes > buf_end);
+    if (ptr < buf_end) {
+        u32 left = (u32)(buf_end - ptr);
+        u64a k1 = TEDDY_VBMI_CONF_MASK_VAR(left);
+        m512 p_mask1 = set_mask_m512(~k1);
         m512 val_0 = loadu_maskz_m512(k1 | patch, ptr - overlap);
-        m512 r_0 = PREP_CONF_FN(val_0, 4);                  
-        r_0 = or512(r_0, p_mask1);                                     
-        CONFIRM_TEDDY_512(r_0, 8, 0, VECTORING, ptr - overlap);  
-    }                                                                
-                                                                    
-    return HWLM_SUCCESS;                                           
+        m512 r_0 = PREP_CONF_FN(val_0, 4);
+        r_0 = or512(r_0, p_mask1);
+        CONFIRM_TEDDY_512(r_0, 8, 0, VECTORING, ptr - overlap);
+    }
+
+    return HWLM_SUCCESS;
 }
 
 #define FDR_EXEC_TEDDY(fdr, a, control, n) return fdr_exec_teddy_512vbmi_##n(fdr, a, control)
@@ -688,284 +688,284 @@ m512 prep_conf_teddy_m4(const m512 *lo_mask, const m512 *dup_mask,
 
 // n_msk 1
 hwlm_error_t fdr_exec_teddy_512_1(const struct FDR *fdr,
-                                  const struct FDR_Runtime_Args *a,            
+                                  const struct FDR_Runtime_Args *a,
                                   hwlm_group_t control) {
-    const u8 *buf_end = a->buf + a->len;        
-    const u8 *ptr = a->buf + a->start_offset;  
-    u32 floodBackoff = FLOOD_BACKOFF_START;   
-    const u8 *tryFloodDetect = a->firstFloodDetect;                 
-    u32 last_match = ones_u32;                                     
-    const struct Teddy *teddy = (const struct Teddy *)fdr;        
-    const size_t iterBytes = 128;                                
-    DEBUG_PRINTF("params: buf %p len %zu start_offset %zu\n",   
-                 a->buf, a->len, a->start_offset);             
-                                                              
-    const m128 *maskBase = getMaskBase(teddy);               
-    PREPARE_MASKS(1);                                  
-    const u32 *confBase = getConfBase(teddy);              
-                                                          
-    const u64a *r_msk_base = getReinforcedMaskBase(teddy, 1);   
-    u32 c_0 = 0x100;                                                
-    u32 c_16 = 0x100;                                              
-    u32 c_32 = 0x100;                                             
-    u32 c_48 = 0x100;                                            
-    const u8 *mainStart = ROUNDUP_PTR(ptr, 64);                 
-    DEBUG_PRINTF("derive: ptr: %p mainstart %p\n", ptr, mainStart); 
-    if (ptr < mainStart) {                                         
-        ptr = mainStart - 64;                                     
-        m512 p_mask;                                             
-        m512 val_0 = vectoredLoad512(&p_mask, ptr, a->start_offset,    
-                                     a->buf, buf_end,                 
+    const u8 *buf_end = a->buf + a->len;
+    const u8 *ptr = a->buf + a->start_offset;
+    u32 floodBackoff = FLOOD_BACKOFF_START;
+    const u8 *tryFloodDetect = a->firstFloodDetect;
+    u32 last_match = ones_u32;
+    const struct Teddy *teddy = (const struct Teddy *)fdr;
+    const size_t iterBytes = 128;
+    DEBUG_PRINTF("params: buf %p len %zu start_offset %zu\n",
+                 a->buf, a->len, a->start_offset);
+
+    const m128 *maskBase = getMaskBase(teddy);
+    PREPARE_MASKS(1);
+    const u32 *confBase = getConfBase(teddy);
+
+    const u64a *r_msk_base = getReinforcedMaskBase(teddy, 1);
+    u32 c_0 = 0x100;
+    u32 c_16 = 0x100;
+    u32 c_32 = 0x100;
+    u32 c_48 = 0x100;
+    const u8 *mainStart = ROUNDUP_PTR(ptr, 64);
+    DEBUG_PRINTF("derive: ptr: %p mainstart %p\n", ptr, mainStart);
+    if (ptr < mainStart) {
+        ptr = mainStart - 64;
+        m512 p_mask;
+        m512 val_0 = vectoredLoad512(&p_mask, ptr, a->start_offset,
+                                     a->buf, buf_end,
                                      a->buf_history, a->len_history, 1);
-        m512 r_0 = PREP_CONF_FN_NO_REINFORCEMENT(val_0, 1);            
-        r_0 = or512(r_0, p_mask);                                          
-        CONFIRM_TEDDY_512(r_0, 8, 0, VECTORING, ptr);        
-        ptr += 64;                                                       
-    }                                                                   
-                                                                       
-    if (ptr + 64 <= buf_end) {                                        
-        m512 r_0 = PREP_CONF_FN(ptr, 1);                        
-        CONFIRM_TEDDY_512(r_0, 8, 0, VECTORING, ptr);  
-        ptr += 64;                                                 
-    }                                                             
-                                                                 
-    for (; ptr + iterBytes <= buf_end; ptr += iterBytes) {      
-        __builtin_prefetch(ptr + (iterBytes * 4));             
-        CHECK_FLOOD;                                          
-        m512 r_0 = PREP_CONF_FN(ptr, 1);                
-        CONFIRM_TEDDY_512(r_0, 8, 0, NOT_CAUTIOUS, ptr);    
-        m512 r_1 = PREP_CONF_FN(ptr + 64, 1);                      
-        CONFIRM_TEDDY_512(r_1, 8, 64, NOT_CAUTIOUS, ptr); 
-    }                                                                 
-                                                                         
-    if (ptr + 64 <= buf_end) {                                          
-        m512 r_0 = PREP_CONF_FN(ptr, 1);                          
-        CONFIRM_TEDDY_512(r_0, 8, 0, NOT_CAUTIOUS, ptr); 
-        ptr += 64;                                                   
-    }                                                               
-                                                                   
-    assert(ptr + 64 > buf_end);                                   
-    if (ptr < buf_end) {                                         
-        m512 p_mask;                                            
-        m512 val_0 = vectoredLoad512(&p_mask, ptr, 0, ptr, buf_end,     
-                                     a->buf_history, a->len_history, 1); 
-        m512 r_0 = PREP_CONF_FN_NO_REINFORCEMENT(val_0, 1);             
-        r_0 = or512(r_0, p_mask);                                           
-        CONFIRM_TEDDY_512(r_0, 8, 0, VECTORING, ptr);         
-    }                                                                     
-                                                                         
-    return HWLM_SUCCESS;                                                
+        m512 r_0 = PREP_CONF_FN_NO_REINFORCEMENT(val_0, 1);
+        r_0 = or512(r_0, p_mask);
+        CONFIRM_TEDDY_512(r_0, 8, 0, VECTORING, ptr);
+        ptr += 64;
+    }
+
+    if (ptr + 64 <= buf_end) {
+        m512 r_0 = PREP_CONF_FN(ptr, 1);
+        CONFIRM_TEDDY_512(r_0, 8, 0, VECTORING, ptr);
+        ptr += 64;
+    }
+
+    for (; ptr + iterBytes <= buf_end; ptr += iterBytes) {
+        __builtin_prefetch(ptr + (iterBytes * 4));
+        CHECK_FLOOD;
+        m512 r_0 = PREP_CONF_FN(ptr, 1);
+        CONFIRM_TEDDY_512(r_0, 8, 0, NOT_CAUTIOUS, ptr);
+        m512 r_1 = PREP_CONF_FN(ptr + 64, 1);
+        CONFIRM_TEDDY_512(r_1, 8, 64, NOT_CAUTIOUS, ptr);
+    }
+
+    if (ptr + 64 <= buf_end) {
+        m512 r_0 = PREP_CONF_FN(ptr, 1);
+        CONFIRM_TEDDY_512(r_0, 8, 0, NOT_CAUTIOUS, ptr);
+        ptr += 64;
+    }
+
+    assert(ptr + 64 > buf_end);
+    if (ptr < buf_end) {
+        m512 p_mask;
+        m512 val_0 = vectoredLoad512(&p_mask, ptr, 0, ptr, buf_end,
+                                     a->buf_history, a->len_history, 1);
+        m512 r_0 = PREP_CONF_FN_NO_REINFORCEMENT(val_0, 1);
+        r_0 = or512(r_0, p_mask);
+        CONFIRM_TEDDY_512(r_0, 8, 0, VECTORING, ptr);
+    }
+
+    return HWLM_SUCCESS;
 }
 
 // n_msk 2
 hwlm_error_t fdr_exec_teddy_512_2(const struct FDR *fdr,
-                                  const struct FDR_Runtime_Args *a,            
+                                  const struct FDR_Runtime_Args *a,
                                   hwlm_group_t control) {
-    const u8 *buf_end = a->buf + a->len;        
-    const u8 *ptr = a->buf + a->start_offset;  
-    u32 floodBackoff = FLOOD_BACKOFF_START;   
-    const u8 *tryFloodDetect = a->firstFloodDetect;                 
-    u32 last_match = ones_u32;                                     
-    const struct Teddy *teddy = (const struct Teddy *)fdr;        
-    const size_t iterBytes = 128;                                
-    DEBUG_PRINTF("params: buf %p len %zu start_offset %zu\n",   
-                 a->buf, a->len, a->start_offset);             
-                                                              
-    const m128 *maskBase = getMaskBase(teddy);               
-    PREPARE_MASKS(2);                                  
-    const u32 *confBase = getConfBase(teddy);              
-                                                          
-    const u64a *r_msk_base = getReinforcedMaskBase(teddy, 2);   
-    u32 c_0 = 0x100;                                                
-    u32 c_16 = 0x100;                                              
-    u32 c_32 = 0x100;                                             
-    u32 c_48 = 0x100;                                            
-    const u8 *mainStart = ROUNDUP_PTR(ptr, 64);                 
-    DEBUG_PRINTF("derive: ptr: %p mainstart %p\n", ptr, mainStart); 
-    if (ptr < mainStart) {                                         
-        ptr = mainStart - 64;                                     
-        m512 p_mask;                                             
-        m512 val_0 = vectoredLoad512(&p_mask, ptr, a->start_offset,    
-                                     a->buf, buf_end,                 
+    const u8 *buf_end = a->buf + a->len;
+    const u8 *ptr = a->buf + a->start_offset;
+    u32 floodBackoff = FLOOD_BACKOFF_START;
+    const u8 *tryFloodDetect = a->firstFloodDetect;
+    u32 last_match = ones_u32;
+    const struct Teddy *teddy = (const struct Teddy *)fdr;
+    const size_t iterBytes = 128;
+    DEBUG_PRINTF("params: buf %p len %zu start_offset %zu\n",
+                 a->buf, a->len, a->start_offset);
+
+    const m128 *maskBase = getMaskBase(teddy);
+    PREPARE_MASKS(2);
+    const u32 *confBase = getConfBase(teddy);
+
+    const u64a *r_msk_base = getReinforcedMaskBase(teddy, 2);
+    u32 c_0 = 0x100;
+    u32 c_16 = 0x100;
+    u32 c_32 = 0x100;
+    u32 c_48 = 0x100;
+    const u8 *mainStart = ROUNDUP_PTR(ptr, 64);
+    DEBUG_PRINTF("derive: ptr: %p mainstart %p\n", ptr, mainStart);
+    if (ptr < mainStart) {
+        ptr = mainStart - 64;
+        m512 p_mask;
+        m512 val_0 = vectoredLoad512(&p_mask, ptr, a->start_offset,
+                                     a->buf, buf_end,
                                      a->buf_history, a->len_history, 2);
-        m512 r_0 = PREP_CONF_FN_NO_REINFORCEMENT(val_0, 2);            
-        r_0 = or512(r_0, p_mask);                                          
-        CONFIRM_TEDDY_512(r_0, 8, 0, VECTORING, ptr);        
-        ptr += 64;                                                       
-    }                                                                   
-                                                                       
-    if (ptr + 64 <= buf_end) {                                        
-        m512 r_0 = PREP_CONF_FN(ptr, 2);                        
-        CONFIRM_TEDDY_512(r_0, 8, 0, VECTORING, ptr);  
-        ptr += 64;                                                 
-    }                                                             
-                                                                 
-    for (; ptr + iterBytes <= buf_end; ptr += iterBytes) {      
-        __builtin_prefetch(ptr + (iterBytes * 4));             
-        CHECK_FLOOD;                                          
-        m512 r_0 = PREP_CONF_FN(ptr, 2);                
-        CONFIRM_TEDDY_512(r_0, 8, 0, NOT_CAUTIOUS, ptr);    
-        m512 r_1 = PREP_CONF_FN(ptr + 64, 2);                      
-        CONFIRM_TEDDY_512(r_1, 8, 64, NOT_CAUTIOUS, ptr); 
-    }                                                                 
-                                                                         
-    if (ptr + 64 <= buf_end) {                                          
-        m512 r_0 = PREP_CONF_FN(ptr, 2);                          
-        CONFIRM_TEDDY_512(r_0, 8, 0, NOT_CAUTIOUS, ptr); 
-        ptr += 64;                                                   
-    }                                                               
-                                                                   
-    assert(ptr + 64 > buf_end);                                   
-    if (ptr < buf_end) {                                         
-        m512 p_mask;                                            
-        m512 val_0 = vectoredLoad512(&p_mask, ptr, 0, ptr, buf_end,     
-                                     a->buf_history, a->len_history, 2); 
-        m512 r_0 = PREP_CONF_FN_NO_REINFORCEMENT(val_0, 2);             
-        r_0 = or512(r_0, p_mask);                                           
-        CONFIRM_TEDDY_512(r_0, 8, 0, VECTORING, ptr);         
-    }                                                                     
-                                                                         
-    return HWLM_SUCCESS;                                                
+        m512 r_0 = PREP_CONF_FN_NO_REINFORCEMENT(val_0, 2);
+        r_0 = or512(r_0, p_mask);
+        CONFIRM_TEDDY_512(r_0, 8, 0, VECTORING, ptr);
+        ptr += 64;
+    }
+
+    if (ptr + 64 <= buf_end) {
+        m512 r_0 = PREP_CONF_FN(ptr, 2);
+        CONFIRM_TEDDY_512(r_0, 8, 0, VECTORING, ptr);
+        ptr += 64;
+    }
+
+    for (; ptr + iterBytes <= buf_end; ptr += iterBytes) {
+        __builtin_prefetch(ptr + (iterBytes * 4));
+        CHECK_FLOOD;
+        m512 r_0 = PREP_CONF_FN(ptr, 2);
+        CONFIRM_TEDDY_512(r_0, 8, 0, NOT_CAUTIOUS, ptr);
+        m512 r_1 = PREP_CONF_FN(ptr + 64, 2);
+        CONFIRM_TEDDY_512(r_1, 8, 64, NOT_CAUTIOUS, ptr);
+    }
+
+    if (ptr + 64 <= buf_end) {
+        m512 r_0 = PREP_CONF_FN(ptr, 2);
+        CONFIRM_TEDDY_512(r_0, 8, 0, NOT_CAUTIOUS, ptr);
+        ptr += 64;
+    }
+
+    assert(ptr + 64 > buf_end);
+    if (ptr < buf_end) {
+        m512 p_mask;
+        m512 val_0 = vectoredLoad512(&p_mask, ptr, 0, ptr, buf_end,
+                                     a->buf_history, a->len_history, 2);
+        m512 r_0 = PREP_CONF_FN_NO_REINFORCEMENT(val_0, 2);
+        r_0 = or512(r_0, p_mask);
+        CONFIRM_TEDDY_512(r_0, 8, 0, VECTORING, ptr);
+    }
+
+    return HWLM_SUCCESS;
 }
 // n_msk 3
 hwlm_error_t fdr_exec_teddy_512_3(const struct FDR *fdr,
-                                  const struct FDR_Runtime_Args *a,            
+                                  const struct FDR_Runtime_Args *a,
                                   hwlm_group_t control) {
-    const u8 *buf_end = a->buf + a->len;        
-    const u8 *ptr = a->buf + a->start_offset;  
-    u32 floodBackoff = FLOOD_BACKOFF_START;   
-    const u8 *tryFloodDetect = a->firstFloodDetect;                 
-    u32 last_match = ones_u32;                                     
-    const struct Teddy *teddy = (const struct Teddy *)fdr;        
-    const size_t iterBytes = 128;                                
-    DEBUG_PRINTF("params: buf %p len %zu start_offset %zu\n",   
-                 a->buf, a->len, a->start_offset);             
-                                                              
-    const m128 *maskBase = getMaskBase(teddy);               
-    PREPARE_MASKS(3);                                  
-    const u32 *confBase = getConfBase(teddy);              
-                                                          
-    const u64a *r_msk_base = getReinforcedMaskBase(teddy, 3);   
-    u32 c_0 = 0x100;                                                
-    u32 c_16 = 0x100;                                              
-    u32 c_32 = 0x100;                                             
-    u32 c_48 = 0x100;                                            
-    const u8 *mainStart = ROUNDUP_PTR(ptr, 64);                 
-    DEBUG_PRINTF("derive: ptr: %p mainstart %p\n", ptr, mainStart); 
-    if (ptr < mainStart) {                                         
-        ptr = mainStart - 64;                                     
-        m512 p_mask;                                             
-        m512 val_0 = vectoredLoad512(&p_mask, ptr, a->start_offset,    
-                                     a->buf, buf_end,                 
+    const u8 *buf_end = a->buf + a->len;
+    const u8 *ptr = a->buf + a->start_offset;
+    u32 floodBackoff = FLOOD_BACKOFF_START;
+    const u8 *tryFloodDetect = a->firstFloodDetect;
+    u32 last_match = ones_u32;
+    const struct Teddy *teddy = (const struct Teddy *)fdr;
+    const size_t iterBytes = 128;
+    DEBUG_PRINTF("params: buf %p len %zu start_offset %zu\n",
+                 a->buf, a->len, a->start_offset);
+
+    const m128 *maskBase = getMaskBase(teddy);
+    PREPARE_MASKS(3);
+    const u32 *confBase = getConfBase(teddy);
+
+    const u64a *r_msk_base = getReinforcedMaskBase(teddy, 3);
+    u32 c_0 = 0x100;
+    u32 c_16 = 0x100;
+    u32 c_32 = 0x100;
+    u32 c_48 = 0x100;
+    const u8 *mainStart = ROUNDUP_PTR(ptr, 64);
+    DEBUG_PRINTF("derive: ptr: %p mainstart %p\n", ptr, mainStart);
+    if (ptr < mainStart) {
+        ptr = mainStart - 64;
+        m512 p_mask;
+        m512 val_0 = vectoredLoad512(&p_mask, ptr, a->start_offset,
+                                     a->buf, buf_end,
                                      a->buf_history, a->len_history, 3);
-        m512 r_0 = PREP_CONF_FN_NO_REINFORCEMENT(val_0, 3);            
-        r_0 = or512(r_0, p_mask);                                          
-        CONFIRM_TEDDY_512(r_0, 8, 0, VECTORING, ptr);        
-        ptr += 64;                                                       
-    }                                                                   
-                                                                       
-    if (ptr + 64 <= buf_end) {                                        
-        m512 r_0 = PREP_CONF_FN(ptr, 3);                        
-        CONFIRM_TEDDY_512(r_0, 8, 0, VECTORING, ptr);  
-        ptr += 64;                                                 
-    }                                                             
-                                                                 
-    for (; ptr + iterBytes <= buf_end; ptr += iterBytes) {      
-        __builtin_prefetch(ptr + (iterBytes * 4));             
-        CHECK_FLOOD;                                          
-        m512 r_0 = PREP_CONF_FN(ptr, 3);                
-        CONFIRM_TEDDY_512(r_0, 8, 0, NOT_CAUTIOUS, ptr);    
-        m512 r_1 = PREP_CONF_FN(ptr + 64, 3);                      
-        CONFIRM_TEDDY_512(r_1, 8, 64, NOT_CAUTIOUS, ptr); 
-    }                                                                 
-                                                                         
-    if (ptr + 64 <= buf_end) {                                          
-        m512 r_0 = PREP_CONF_FN(ptr, 3);                          
-        CONFIRM_TEDDY_512(r_0, 8, 0, NOT_CAUTIOUS, ptr); 
-        ptr += 64;                                                   
-    }                                                               
-                                                                   
-    assert(ptr + 64 > buf_end);                                   
-    if (ptr < buf_end) {                                         
-        m512 p_mask;                                            
-        m512 val_0 = vectoredLoad512(&p_mask, ptr, 0, ptr, buf_end,     
-                                     a->buf_history, a->len_history, 3); 
-        m512 r_0 = PREP_CONF_FN_NO_REINFORCEMENT(val_0, 3);             
-        r_0 = or512(r_0, p_mask);                                           
-        CONFIRM_TEDDY_512(r_0, 8, 0, VECTORING, ptr);         
-    }                                                                     
-                                                                         
-    return HWLM_SUCCESS;                                                
+        m512 r_0 = PREP_CONF_FN_NO_REINFORCEMENT(val_0, 3);
+        r_0 = or512(r_0, p_mask);
+        CONFIRM_TEDDY_512(r_0, 8, 0, VECTORING, ptr);
+        ptr += 64;
+    }
+
+    if (ptr + 64 <= buf_end) {
+        m512 r_0 = PREP_CONF_FN(ptr, 3);
+        CONFIRM_TEDDY_512(r_0, 8, 0, VECTORING, ptr);
+        ptr += 64;
+    }
+
+    for (; ptr + iterBytes <= buf_end; ptr += iterBytes) {
+        __builtin_prefetch(ptr + (iterBytes * 4));
+        CHECK_FLOOD;
+        m512 r_0 = PREP_CONF_FN(ptr, 3);
+        CONFIRM_TEDDY_512(r_0, 8, 0, NOT_CAUTIOUS, ptr);
+        m512 r_1 = PREP_CONF_FN(ptr + 64, 3);
+        CONFIRM_TEDDY_512(r_1, 8, 64, NOT_CAUTIOUS, ptr);
+    }
+
+    if (ptr + 64 <= buf_end) {
+        m512 r_0 = PREP_CONF_FN(ptr, 3);
+        CONFIRM_TEDDY_512(r_0, 8, 0, NOT_CAUTIOUS, ptr);
+        ptr += 64;
+    }
+
+    assert(ptr + 64 > buf_end);
+    if (ptr < buf_end) {
+        m512 p_mask;
+        m512 val_0 = vectoredLoad512(&p_mask, ptr, 0, ptr, buf_end,
+                                     a->buf_history, a->len_history, 3);
+        m512 r_0 = PREP_CONF_FN_NO_REINFORCEMENT(val_0, 3);
+        r_0 = or512(r_0, p_mask);
+        CONFIRM_TEDDY_512(r_0, 8, 0, VECTORING, ptr);
+    }
+
+    return HWLM_SUCCESS;
 }
 // n_msk 4
 hwlm_error_t fdr_exec_teddy_512_4(const struct FDR *fdr,
-                                  const struct FDR_Runtime_Args *a,            
+                                  const struct FDR_Runtime_Args *a,
                                   hwlm_group_t control) {
-    const u8 *buf_end = a->buf + a->len;        
-    const u8 *ptr = a->buf + a->start_offset;  
-    u32 floodBackoff = FLOOD_BACKOFF_START;   
-    const u8 *tryFloodDetect = a->firstFloodDetect;                 
-    u32 last_match = ones_u32;                                     
-    const struct Teddy *teddy = (const struct Teddy *)fdr;        
-    const size_t iterBytes = 128;                                
-    DEBUG_PRINTF("params: buf %p len %zu start_offset %zu\n",   
-                 a->buf, a->len, a->start_offset);             
-                                                              
-    const m128 *maskBase = getMaskBase(teddy);               
-    PREPARE_MASKS(4);                                  
-    const u32 *confBase = getConfBase(teddy);              
-                                                          
-    const u64a *r_msk_base = getReinforcedMaskBase(teddy, 4);   
-    u32 c_0 = 0x100;                                                
-    u32 c_16 = 0x100;                                              
-    u32 c_32 = 0x100;                                             
-    u32 c_48 = 0x100;                                            
-    const u8 *mainStart = ROUNDUP_PTR(ptr, 64);                 
-    DEBUG_PRINTF("derive: ptr: %p mainstart %p\n", ptr, mainStart); 
-    if (ptr < mainStart) {                                         
-        ptr = mainStart - 64;                                     
-        m512 p_mask;                                             
-        m512 val_0 = vectoredLoad512(&p_mask, ptr, a->start_offset,    
-                                     a->buf, buf_end,                 
+    const u8 *buf_end = a->buf + a->len;
+    const u8 *ptr = a->buf + a->start_offset;
+    u32 floodBackoff = FLOOD_BACKOFF_START;
+    const u8 *tryFloodDetect = a->firstFloodDetect;
+    u32 last_match = ones_u32;
+    const struct Teddy *teddy = (const struct Teddy *)fdr;
+    const size_t iterBytes = 128;
+    DEBUG_PRINTF("params: buf %p len %zu start_offset %zu\n",
+                 a->buf, a->len, a->start_offset);
+
+    const m128 *maskBase = getMaskBase(teddy);
+    PREPARE_MASKS(4);
+    const u32 *confBase = getConfBase(teddy);
+
+    const u64a *r_msk_base = getReinforcedMaskBase(teddy, 4);
+    u32 c_0 = 0x100;
+    u32 c_16 = 0x100;
+    u32 c_32 = 0x100;
+    u32 c_48 = 0x100;
+    const u8 *mainStart = ROUNDUP_PTR(ptr, 64);
+    DEBUG_PRINTF("derive: ptr: %p mainstart %p\n", ptr, mainStart);
+    if (ptr < mainStart) {
+        ptr = mainStart - 64;
+        m512 p_mask;
+        m512 val_0 = vectoredLoad512(&p_mask, ptr, a->start_offset,
+                                     a->buf, buf_end,
                                      a->buf_history, a->len_history, 4);
-        m512 r_0 = PREP_CONF_FN_NO_REINFORCEMENT(val_0, 4);            
-        r_0 = or512(r_0, p_mask);                                          
-        CONFIRM_TEDDY_512(r_0, 8, 0, VECTORING, ptr);        
-        ptr += 64;                                                       
-    }                                                                   
-                                                                       
-    if (ptr + 64 <= buf_end) {                                        
-        m512 r_0 = PREP_CONF_FN(ptr, 4);                        
-        CONFIRM_TEDDY_512(r_0, 8, 0, VECTORING, ptr);  
-        ptr += 64;                                                 
-    }                                                             
-                                                                 
-    for (; ptr + iterBytes <= buf_end; ptr += iterBytes) {      
-        __builtin_prefetch(ptr + (iterBytes * 4));             
-        CHECK_FLOOD;                                          
-        m512 r_0 = PREP_CONF_FN(ptr, 4);                
-        CONFIRM_TEDDY_512(r_0, 8, 0, NOT_CAUTIOUS, ptr);    
-        m512 r_1 = PREP_CONF_FN(ptr + 64, 4);                      
-        CONFIRM_TEDDY_512(r_1, 8, 64, NOT_CAUTIOUS, ptr); 
-    }                                                                 
-                                                                         
-    if (ptr + 64 <= buf_end) {                                          
-        m512 r_0 = PREP_CONF_FN(ptr, 4);                          
-        CONFIRM_TEDDY_512(r_0, 8, 0, NOT_CAUTIOUS, ptr); 
-        ptr += 64;                                                   
-    }                                                               
-                                                                   
-    assert(ptr + 64 > buf_end);                                   
-    if (ptr < buf_end) {                                         
-        m512 p_mask;                                            
-        m512 val_0 = vectoredLoad512(&p_mask, ptr, 0, ptr, buf_end,     
-                                     a->buf_history, a->len_history, 4); 
-        m512 r_0 = PREP_CONF_FN_NO_REINFORCEMENT(val_0, 4);             
-        r_0 = or512(r_0, p_mask);                                           
-        CONFIRM_TEDDY_512(r_0, 8, 0, VECTORING, ptr);         
-    }                                                                     
-                                                                         
-    return HWLM_SUCCESS;                                                
+        m512 r_0 = PREP_CONF_FN_NO_REINFORCEMENT(val_0, 4);
+        r_0 = or512(r_0, p_mask);
+        CONFIRM_TEDDY_512(r_0, 8, 0, VECTORING, ptr);
+        ptr += 64;
+    }
+
+    if (ptr + 64 <= buf_end) {
+        m512 r_0 = PREP_CONF_FN(ptr, 4);
+        CONFIRM_TEDDY_512(r_0, 8, 0, VECTORING, ptr);
+        ptr += 64;
+    }
+
+    for (; ptr + iterBytes <= buf_end; ptr += iterBytes) {
+        __builtin_prefetch(ptr + (iterBytes * 4));
+        CHECK_FLOOD;
+        m512 r_0 = PREP_CONF_FN(ptr, 4);
+        CONFIRM_TEDDY_512(r_0, 8, 0, NOT_CAUTIOUS, ptr);
+        m512 r_1 = PREP_CONF_FN(ptr + 64, 4);
+        CONFIRM_TEDDY_512(r_1, 8, 64, NOT_CAUTIOUS, ptr);
+    }
+
+    if (ptr + 64 <= buf_end) {
+        m512 r_0 = PREP_CONF_FN(ptr, 4);
+        CONFIRM_TEDDY_512(r_0, 8, 0, NOT_CAUTIOUS, ptr);
+        ptr += 64;
+    }
+
+    assert(ptr + 64 > buf_end);
+    if (ptr < buf_end) {
+        m512 p_mask;
+        m512 val_0 = vectoredLoad512(&p_mask, ptr, 0, ptr, buf_end,
+                                     a->buf_history, a->len_history, 4);
+        m512 r_0 = PREP_CONF_FN_NO_REINFORCEMENT(val_0, 4);
+        r_0 = or512(r_0, p_mask);
+        CONFIRM_TEDDY_512(r_0, 8, 0, VECTORING, ptr);
+    }
+
+    return HWLM_SUCCESS;
 }
 
 #define FDR_EXEC_TEDDY(fdr, a, control, n) return fdr_exec_teddy_512_##n(fdr, a, control)
@@ -981,17 +981,17 @@ hwlm_error_t confirm_teddy_64_256(m256 var, int bucket, int offset,
                                   const struct FDR_Runtime_Args *a,
                                   const u32* confBase, hwlm_group_t *control,
                                   u32 *last_match) {
-    if (unlikely(diff256(var, ones256()))) {                      
-        m128 lo = movdq_lo(var);                                 
-        m128 hi = movdq_hi(var);                                
-        u64a part1 = movq(lo);                                 
-        u64a part2 = movq(rshiftbyte_m128(lo, 8));            
-        u64a part3 = movq(hi);                               
-        u64a part4 = movq(rshiftbyte_m128(hi, 8));          
-        CONF_CHUNK_64(part1, bucket, offset, reason, ptr);  
-        CONF_CHUNK_64(part2, bucket, offset + 8, reason, ptr);    
-        CONF_CHUNK_64(part3, bucket, offset + 16, reason, ptr);  
-        CONF_CHUNK_64(part4, bucket, offset + 24, reason, ptr); 
+    if (unlikely(diff256(var, ones256()))) {
+        m128 lo = movdq_lo(var);
+        m128 hi = movdq_hi(var);
+        u64a part1 = movq(lo);
+        u64a part2 = movq(rshiftbyte_m128(lo, 8));
+        u64a part3 = movq(hi);
+        u64a part4 = movq(rshiftbyte_m128(hi, 8));
+        CONF_CHUNK_64(part1, bucket, offset, reason, ptr);
+        CONF_CHUNK_64(part2, bucket, offset + 8, reason, ptr);
+        CONF_CHUNK_64(part3, bucket, offset + 16, reason, ptr);
+        CONF_CHUNK_64(part4, bucket, offset + 24, reason, ptr);
     }
     return HWLM_SUCCESS;
 }
@@ -1004,26 +1004,26 @@ hwlm_error_t confirm_teddy_32_256(m256 var, int bucket, int offset,
                                   const struct FDR_Runtime_Args *a,
                                   const u32* confBase, hwlm_group_t *control,
                                   u32 *last_match) {
-    if (unlikely(diff256(var, ones256()))) {              
-        m128 lo = movdq_lo(var);                         
-        m128 hi = movdq_hi(var);                        
-        u32 part1 = movd(lo);                          
-        u32 part2 = movd(rshiftbyte_m128(lo, 4));     
-        u32 part3 = movd(rshiftbyte_m128(lo, 8));    
-        u32 part4 = movd(rshiftbyte_m128(lo, 12));  
-        u32 part5 = movd(hi);                      
-        u32 part6 = movd(rshiftbyte_m128(hi, 4));                 
-        u32 part7 = movd(rshiftbyte_m128(hi, 8));                
-        u32 part8 = movd(rshiftbyte_m128(hi, 12));              
-        CONF_CHUNK_32(part1, bucket, offset, reason, ptr);      
-        CONF_CHUNK_32(part2, bucket, offset + 4, reason, ptr); 
+    if (unlikely(diff256(var, ones256()))) {
+        m128 lo = movdq_lo(var);
+        m128 hi = movdq_hi(var);
+        u32 part1 = movd(lo);
+        u32 part2 = movd(rshiftbyte_m128(lo, 4));
+        u32 part3 = movd(rshiftbyte_m128(lo, 8));
+        u32 part4 = movd(rshiftbyte_m128(lo, 12));
+        u32 part5 = movd(hi);
+        u32 part6 = movd(rshiftbyte_m128(hi, 4));
+        u32 part7 = movd(rshiftbyte_m128(hi, 8));
+        u32 part8 = movd(rshiftbyte_m128(hi, 12));
+        CONF_CHUNK_32(part1, bucket, offset, reason, ptr);
+        CONF_CHUNK_32(part2, bucket, offset + 4, reason, ptr);
         CONF_CHUNK_32(part3, bucket, offset + 8, reason, ptr);
-        CONF_CHUNK_32(part4, bucket, offset + 12, reason, ptr);  
-        CONF_CHUNK_32(part5, bucket, offset + 16, reason, ptr); 
-        CONF_CHUNK_32(part6, bucket, offset + 20, reason, ptr); 
-        CONF_CHUNK_32(part7, bucket, offset + 24, reason, ptr);   
-        CONF_CHUNK_32(part8, bucket, offset + 28, reason, ptr);  
-    }                                                         
+        CONF_CHUNK_32(part4, bucket, offset + 12, reason, ptr);
+        CONF_CHUNK_32(part5, bucket, offset + 16, reason, ptr);
+        CONF_CHUNK_32(part6, bucket, offset + 20, reason, ptr);
+        CONF_CHUNK_32(part7, bucket, offset + 24, reason, ptr);
+        CONF_CHUNK_32(part8, bucket, offset + 28, reason, ptr);
+    }
     return HWLM_SUCCESS;
 }
 
