@@ -198,20 +198,20 @@ hwlm_error_t confirm_teddy_32_512(m512 var, int bucket, int offset,
 #define TEDDY_VBMI_SL3_MASK   0xfffffffffffffff8ULL
 
 static really_inline
-m512 prep_conf_teddy_m1(const m512 *lo_mask, const m512 *dup_mask,
+m512 prep_conf_teddy_512_m1(const m512 *lo_mask, const m512 *dup_mask,
                         UNUSED const m512 *sl_msk, const m512 val) {
     m512 lo = and512(val, *lo_mask);                               
-    m512 hi = and512(rshift64_m512(val, 4), *lo_mask)
+    m512 hi = and512(rshift64_m512(val, 4), *lo_mask);
     m512 shuf_or_b0 = or512(pshufb_m512(dup_mask[0], lo), 
                             pshufb_m512(dup_mask[1], hi));
     return shuf_or_b0;
 }
 
 static really_inline
-m512 prep_conf_teddy_m2(const m512 *lo_mask, const m512 *dup_mask,
+m512 prep_conf_teddy_512_m2(const m512 *lo_mask, const m512 *dup_mask,
                         UNUSED const m512 *sl_msk, const m512 val) {
     m512 lo = and512(val, *lo_mask);                               
-    m512 hi = and512(rshift64_m512(val, 4), *lo_mask)
+    m512 hi = and512(rshift64_m512(val, 4), *lo_mask);
     m512 shuf_or_b0 = or512(pshufb_m512(dup_mask[0], lo), 
                             pshufb_m512(dup_mask[1], hi));
     m512 shuf_or_b1 = or512(pshufb_m512(dup_mask[2], lo),
@@ -221,10 +221,10 @@ m512 prep_conf_teddy_m2(const m512 *lo_mask, const m512 *dup_mask,
 }
 
 static really_inline
-m512 prep_conf_teddy_m3(const m512 *lo_mask, const m512 *dup_mask,
+m512 prep_conf_teddy_512_m3(const m512 *lo_mask, const m512 *dup_mask,
                         UNUSED const m512 *sl_msk, const m512 val) {
     m512 lo = and512(val, *lo_mask);                               
-    m512 hi = and512(rshift64_m512(val, 4), *lo_mask)
+    m512 hi = and512(rshift64_m512(val, 4), *lo_mask);
     m512 shuf_or_b0 = or512(pshufb_m512(dup_mask[0], lo), 
                             pshufb_m512(dup_mask[1], hi));
     m512 shuf_or_b1 = or512(pshufb_m512(dup_mask[2], lo),
@@ -237,10 +237,10 @@ m512 prep_conf_teddy_m3(const m512 *lo_mask, const m512 *dup_mask,
 }
 
 static really_inline
-m512 prep_conf_teddy_m4(const m512 *lo_mask, const m512 *dup_mask,
+m512 prep_conf_teddy_512_m4(const m512 *lo_mask, const m512 *dup_mask,
                         UNUSED const m512 *sl_msk, const m512 val) {
     m512 lo = and512(val, *lo_mask);                               
-    m512 hi = and512(rshift64_m512(val, 4), *lo_mask)
+    m512 hi = and512(rshift64_m512(val, 4), *lo_mask);
     m512 shuf_or_b0 = or512(pshufb_m512(dup_mask[0], lo), 
                             pshufb_m512(dup_mask[1], hi));
     m512 shuf_or_b1 = or512(pshufb_m512(dup_mask[2], lo),
@@ -256,8 +256,8 @@ m512 prep_conf_teddy_m4(const m512 *lo_mask, const m512 *dup_mask,
 }
 
 
-#define PREP_CONF_FN(val, n)                                                  \
-    prep_conf_teddy_m##n(&lo_mask, dup_mask, sl_msk, val)
+#define PREP_CONF_FN_512(val, n)                                                  \
+    prep_conf_teddy_512_m##n(&lo_mask, dup_mask, sl_msk, val)
 
 
 #define TEDDY_VBMI_SL1_POS    15
@@ -1681,7 +1681,7 @@ m128 prep_conf_teddy_128_m2(const m128 *maskBase, m128 *old_1, m128 val) {
     m128 mask = set1_16x8(0xf);
     m128 lo = and128(val, mask);
     m128 hi = and128(rshift64_m128(val, 4), mask);
-    m128 r = prep_conf_teddy_m1(maskBase, val);
+    m128 r = prep_conf_teddy_128_m1(maskBase, val);
 
     m128 res_1 = or128(pshufb_m128(maskBase[1 * 2], lo),
                        pshufb_m128(maskBase[1 * 2 + 1], hi));
@@ -1696,7 +1696,7 @@ m128 prep_conf_teddy_128_m3(const m128 *maskBase, m128 *old_1, m128 *old_2,
     m128 mask = set1_16x8(0xf);
     m128 lo = and128(val, mask);
     m128 hi = and128(rshift64_m128(val, 4), mask);
-    m128 r = prep_conf_teddy_m2(maskBase, old_1, val);
+    m128 r = prep_conf_teddy_128_m2(maskBase, old_1, val);
 
     m128 res_2 = or128(pshufb_m128(maskBase[2 * 2], lo),
                        pshufb_m128(maskBase[2 * 2 + 1], hi));
@@ -1711,7 +1711,7 @@ m128 prep_conf_teddy_128_m4(const m128 *maskBase, m128 *old_1, m128 *old_2,
     m128 mask = set1_16x8(0xf);
     m128 lo = and128(val, mask);
     m128 hi = and128(rshift64_m128(val, 4), mask);
-    m128 r = prep_conf_teddy_m3(maskBase, old_1, old_2, val);
+    m128 r = prep_conf_teddy_128_m3(maskBase, old_1, old_2, val);
 
     m128 res_3 = or128(pshufb_m128(maskBase[3 * 2], lo),
                        pshufb_m128(maskBase[3 * 2 + 1], hi));
