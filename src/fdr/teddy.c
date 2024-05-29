@@ -1152,96 +1152,111 @@ hwlm_error_t confirm_teddy_32_256(m256 var, int bucket, int offset,
 #define CONFIRM_TEDDY_256(...) if(confirm_teddy_256_f(__VA_ARGS__, a, confBase, &control, &last_match) == HWLM_TERMINATED)return HWLM_TERMINATED;
 
 
-#define PREP_SHUF_MASK_NO_REINFORCEMENT(val)                                \
-    m256 lo = and256(val, *lo_mask);                                        \
-    m256 hi = and256(rshift64_m256(val, 4), *lo_mask)
+m256 shift_or_256_m1(const m256 *dup_mask, m256 lo, m256 hi){
+    return or256(pshufb_m256(dup_mask[0], lo), pshufb_m256(dup_mask[1], hi));
+}
 
-#define PREP_SHUF_MASK                                                      \
-    PREP_SHUF_MASK_NO_REINFORCEMENT(load256(ptr));                          \
-    *c_128 = *(ptr + 15);                                                   \
-    m256 r_msk = set4x64(0ULL, r_msk_base[*c_128], 0ULL, r_msk_base[*c_0]); \
-    *c_0 = *(ptr + 31)
+m256 shift_or_256_m2(const m256 *dup_mask, m256 lo, m256 hi){
+    return or256(lshift128_m256(or256(pshufb_m256(dup_mask[2], lo),
+                                pshufb_m256(dup_mask[3], hi)),
+                                1), shift_or_256_m1(dup_mask, lo, hi));
+}
 
-#define SHIFT_OR_M1                                                         \
-    or256(pshufb_m256(dup_mask[0], lo), pshufb_m256(dup_mask[1], hi))
+m256 shift_or_256_m3(const m256 *dup_mask, m256 lo, m256 hi){
+    return or256(lshift128_m256(or256(pshufb_m256(dup_mask[4], lo),
+                                pshufb_m256(dup_mask[5], hi)),
+                                2), shift_or_256_m2(dup_mask, lo, hi));
+}
 
-#define SHIFT_OR_M2                                                         \
-    or256(lshift128_m256(or256(pshufb_m256(dup_mask[2], lo),                \
-                               pshufb_m256(dup_mask[3], hi)),               \
-                         1), SHIFT_OR_M1)
-
-#define SHIFT_OR_M3                                                         \
-    or256(lshift128_m256(or256(pshufb_m256(dup_mask[4], lo),                \
-                               pshufb_m256(dup_mask[5], hi)),               \
-                         2), SHIFT_OR_M2)
-
-#define SHIFT_OR_M4                                                         \
-    or256(lshift128_m256(or256(pshufb_m256(dup_mask[6], lo),                \
-                               pshufb_m256(dup_mask[7], hi)),               \
-                         3), SHIFT_OR_M3)
+m256 shift_or_256_m4(const m256 *dup_mask, m256 lo, m256 hi){
+    return or256(lshift128_m256(or256(pshufb_m256(dup_mask[6], lo),
+                                pshufb_m256(dup_mask[7], hi)),
+                                3), shift_or_256_m3(dup_mask, lo, hi));
+}
 
 static really_inline
 m256 prep_conf_teddy_no_reinforcement_m1(const m256 *lo_mask,
                                          const m256 *dup_mask,
                                          const m256 val) {
-    PREP_SHUF_MASK_NO_REINFORCEMENT(val);
-    return SHIFT_OR_M1;
+    m256 lo = and256(val, *lo_mask);
+    m256 hi = and256(rshift64_m256(val, 4), *lo_mask);
+    return shift_or_256_m1(dup_mask, lo, hi);
+
 }
 
 static really_inline
 m256 prep_conf_teddy_no_reinforcement_m2(const m256 *lo_mask,
                                          const m256 *dup_mask,
                                          const m256 val) {
-    PREP_SHUF_MASK_NO_REINFORCEMENT(val);
-    return SHIFT_OR_M2;
+    m256 lo = and256(val, *lo_mask);
+    m256 hi = and256(rshift64_m256(val, 4), *lo_mask);
+    return shift_or_256_m2(dup_mask, lo, hi);
 }
 
 static really_inline
 m256 prep_conf_teddy_no_reinforcement_m3(const m256 *lo_mask,
                                          const m256 *dup_mask,
                                          const m256 val) {
-    PREP_SHUF_MASK_NO_REINFORCEMENT(val);
-    return SHIFT_OR_M3;
+    m256 lo = and256(val, *lo_mask);
+    m256 hi = and256(rshift64_m256(val, 4), *lo_mask);
+    return shift_or_256_m3(dup_mask, lo, hi);
 }
 
 static really_inline
 m256 prep_conf_teddy_no_reinforcement_m4(const m256 *lo_mask,
                                          const m256 *dup_mask,
                                          const m256 val) {
-    PREP_SHUF_MASK_NO_REINFORCEMENT(val);
-    return SHIFT_OR_M4;
+    m256 lo = and256(val, *lo_mask);
+    m256 hi = and256(rshift64_m256(val, 4), *lo_mask);
+    return shift_or_256_m4(dup_mask, lo, hi);
 }
 
 static really_inline
 m256 prep_conf_teddy_m1(const m256 *lo_mask, const m256 *dup_mask,
                         const u8 *ptr, const u64a *r_msk_base,
                         u32 *c_0, u32 *c_128) {
-    PREP_SHUF_MASK;
-    return or256(SHIFT_OR_M1, r_msk);
+    m256 lo = and256(load256(ptr), *lo_mask);
+    m256 hi = and256(rshift64_m256(load256(ptr), 4), *lo_mask);
+    *c_128 = *(ptr + 15);
+    m256 r_msk = set4x64(0ULL, r_msk_base[*c_128], 0ULL, r_msk_base[*c_0]);
+    *c_0 = *(ptr + 31);
+    return or256(shift_or_256_m1(dup_mask, lo, hi), r_msk);
 }
 
 static really_inline
 m256 prep_conf_teddy_m2(const m256 *lo_mask, const m256 *dup_mask,
                         const u8 *ptr, const u64a *r_msk_base,
                         u32 *c_0, u32 *c_128) {
-    PREP_SHUF_MASK;
-    return or256(SHIFT_OR_M2, r_msk);
+    m256 lo = and256(load256(ptr), *lo_mask);
+    m256 hi = and256(rshift64_m256(load256(ptr), 4), *lo_mask);
+    *c_128 = *(ptr + 15);
+    m256 r_msk = set4x64(0ULL, r_msk_base[*c_128], 0ULL, r_msk_base[*c_0]);
+    *c_0 = *(ptr + 31);
+    return or256(shift_or_256_m2(dup_mask, lo, hi), r_msk);
 }
 
 static really_inline
 m256 prep_conf_teddy_m3(const m256 *lo_mask, const m256 *dup_mask,
                         const u8 *ptr, const u64a *r_msk_base,
                         u32 *c_0, u32 *c_128) {
-    PREP_SHUF_MASK;
-    return or256(SHIFT_OR_M3, r_msk);
+    m256 lo = and256(load256(ptr), *lo_mask);
+    m256 hi = and256(rshift64_m256(load256(ptr), 4), *lo_mask);
+    *c_128 = *(ptr + 15);
+    m256 r_msk = set4x64(0ULL, r_msk_base[*c_128], 0ULL, r_msk_base[*c_0]);
+    *c_0 = *(ptr + 31);
+    return or256(shift_or_256_m3(dup_mask, lo, hi), r_msk);
 }
 
 static really_inline
 m256 prep_conf_teddy_m4(const m256 *lo_mask, const m256 *dup_mask,
                         const u8 *ptr, const u64a *r_msk_base,
                         u32 *c_0, u32 *c_128) {
-    PREP_SHUF_MASK;
-    return or256(SHIFT_OR_M4, r_msk);
+    m256 lo = and256(load256(ptr), *lo_mask);
+    m256 hi = and256(rshift64_m256(load256(ptr), 4), *lo_mask);
+    *c_128 = *(ptr + 15);
+    m256 r_msk = set4x64(0ULL, r_msk_base[*c_128], 0ULL, r_msk_base[*c_0]);
+    *c_0 = *(ptr + 31);
+    return or256(shift_or_256_m4(dup_mask, lo, hi), r_msk);
 }
 
 #define PREP_CONF_FN_NO_REINFORCEMENT(val, n)                                 \
@@ -1653,7 +1668,7 @@ hwlm_error_t confirm_teddy_32_128(m128 var, int bucket, int offset,
 #define CONFIRM_TEDDY_128(...) if(confirm_teddy_128_f(__VA_ARGS__, a, confBase, &control, &last_match) == HWLM_TERMINATED)return HWLM_TERMINATED;
 
 static really_inline
-m128 prep_conf_teddy_m1(const m128 *maskBase, m128 val) {
+m128 prep_conf_teddy_128_m1(const m128 *maskBase, m128 val) {
     m128 mask = set1_16x8(0xf);
     m128 lo = and128(val, mask);
     m128 hi = and128(rshift64_m128(val, 4), mask);
@@ -1662,7 +1677,7 @@ m128 prep_conf_teddy_m1(const m128 *maskBase, m128 val) {
 }
 
 static really_inline
-m128 prep_conf_teddy_m2(const m128 *maskBase, m128 *old_1, m128 val) {
+m128 prep_conf_teddy_128_m2(const m128 *maskBase, m128 *old_1, m128 val) {
     m128 mask = set1_16x8(0xf);
     m128 lo = and128(val, mask);
     m128 hi = and128(rshift64_m128(val, 4), mask);
@@ -1676,7 +1691,7 @@ m128 prep_conf_teddy_m2(const m128 *maskBase, m128 *old_1, m128 val) {
 }
 
 static really_inline
-m128 prep_conf_teddy_m3(const m128 *maskBase, m128 *old_1, m128 *old_2,
+m128 prep_conf_teddy_128_m3(const m128 *maskBase, m128 *old_1, m128 *old_2,
                         m128 val) {
     m128 mask = set1_16x8(0xf);
     m128 lo = and128(val, mask);
@@ -1691,7 +1706,7 @@ m128 prep_conf_teddy_m3(const m128 *maskBase, m128 *old_1, m128 *old_2,
 }
 
 static really_inline
-m128 prep_conf_teddy_m4(const m128 *maskBase, m128 *old_1, m128 *old_2,
+m128 prep_conf_teddy_128_m4(const m128 *maskBase, m128 *old_1, m128 *old_2,
                         m128 *old_3, m128 val) {
     m128 mask = set1_16x8(0xf);
     m128 lo = and128(val, mask);
@@ -1705,38 +1720,23 @@ m128 prep_conf_teddy_m4(const m128 *maskBase, m128 *old_1, m128 *old_2,
     return or128(r, res_shifted_3);
 }
 
-#define FDR_EXEC_TEDDY_RES_OLD_1
-
-#define FDR_EXEC_TEDDY_RES_OLD_2                                              \
-    m128 res_old_1 = zeroes128();
-
-#define FDR_EXEC_TEDDY_RES_OLD_3                                              \
-    m128 res_old_1 = zeroes128();                                             \
-    m128 res_old_2 = zeroes128();
-
-#define FDR_EXEC_TEDDY_RES_OLD_4                                              \
-    m128 res_old_1 = zeroes128();                                             \
-    m128 res_old_2 = zeroes128();                                             \
-    m128 res_old_3 = zeroes128();
-
-#define FDR_EXEC_TEDDY_RES_OLD(n) FDR_EXEC_TEDDY_RES_OLD_##n
-
 #define PREP_CONF_FN_1(mask_base, val)                                        \
-    prep_conf_teddy_m1(mask_base, val)
+    prep_conf_teddy_m128_1(mask_base, val)
 
 #define PREP_CONF_FN_2(mask_base, val)                                        \
-    prep_conf_teddy_m2(mask_base, &res_old_1, val)
+    prep_conf_teddy_m128_2(mask_base, &res_old_1, val)
 
 #define PREP_CONF_FN_3(mask_base, val)                                        \
-    prep_conf_teddy_m3(mask_base, &res_old_1, &res_old_2, val)
+    prep_conf_teddy_m128_3(mask_base, &res_old_1, &res_old_2, val)
 
 #define PREP_CONF_FN_4(mask_base, val)                                        \
-    prep_conf_teddy_m4(mask_base, &res_old_1, &res_old_2, &res_old_3, val)
+    prep_conf_teddy_m128_4(mask_base, &res_old_1, &res_old_2, &res_old_3, val)
 
 #define PREP_CONF_FN(mask_base, val, n)                                       \
     PREP_CONF_FN_##n(mask_base, val)
 
 // n_msk 1
+#define N_MSK_VAL 1
 hwlm_error_t fdr_exec_teddy_128_1(const struct FDR *fdr,
                              const struct FDR_Runtime_Args *a,
                              hwlm_group_t control) {
@@ -1753,7 +1753,17 @@ hwlm_error_t fdr_exec_teddy_128_1(const struct FDR *fdr,
     const m128 *maskBase = getMaskBase(teddy);
     const u32 *confBase = getConfBase(teddy);
 
-    FDR_EXEC_TEDDY_RES_OLD(1);
+    // FDR_EXEC_TEDDY_RES_OLD(1);
+#if N_MSK_VAL > 1
+    m128 res_old_1 = zeroes128();
+#endif
+#if N_MSK_VAL > 2
+    m128 res_old_2 = zeroes128();
+#endif
+#if N_MSK_VAL > 3
+    m128 res_old_3 = zeroes128();
+#endif
+
     const u8 *mainStart = ROUNDUP_PTR(ptr, 16);
     DEBUG_PRINTF("derive: ptr: %p mainstart %p\n", ptr, mainStart);
     if (ptr < mainStart) {
@@ -1804,6 +1814,8 @@ hwlm_error_t fdr_exec_teddy_128_1(const struct FDR *fdr,
 
 
 // n_msk 2
+#undef N_MSK_VAL
+#define N_MSK_VAL 2
 hwlm_error_t fdr_exec_teddy_128_2(const struct FDR *fdr,
                              const struct FDR_Runtime_Args *a,
                              hwlm_group_t control) {
@@ -1820,7 +1832,16 @@ hwlm_error_t fdr_exec_teddy_128_2(const struct FDR *fdr,
     const m128 *maskBase = getMaskBase(teddy);
     const u32 *confBase = getConfBase(teddy);
 
-    FDR_EXEC_TEDDY_RES_OLD(2);
+    // FDR_EXEC_TEDDY_RES_OLD(2);
+#if N_MSK_VAL > 1
+    m128 res_old_1 = zeroes128();
+#endif
+#if N_MSK_VAL > 2
+    m128 res_old_2 = zeroes128();
+#endif
+#if N_MSK_VAL > 3
+    m128 res_old_3 = zeroes128();
+#endif
     const u8 *mainStart = ROUNDUP_PTR(ptr, 16);
     DEBUG_PRINTF("derive: ptr: %p mainstart %p\n", ptr, mainStart);
     if (ptr < mainStart) {
@@ -1870,6 +1891,8 @@ hwlm_error_t fdr_exec_teddy_128_2(const struct FDR *fdr,
 }
 
 // n_msk 3
+#undef N_MSK_VAL
+#define N_MSK_VAL 3
 hwlm_error_t fdr_exec_teddy_128_3(const struct FDR *fdr,
                              const struct FDR_Runtime_Args *a,
                              hwlm_group_t control) {
@@ -1886,7 +1909,16 @@ hwlm_error_t fdr_exec_teddy_128_3(const struct FDR *fdr,
     const m128 *maskBase = getMaskBase(teddy);
     const u32 *confBase = getConfBase(teddy);
 
-    FDR_EXEC_TEDDY_RES_OLD(3);
+    // FDR_EXEC_TEDDY_RES_OLD(3);
+#if N_MSK_VAL > 1
+    m128 res_old_1 = zeroes128();
+#endif
+#if N_MSK_VAL > 2
+    m128 res_old_2 = zeroes128();
+#endif
+#if N_MSK_VAL > 3
+    m128 res_old_3 = zeroes128();
+#endif
     const u8 *mainStart = ROUNDUP_PTR(ptr, 16);
     DEBUG_PRINTF("derive: ptr: %p mainstart %p\n", ptr, mainStart);
     if (ptr < mainStart) {
@@ -1936,6 +1968,8 @@ hwlm_error_t fdr_exec_teddy_128_3(const struct FDR *fdr,
 }
 
 // n_msk 4
+#undef N_MSK_VAL
+#define N_MSK_VAL 4
 hwlm_error_t fdr_exec_teddy_128_4(const struct FDR *fdr,
                              const struct FDR_Runtime_Args *a,
                              hwlm_group_t control) {
@@ -1952,7 +1986,16 @@ hwlm_error_t fdr_exec_teddy_128_4(const struct FDR *fdr,
     const m128 *maskBase = getMaskBase(teddy);
     const u32 *confBase = getConfBase(teddy);
 
-    FDR_EXEC_TEDDY_RES_OLD(4);
+    // FDR_EXEC_TEDDY_RES_OLD(4);
+#if N_MSK_VAL > 1
+    m128 res_old_1 = zeroes128();
+#endif
+#if N_MSK_VAL > 2
+    m128 res_old_2 = zeroes128();
+#endif
+#if N_MSK_VAL > 3
+    m128 res_old_3 = zeroes128();
+#endif
     const u8 *mainStart = ROUNDUP_PTR(ptr, 16);
     DEBUG_PRINTF("derive: ptr: %p mainstart %p\n", ptr, mainStart);
     if (ptr < mainStart) {
