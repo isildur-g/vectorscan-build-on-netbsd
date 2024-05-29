@@ -198,7 +198,7 @@ hwlm_error_t confirm_teddy_32_512(m512 var, int bucket, int offset,
 #define TEDDY_VBMI_SL3_MASK   0xfffffffffffffff8ULL
 
 static really_inline
-m512 prep_conf_teddy_512_m1(const m512 *lo_mask, const m512 *dup_mask,
+m512 prep_conf_teddy_512vbmi_m1(const m512 *lo_mask, const m512 *dup_mask,
                         UNUSED const m512 *sl_msk, const m512 val) {
     m512 lo = and512(val, *lo_mask);                               
     m512 hi = and512(rshift64_m512(val, 4), *lo_mask);
@@ -208,7 +208,7 @@ m512 prep_conf_teddy_512_m1(const m512 *lo_mask, const m512 *dup_mask,
 }
 
 static really_inline
-m512 prep_conf_teddy_512_m2(const m512 *lo_mask, const m512 *dup_mask,
+m512 prep_conf_teddy_512vbmi_m2(const m512 *lo_mask, const m512 *dup_mask,
                         UNUSED const m512 *sl_msk, const m512 val) {
     m512 lo = and512(val, *lo_mask);                               
     m512 hi = and512(rshift64_m512(val, 4), *lo_mask);
@@ -221,7 +221,7 @@ m512 prep_conf_teddy_512_m2(const m512 *lo_mask, const m512 *dup_mask,
 }
 
 static really_inline
-m512 prep_conf_teddy_512_m3(const m512 *lo_mask, const m512 *dup_mask,
+m512 prep_conf_teddy_512vbmi_m3(const m512 *lo_mask, const m512 *dup_mask,
                         UNUSED const m512 *sl_msk, const m512 val) {
     m512 lo = and512(val, *lo_mask);                               
     m512 hi = and512(rshift64_m512(val, 4), *lo_mask);
@@ -237,7 +237,7 @@ m512 prep_conf_teddy_512_m3(const m512 *lo_mask, const m512 *dup_mask,
 }
 
 static really_inline
-m512 prep_conf_teddy_512_m4(const m512 *lo_mask, const m512 *dup_mask,
+m512 prep_conf_teddy_512vbmi_m4(const m512 *lo_mask, const m512 *dup_mask,
                         UNUSED const m512 *sl_msk, const m512 val) {
     m512 lo = and512(val, *lo_mask);                               
     m512 hi = and512(rshift64_m512(val, 4), *lo_mask);
@@ -257,7 +257,7 @@ m512 prep_conf_teddy_512_m4(const m512 *lo_mask, const m512 *dup_mask,
 
 
 #define PREP_CONF_FN_512(val, n)                                                  \
-    prep_conf_teddy_512_m##n(&lo_mask, dup_mask, sl_msk, val)
+    prep_conf_teddy_512vbmi_m##n(&lo_mask, dup_mask, sl_msk, val)
 
 
 #define TEDDY_VBMI_SL1_POS    15
