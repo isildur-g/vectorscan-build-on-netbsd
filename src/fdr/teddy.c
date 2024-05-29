@@ -1721,16 +1721,16 @@ m128 prep_conf_teddy_128_m4(const m128 *maskBase, m128 *old_1, m128 *old_2,
 }
 
 #define PREP_CONF_FN_1(mask_base, val)                                        \
-    prep_conf_teddy_m128_1(mask_base, val)
+    prep_conf_teddy_128_m1(mask_base, val)
 
 #define PREP_CONF_FN_2(mask_base, val)                                        \
-    prep_conf_teddy_m128_2(mask_base, &res_old_1, val)
+    prep_conf_teddy_128_m2(mask_base, &res_old_1, val)
 
 #define PREP_CONF_FN_3(mask_base, val)                                        \
-    prep_conf_teddy_m128_3(mask_base, &res_old_1, &res_old_2, val)
+    prep_conf_teddy_128_m3(mask_base, &res_old_1, &res_old_2, val)
 
 #define PREP_CONF_FN_4(mask_base, val)                                        \
-    prep_conf_teddy_m128_4(mask_base, &res_old_1, &res_old_2, &res_old_3, val)
+    prep_conf_teddy_128_m4(mask_base, &res_old_1, &res_old_2, &res_old_3, val)
 
 #define PREP_CONF_FN(mask_base, val, n)                                       \
     PREP_CONF_FN_##n(mask_base, val)
