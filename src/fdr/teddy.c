@@ -76,26 +76,70 @@ const u8 ALIGN_DIRECTIVE p_mask_arr[17][32] = {
 };
 
 
-#define CONF_CHUNK_64(chunk, bucket, off, reason, pt)              \
+/*
+#define MACROS_CONF_CHUNK_64(chunk, bucket, off, reason, pt, confBase, a)          \
 do {                                                                        \
     if (unlikely(chunk != ones_u64a)) {                                     \
         chunk = ~chunk;                                                     \
         do_confWithBit_teddy(&chunk, bucket, off, confBase, reason, a, pt,  \
-                control, last_match);                                     \
+                &control, &last_match);                                     \
         CHECK_HWLM_TERMINATE_MATCHING;                                      \
     }                                                                       \
 } while(0)
 
-#define CONF_CHUNK_32(chunk, bucket, off, reason, pt)              \
+#define MACROS_CONF_CHUNK_32(chunk, bucket, off, reason, pt, confBase, a)          \
 do {                                                                        \
     if (unlikely(chunk != ones_u32)) {                                      \
         chunk = ~chunk;                                                     \
         do_confWithBit_teddy(&chunk, bucket, off, confBase, reason, a, pt,  \
-                control, last_match);                                     \
+                &control, &last_match);                                     \
         CHECK_HWLM_TERMINATE_MATCHING;                                      \
     }                                                                       \
 } while(0)
 
+*/
+
+
+#ifdef ARCH_64_BIT
+hwlm_error_t conf_chunk_64(u64a* chunk, int bucket, int offset,
+                           int reason, const u8 *pt,
+                           const u32* confBase,
+                           const struct FDR_Runtime_Args *a,
+                           hwlm_group_t control,
+                           u32 *last_match) {
+    if (unlikely(*chunk != ones_u64a)) {
+        *chunk = ~*chunk;
+        do_confWithBit_teddy(chunk, bucket, offset, confBase, reason, a, pt,
+                &control, last_match);
+        CHECK_HWLM_TERMINATE_MATCHING;
+    }
+    return HWLM_SUCCESS;
+}
+
+#define CONF_CHUNK_64(chunk, bucket, off, reason, pt, confBase, a, control, last_match) \
+ if(conf_chunk_64(chunk, bucket, off, reason, pt, confBase, a, control, last_match) == HWLM_TERMINATED)return HWLM_TERMINATED;
+
+#else // 32/64
+
+hwlm_error_t conf_chunk_32(u32* chunk, int bucket, int offset, 
+                           int reason, const u8 *pt,
+                           const u32* confBase,
+                           const struct FDR_Runtime_Args *a,
+                           hwlm_group_t control,
+                           u32 *last_match) {
+    if (unlikely(*chunk != ones_u32)) {
+        *chunk = ~*chunk;
+        do_confWithBit_teddy(chunk, bucket, offset, confBase, reason, a, pt,
+                &control, last_match);
+        CHECK_HWLM_TERMINATE_MATCHING;
+    }
+    return HWLM_SUCCESS;
+}
+
+#define CONF_CHUNK_32(chunk, bucket, off, reason, pt, confBase, a, control, last_match) \
+ if(conf_chunk_32(chunk, bucket, off, reason, pt, confBase, a, control, last_match) == HWLM_TERMINATED)return HWLM_TERMINATED;
+
+#endif
 
 #if defined(HAVE_AVX512VBMI) || defined(HAVE_AVX512) // common to both 512b's
 
@@ -103,8 +147,9 @@ do {                                                                        \
 hwlm_error_t confirm_teddy_64_512(m512 var, int bucket, int offset,
                                   int reason, const u8 *ptr,
                                   const struct FDR_Runtime_Args *a,
-                                  const u32* confBase, hwlm_group_t *control,
+                                  const u32* confBase, hwlm_group_t control,
                                   u32 *last_match) {
+    //printf("XXX in confirm_teddy_64_512\n");
     if (unlikely(diff512(var, ones512()))) {
         m128 p128_0 = extract128from512(var, 0);
         m128 p128_1 = extract128from512(var, 1);
@@ -118,14 +163,14 @@ hwlm_error_t confirm_teddy_64_512(m512 var, int bucket, int offset,
         u64a part6 = movq(rshiftbyte_m128(p128_2, 8));
         u64a part7 = movq(p128_3);
         u64a part8 = movq(rshiftbyte_m128(p128_3, 8));
-        CONF_CHUNK_64(part1, bucket, offset, reason, ptr);
-        CONF_CHUNK_64(part2, bucket, offset + 8, reason, ptr);
-        CONF_CHUNK_64(part3, bucket, offset + 16, reason, ptr);
-        CONF_CHUNK_64(part4, bucket, offset + 24, reason, ptr);
-        CONF_CHUNK_64(part5, bucket, offset + 32, reason, ptr);
-        CONF_CHUNK_64(part6, bucket, offset + 40, reason, ptr);
-        CONF_CHUNK_64(part7, bucket, offset + 48, reason, ptr);
-        CONF_CHUNK_64(part8, bucket, offset + 56, reason, ptr);
+        CONF_CHUNK_64(&part1, bucket, offset, reason, ptr, confBase, a, control, last_match);
+        CONF_CHUNK_64(&part2, bucket, offset + 8, reason, ptr, confBase, a, control, last_match);
+        CONF_CHUNK_64(&part3, bucket, offset + 16, reason, ptr, confBase, a, control, last_match);
+        CONF_CHUNK_64(&part4, bucket, offset + 24, reason, ptr, confBase, a, control, last_match);
+        CONF_CHUNK_64(&part5, bucket, offset + 32, reason, ptr, confBase, a, control, last_match);
+        CONF_CHUNK_64(&part6, bucket, offset + 40, reason, ptr, confBase, a, control, last_match);
+        CONF_CHUNK_64(&part7, bucket, offset + 48, reason, ptr, confBase, a, control, last_match);
+        CONF_CHUNK_64(&part8, bucket, offset + 56, reason, ptr, confBase, a, control, last_match);
     }
     return HWLM_SUCCESS;
 }
@@ -136,7 +181,7 @@ hwlm_error_t confirm_teddy_64_512(m512 var, int bucket, int offset,
 hwlm_error_t confirm_teddy_32_512(m512 var, int bucket, int offset,
                                   int reason, const u8 *ptr,
                                   const struct FDR_Runtime_Args *a,
-                                  const u32* confBase, hwlm_group_t *control,
+                                  const u32* confBase, hwlm_group_t control,
                                   u32 *last_match) {
     if (unlikely(diff512(var, ones512()))) {
         m128 p128_0 = extract128from512(var, 0);
@@ -159,22 +204,22 @@ hwlm_error_t confirm_teddy_32_512(m512 var, int bucket, int offset,
         u32 part14 = movd(rshiftbyte_m128(p128_3, 4));
         u32 part15 = movd(rshiftbyte_m128(p128_3, 8));
         u32 part16 = movd(rshiftbyte_m128(p128_3, 12));
-        CONF_CHUNK_32(part1, bucket, offset, reason, ptr);
-        CONF_CHUNK_32(part2, bucket, offset + 4, reason, ptr);
-        CONF_CHUNK_32(part3, bucket, offset + 8, reason, ptr);
-        CONF_CHUNK_32(part4, bucket, offset + 12, reason, ptr);
-        CONF_CHUNK_32(part5, bucket, offset + 16, reason, ptr);
-        CONF_CHUNK_32(part6, bucket, offset + 20, reason, ptr);
-        CONF_CHUNK_32(part7, bucket, offset + 24, reason, ptr);
-        CONF_CHUNK_32(part8, bucket, offset + 28, reason, ptr);
-        CONF_CHUNK_32(part9, bucket, offset + 32, reason, ptr);
-        CONF_CHUNK_32(part10, bucket, offset + 36, reason, ptr);
-        CONF_CHUNK_32(part11, bucket, offset + 40, reason, ptr);
-        CONF_CHUNK_32(part12, bucket, offset + 44, reason, ptr);
-        CONF_CHUNK_32(part13, bucket, offset + 48, reason, ptr);
-        CONF_CHUNK_32(part14, bucket, offset + 52, reason, ptr);
-        CONF_CHUNK_32(part15, bucket, offset + 56, reason, ptr);
-        CONF_CHUNK_32(part16, bucket, offset + 60, reason, ptr);
+        CONF_CHUNK_32(&part1, bucket, offset, reason, ptr, confBase, a, control, last_match);
+        CONF_CHUNK_32(&part2, bucket, offset + 4, reason, ptr, confBase, a, control, last_match);
+        CONF_CHUNK_32(&part3, bucket, offset + 8, reason, ptr, confBase, a, control, last_match);
+        CONF_CHUNK_32(&part4, bucket, offset + 12, reason, ptr, confBase, a, control, last_match);
+        CONF_CHUNK_32(&part5, bucket, offset + 16, reason, ptr, confBase, a, control, last_match);
+        CONF_CHUNK_32(&part6, bucket, offset + 20, reason, ptr, confBase, a, control, last_match);
+        CONF_CHUNK_32(&part7, bucket, offset + 24, reason, ptr, confBase, a, control, last_match);
+        CONF_CHUNK_32(&part8, bucket, offset + 28, reason, ptr, confBase, a, control, last_match);
+        CONF_CHUNK_32(&part9, bucket, offset + 32, reason, ptr, confBase, a, control, last_match);
+        CONF_CHUNK_32(&part10, bucket, offset + 36, reason, ptr, confBase, a, control, last_match);
+        CONF_CHUNK_32(&part11, bucket, offset + 40, reason, ptr, confBase, a, control, last_match);
+        CONF_CHUNK_32(&part12, bucket, offset + 44, reason, ptr, confBase, a, control, last_match);
+        CONF_CHUNK_32(&part13, bucket, offset + 48, reason, ptr, confBase, a, control, last_match);
+        CONF_CHUNK_32(&part14, bucket, offset + 52, reason, ptr, confBase, a, control, last_match);
+        CONF_CHUNK_32(&part15, bucket, offset + 56, reason, ptr, confBase, a, control, last_match);
+        CONF_CHUNK_32(&part16, bucket, offset + 60, reason, ptr, confBase, a, control, last_match);
     }
     return HWLM_SUCCESS;
 }
@@ -183,7 +228,7 @@ hwlm_error_t confirm_teddy_32_512(m512 var, int bucket, int offset,
 
 #endif // 32/64
 
-#define CONFIRM_TEDDY_512(...) if(confirm_teddy_512_f(__VA_ARGS__, a, confBase, &control, &last_match) == HWLM_TERMINATED)return HWLM_TERMINATED;
+#define CONFIRM_TEDDY_512(...) if(confirm_teddy_512_f(__VA_ARGS__, a, confBase, control, &last_match) == HWLM_TERMINATED)return HWLM_TERMINATED;
 
 #endif // AVX512VBMI or AVX512
 
@@ -209,7 +254,7 @@ m512 prep_conf_teddy_512vbmi_m1(const m512 *lo_mask, const m512 *dup_mask,
 
 static really_inline
 m512 prep_conf_teddy_512vbmi_m2(const m512 *lo_mask, const m512 *dup_mask,
-                        UNUSED const m512 *sl_msk, const m512 val) {
+                        const m512 *sl_msk, const m512 val) {
     m512 lo = and512(val, *lo_mask);                               
     m512 hi = and512(rshift64_m512(val, 4), *lo_mask);
     m512 shuf_or_b0 = or512(pshufb_m512(dup_mask[0], lo), 
@@ -222,7 +267,7 @@ m512 prep_conf_teddy_512vbmi_m2(const m512 *lo_mask, const m512 *dup_mask,
 
 static really_inline
 m512 prep_conf_teddy_512vbmi_m3(const m512 *lo_mask, const m512 *dup_mask,
-                        UNUSED const m512 *sl_msk, const m512 val) {
+                        const m512 *sl_msk, const m512 val) {
     m512 lo = and512(val, *lo_mask);                               
     m512 hi = and512(rshift64_m512(val, 4), *lo_mask);
     m512 shuf_or_b0 = or512(pshufb_m512(dup_mask[0], lo), 
@@ -238,7 +283,7 @@ m512 prep_conf_teddy_512vbmi_m3(const m512 *lo_mask, const m512 *dup_mask,
 
 static really_inline
 m512 prep_conf_teddy_512vbmi_m4(const m512 *lo_mask, const m512 *dup_mask,
-                        UNUSED const m512 *sl_msk, const m512 val) {
+                        const m512 *sl_msk, const m512 val) {
     m512 lo = and512(val, *lo_mask);                               
     m512 hi = and512(rshift64_m512(val, 4), *lo_mask);
     m512 shuf_or_b0 = or512(pshufb_m512(dup_mask[0], lo), 
@@ -256,7 +301,7 @@ m512 prep_conf_teddy_512vbmi_m4(const m512 *lo_mask, const m512 *dup_mask,
 }
 
 
-#define PREP_CONF_FN_512(val, n)                                                  \
+#define PREP_CONF_FN_512(val, n)                                          \
     prep_conf_teddy_512vbmi_m##n(&lo_mask, dup_mask, sl_msk, val)
 
 
@@ -1097,8 +1142,9 @@ hwlm_error_t fdr_exec_teddy_512_4(const struct FDR *fdr,
 hwlm_error_t confirm_teddy_64_256(m256 var, int bucket, int offset,
                                   int reason, const u8 *ptr,
                                   const struct FDR_Runtime_Args *a,
-                                  const u32* confBase, hwlm_group_t *control,
+                                  const u32* confBase, hwlm_group_t control,
                                   u32 *last_match) {
+    //printf("XXX in confirm_teddy_64_256\n");
     if (unlikely(diff256(var, ones256()))) {
         m128 lo = movdq_lo(var);
         m128 hi = movdq_hi(var);
@@ -1106,10 +1152,10 @@ hwlm_error_t confirm_teddy_64_256(m256 var, int bucket, int offset,
         u64a part2 = movq(rshiftbyte_m128(lo, 8));
         u64a part3 = movq(hi);
         u64a part4 = movq(rshiftbyte_m128(hi, 8));
-        CONF_CHUNK_64(part1, bucket, offset, reason, ptr);
-        CONF_CHUNK_64(part2, bucket, offset + 8, reason, ptr);
-        CONF_CHUNK_64(part3, bucket, offset + 16, reason, ptr);
-        CONF_CHUNK_64(part4, bucket, offset + 24, reason, ptr);
+        CONF_CHUNK_64(&part1, bucket, offset, reason, ptr, confBase, a, control, last_match);
+        CONF_CHUNK_64(&part2, bucket, offset + 8, reason, ptr, confBase, a, control, last_match);
+        CONF_CHUNK_64(&part3, bucket, offset + 16, reason, ptr, confBase, a, control, last_match);
+        CONF_CHUNK_64(&part4, bucket, offset + 24, reason, ptr, confBase, a, control, last_match);
     }
     return HWLM_SUCCESS;
 }
@@ -1120,7 +1166,7 @@ hwlm_error_t confirm_teddy_64_256(m256 var, int bucket, int offset,
 hwlm_error_t confirm_teddy_32_256(m256 var, int bucket, int offset,
                                   int reason, const u8 *ptr,
                                   const struct FDR_Runtime_Args *a,
-                                  const u32* confBase, hwlm_group_t *control,
+                                  const u32* confBase, hwlm_group_t control,
                                   u32 *last_match) {
     if (unlikely(diff256(var, ones256()))) {
         m128 lo = movdq_lo(var);
@@ -1133,14 +1179,14 @@ hwlm_error_t confirm_teddy_32_256(m256 var, int bucket, int offset,
         u32 part6 = movd(rshiftbyte_m128(hi, 4));
         u32 part7 = movd(rshiftbyte_m128(hi, 8));
         u32 part8 = movd(rshiftbyte_m128(hi, 12));
-        CONF_CHUNK_32(part1, bucket, offset, reason, ptr);
-        CONF_CHUNK_32(part2, bucket, offset + 4, reason, ptr);
-        CONF_CHUNK_32(part3, bucket, offset + 8, reason, ptr);
-        CONF_CHUNK_32(part4, bucket, offset + 12, reason, ptr);
-        CONF_CHUNK_32(part5, bucket, offset + 16, reason, ptr);
-        CONF_CHUNK_32(part6, bucket, offset + 20, reason, ptr);
-        CONF_CHUNK_32(part7, bucket, offset + 24, reason, ptr);
-        CONF_CHUNK_32(part8, bucket, offset + 28, reason, ptr);
+        CONF_CHUNK_32(&part1, bucket, offset, reason, ptr, confBase, a, control, last_match);
+        CONF_CHUNK_32(&part2, bucket, offset + 4, reason, ptr, confBase, a, control, last_match);
+        CONF_CHUNK_32(&part3, bucket, offset + 8, reason, ptr, confBase, a, control, last_match);
+        CONF_CHUNK_32(&part4, bucket, offset + 12, reason, ptr, confBase, a, control, last_match);
+        CONF_CHUNK_32(&part5, bucket, offset + 16, reason, ptr, confBase, a, control, last_match);
+        CONF_CHUNK_32(&part6, bucket, offset + 20, reason, ptr, confBase, a, control, last_match);
+        CONF_CHUNK_32(&part7, bucket, offset + 24, reason, ptr, confBase, a, control, last_match);
+        CONF_CHUNK_32(&part8, bucket, offset + 28, reason, ptr, confBase, a, control, last_match);
     }
     return HWLM_SUCCESS;
 }
@@ -1149,7 +1195,7 @@ hwlm_error_t confirm_teddy_32_256(m256 var, int bucket, int offset,
 
 #endif
 
-#define CONFIRM_TEDDY_256(...) if(confirm_teddy_256_f(__VA_ARGS__, a, confBase, &control, &last_match) == HWLM_TERMINATED)return HWLM_TERMINATED;
+#define CONFIRM_TEDDY_256(...) if(confirm_teddy_256_f(__VA_ARGS__, a, confBase, control, &last_match) == HWLM_TERMINATED)return HWLM_TERMINATED;
 
 
 m256 shift_or_256_m1(const m256 *dup_mask, m256 lo, m256 hi){
@@ -1623,18 +1669,20 @@ hwlm_error_t fdr_exec_teddy_256_4(const struct FDR *fdr,
 
 #ifdef ARCH_64_BIT
 /* functionized version */
+static really_inline
 hwlm_error_t confirm_teddy_64_128(m128 var, int bucket, int offset,
                                   int reason, const u8 *ptr,
                                   const struct FDR_Runtime_Args *a,
-                                  const u32* confBase, hwlm_group_t *control,
+                                  const u32* confBase, hwlm_group_t control,
                                   u32 *last_match) {
+    //printf("XXX in confirm_teddy_64_128\n");
     if (unlikely(diff128(var, ones128()))) {
         u64a __attribute__((aligned(16))) vec[2];
         store128(vec, var);
         u64a lo = vec[0];
         u64a hi = vec[1];
-        CONF_CHUNK_64(lo, bucket, offset, reason, ptr);
-        CONF_CHUNK_64(hi, bucket, offset + 8, reason, ptr);
+        CONF_CHUNK_64(&lo, bucket, offset, reason, ptr, confBase, a, control, last_match);
+        CONF_CHUNK_64(&hi, bucket, offset + 8, reason, ptr, confBase, a, control, last_match);
     }
     return HWLM_SUCCESS;
 }
@@ -1644,20 +1692,21 @@ hwlm_error_t confirm_teddy_64_128(m128 var, int bucket, int offset,
 #else
 
 /* functionized version */
+static really_inline
 hwlm_error_t confirm_teddy_32_128(m128 var, int bucket, int offset,
                                   int reason, const u8 *ptr,
                                   const struct FDR_Runtime_Args *a,
-                                  const u32* confBase, hwlm_group_t *control,
+                                  const u32* confBase, hwlm_group_t control,
                                   u32 *last_match) {
     if (unlikely(diff128(var, ones128()))) {
         u32 part1 = movd(var);
         u32 part2 = movd(rshiftbyte_m128(var, 4));
         u32 part3 = movd(rshiftbyte_m128(var, 8));
         u32 part4 = movd(rshiftbyte_m128(var, 12));
-        CONF_CHUNK_32(part1, bucket, offset, reason, ptr);
-        CONF_CHUNK_32(part2, bucket, offset + 4, reason, ptr);
-        CONF_CHUNK_32(part3, bucket, offset + 8, reason, ptr);
-        CONF_CHUNK_32(part4, bucket, offset + 12, reason, ptr);
+        CONF_CHUNK_32(&part1, bucket, offset, reason, ptr, confBase, a, control, last_match);
+        CONF_CHUNK_32(&part2, bucket, offset + 4, reason, ptr, confBase, a, control, last_match);
+        CONF_CHUNK_32(&part3, bucket, offset + 8, reason, ptr, confBase, a, control, last_match);
+        CONF_CHUNK_32(&part4, bucket, offset + 12, reason, ptr, confBase, a, control, last_match);
     }
     return HWLM_SUCCESS;
 }
@@ -1665,7 +1714,31 @@ hwlm_error_t confirm_teddy_32_128(m128 var, int bucket, int offset,
 
 #endif
 
-#define CONFIRM_TEDDY_128(...) if(confirm_teddy_128_f(__VA_ARGS__, a, confBase, &control, &last_match) == HWLM_TERMINATED)return HWLM_TERMINATED;
+/* XXX testing this to compare results
+#define MACROS_CONFIRM_TEDDY(var, bucket, offset, reason, pt)  \
+do {                                                                        \
+    if (unlikely(diff128(var, ones128()))) {                                \
+        u64a __attribute__((aligned(16))) vec[2];                           \
+        store128(vec, var);                                                 \
+        u64a lo = vec[0];                                                   \
+        u64a hi = vec[1];                                                   \
+        MACROS_CONF_CHUNK_64(lo, bucket, offset, reason, pt, confBase, a);  \
+        MACROS_CONF_CHUNK_64(hi, bucket, offset + 8, reason, pt, confBase, a);\
+    }                                                                       \
+} while(0)
+ */
+
+#define CONFIRM_TEDDY_128(...) if(confirm_teddy_128_f(__VA_ARGS__, a, confBase, control, &last_match) == HWLM_TERMINATED)return HWLM_TERMINATED;
+
+
+/*
+#define CONFIRM_TEDDY_128(...) \
+        CONFIRM_TEDDY_128_F(__VA_ARGS__);\
+        //printf("funcs still here\n"); \
+        MACROS_CONFIRM_TEDDY(__VA_ARGS__);\
+        //printf("macros still here\n");
+*/
+
 
 static really_inline
 m128 prep_conf_teddy_128_m1(const m128 *maskBase, m128 val) {
@@ -1735,6 +1808,7 @@ m128 prep_conf_teddy_128_m4(const m128 *maskBase, m128 *old_1, m128 *old_2,
 #define PREP_CONF_FN(mask_base, val, n)                                       \
     PREP_CONF_FN_##n(mask_base, val)
 
+
 // n_msk 1
 #define N_MSK_VAL 1
 hwlm_error_t fdr_exec_teddy_128_1(const struct FDR *fdr,
@@ -1763,6 +1837,7 @@ hwlm_error_t fdr_exec_teddy_128_1(const struct FDR *fdr,
 #if N_MSK_VAL > 3
     m128 res_old_3 = zeroes128();
 #endif
+    //printf("fdr_exec_teddy_128_l\n");
 
     const u8 *mainStart = ROUNDUP_PTR(ptr, 16);
     DEBUG_PRINTF("derive: ptr: %p mainstart %p\n", ptr, mainStart);
@@ -1774,6 +1849,8 @@ hwlm_error_t fdr_exec_teddy_128_1(const struct FDR *fdr,
                                      a->buf_history, a->len_history, 1);
         m128 r_0 = PREP_CONF_FN(maskBase, val_0, 1);
         r_0 = or128(r_0, p_mask);
+        // is it possible that oen of these will return where
+        // the functionized one won't?
         CONFIRM_TEDDY_128(r_0, 8, 0, VECTORING, ptr);
         ptr += 16;
     }
@@ -1842,6 +1919,7 @@ hwlm_error_t fdr_exec_teddy_128_2(const struct FDR *fdr,
 #if N_MSK_VAL > 3
     m128 res_old_3 = zeroes128();
 #endif
+    //printf("fdr_exec_teddy_128_2\n");
     const u8 *mainStart = ROUNDUP_PTR(ptr, 16);
     DEBUG_PRINTF("derive: ptr: %p mainstart %p\n", ptr, mainStart);
     if (ptr < mainStart) {
@@ -1919,6 +1997,7 @@ hwlm_error_t fdr_exec_teddy_128_3(const struct FDR *fdr,
 #if N_MSK_VAL > 3
     m128 res_old_3 = zeroes128();
 #endif
+    //printf("fdr_exec_teddy_128_3\n");
     const u8 *mainStart = ROUNDUP_PTR(ptr, 16);
     DEBUG_PRINTF("derive: ptr: %p mainstart %p\n", ptr, mainStart);
     if (ptr < mainStart) {
@@ -1996,6 +2075,7 @@ hwlm_error_t fdr_exec_teddy_128_4(const struct FDR *fdr,
 #if N_MSK_VAL > 3
     m128 res_old_3 = zeroes128();
 #endif
+    //printf("fdr_exec_teddy_128_4\n");
     const u8 *mainStart = ROUNDUP_PTR(ptr, 16);
     DEBUG_PRINTF("derive: ptr: %p mainstart %p\n", ptr, mainStart);
     if (ptr < mainStart) {
