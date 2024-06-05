@@ -377,6 +377,7 @@ m512 shift_or_512_m4(const m512 *dup_mask, m512 lo, m512 hi){
                                 3), shift_or_512_m3(dup_mask, lo, hi));
 }
 
+/*
 static really_inline
 m512 prep_conf_teddy_no_reinforcement_512_m1(const m512 *lo_mask,
                                          const m512 *dup_mask,
@@ -418,8 +419,25 @@ m512 prep_conf_teddy_no_reinforcement_512_m4(const m512 *lo_mask,
     m512 lo = and512(val, *lo_mask); 
     m512 hi = and512(rshift64_m512(val, 4), *lo_mask);
     // return SHIFT_OR_M4;
-    return shift_or_512_m3(dup_mask, lo, hi);
+    return shift_or_512_m4(dup_mask, lo, hi);
 }
+*/
+
+template <int NMSK>
+static really_inline
+m512 prep_conf_teddy_no_reinforcement_512_templ(const m512 *lo_mask,
+                                                const m512 *dup_mask,
+                                                const m512 val) {
+    m512 lo = and512(val, *lo_mask);
+    m512 hi = and512(rshift64_m512(val, 4), *lo_mask);
+    switch(NMSK) {
+        case 1: return shift_or_512_m1(dup_mask, lo, hi); break;
+        case 2: return shift_or_512_m2(dup_mask, lo, hi); break;
+        case 3: return shift_or_512_m3(dup_mask, lo, hi); break;
+        case 4: return shift_or_512_m4(dup_mask, lo, hi); break;
+    }
+}
+
 
 static really_inline
 m512 prep_conf_teddy_512_m1(const m512 *lo_mask, const m512 *dup_mask,
@@ -486,7 +504,7 @@ m512 prep_conf_teddy_512_m4(const m512 *lo_mask, const m512 *dup_mask,
 }
 
 #define PREP_CONF_FN_NO_REINFORCEMENT(val, n)                                 \
-    prep_conf_teddy_no_reinforcement_512_m##n(&lo_mask, dup_mask, val)
+    prep_conf_teddy_no_reinforcement_512_templ<n>(&lo_mask, dup_mask, val)
 
 #define PREP_CONF_FN(ptr, n)                                                  \
     prep_conf_teddy_512_m##n(&lo_mask, dup_mask, ptr, r_msk_base,             \
@@ -1254,22 +1272,6 @@ m128 prep_conf_teddy_128_m4(const m128 *maskBase, m128 *old_1, m128 *old_2,
     return or128(r, res_shifted_3);
 }
 
-/*
-#define PREP_CONF_FN_1(mask_base, val)                                        \
-    prep_conf_teddy_128_m1(mask_base, val)
-
-#define PREP_CONF_FN_2(mask_base, val)                                        \
-    prep_conf_teddy_128_m2(mask_base, &res_old_1, val)
-
-#define PREP_CONF_FN_3(mask_base, val)                                        \
-    prep_conf_teddy_128_m3(mask_base, &res_old_1, &res_old_2, val)
-
-#define PREP_CONF_FN_4(mask_base, val)                                        \
-    prep_conf_teddy_128_m4(mask_base, &res_old_1, &res_old_2, &res_old_3, val)
-
-#define PREP_CONF_FN(mask_base, val, n)                                       \
-    PREP_CONF_FN_##n(mask_base, val)
-*/
 
 template <int NMSK>
 m128 prep_conf_teddy_128_templ(const m128 *maskBase, m128 val) {
@@ -1283,20 +1285,10 @@ m128 prep_conf_teddy_128_templ(const m128 *maskBase, m128 val) {
         case 3: res_old_1 = zeroes128();
                 res_old_2 = zeroes128();
                 return prep_conf_teddy_128_m3(maskBase, &res_old_1, &res_old_2, val); break;
-        default: res_old_1 = zeroes128();
-                 res_old_2 = zeroes128(); 
-                 res_old_3 = zeroes128(); 
-                 return prep_conf_teddy_128_m4(maskBase, &res_old_1, &res_old_2, &res_old_3, val);
-
-/*
-    if(NMSK > 1) m128 res_old_1 = zeroes128();
-    if(NMSK > 2) m128 res_old_2 = zeroes128();
-    if(NMSK > 3) m128 res_old_3 = zeroes128();
-    if(NMSK == 1) return prep_conf_teddy_128_m1(maskBase, val);
-    if(NMSK == 2) return prep_conf_teddy_128_m2(maskBase, &res_old_1, val);
-    if(NMSK == 3) return prep_conf_teddy_128_m3(maskBase, &res_old_1, &res_old_2, val);
-    if(NMSK == 4) return prep_conf_teddy_128_m4(maskBase, &res_old_1, &res_old_2, &res_old_3, val);
-*/
+        case 4: res_old_1 = zeroes128();
+                res_old_2 = zeroes128(); 
+                res_old_3 = zeroes128(); 
+                return prep_conf_teddy_128_m4(maskBase, &res_old_1, &res_old_2, &res_old_3, val);
     }
 }
 
@@ -1317,11 +1309,6 @@ hwlm_error_t fdr_exec_teddy_128_templ(const struct FDR *fdr,
     const m128 *maskBase = getMaskBase(teddy);
     const u32 *confBase = getConfBase(teddy);
 
-/*
-    if(NMSK > 1) m128 res_old_1 = zeroes128();
-    if(NMSK > 2) m128 res_old_2 = zeroes128();
-    if(NMSK > 3) m128 res_old_3 = zeroes128();
-*/
     const u8 *mainStart = ROUNDUP_PTR(ptr, 16);
     DEBUG_PRINTF("derive: ptr: %p mainstart %p\n", ptr, mainStart);
     if (ptr < mainStart) {
