@@ -377,52 +377,6 @@ m512 shift_or_512_m4(const m512 *dup_mask, m512 lo, m512 hi){
                                 3), shift_or_512_m3(dup_mask, lo, hi));
 }
 
-/*
-static really_inline
-m512 prep_conf_teddy_no_reinforcement_512_m1(const m512 *lo_mask,
-                                         const m512 *dup_mask,
-                                         const m512 val) {
-    // PREP_SHUF_MASK_NO_REINFORCEMENT(val);
-    m512 lo = and512(val, *lo_mask);
-    m512 hi = and512(rshift64_m512(val, 4), *lo_mask);
-    // SHIFT_OR_M1
-    return shift_or_512_m1(dup_mask, lo, hi);
-}
-
-static really_inline
-m512 prep_conf_teddy_no_reinforcement_512_m2(const m512 *lo_mask,
-                                         const m512 *dup_mask,
-                                         const m512 val) {
-    // PREP_SHUF_MASK_NO_REINFORCEMENT(val);
-    m512 lo = and512(val, *lo_mask);
-    m512 hi = and512(rshift64_m512(val, 4), *lo_mask);
-    // return SHIFT_OR_M2;
-    return shift_or_512_m2(dup_mask, lo, hi);
-}
-
-static really_inline
-m512 prep_conf_teddy_no_reinforcement_512_m3(const m512 *lo_mask,
-                                         const m512 *dup_mask,
-                                         const m512 val) {
-    // PREP_SHUF_MASK_NO_REINFORCEMENT(val);
-    m512 lo = and512(val, *lo_mask);
-    m512 hi = and512(rshift64_m512(val, 4), *lo_mask);
-    // return SHIFT_OR_M3;
-    return shift_or_512_m3(dup_mask, lo, hi);
-}
-
-static really_inline
-m512 prep_conf_teddy_no_reinforcement_512_m4(const m512 *lo_mask,
-                                         const m512 *dup_mask,
-                                         const m512 val) {
-    // PREP_SHUF_MASK_NO_REINFORCEMENT(val);
-    m512 lo = and512(val, *lo_mask); 
-    m512 hi = and512(rshift64_m512(val, 4), *lo_mask);
-    // return SHIFT_OR_M4;
-    return shift_or_512_m4(dup_mask, lo, hi);
-}
-*/
-
 template <int NMSK>
 static really_inline
 m512 prep_conf_teddy_no_reinforcement_512_templ(const m512 *lo_mask,
@@ -438,72 +392,6 @@ m512 prep_conf_teddy_no_reinforcement_512_templ(const m512 *lo_mask,
     }
 }
 
-
-/*
-static really_inline
-m512 prep_conf_teddy_512_m1(const m512 *lo_mask, const m512 *dup_mask,
-                        const u8 *ptr, const u64a *r_msk_base,
-                        u32 *c_0, u32 *c_16, u32 *c_32, u32 *c_48) {
-    // PREP_SHUF_MASK;
-    m512 lo = and512(load512(ptr), *lo_mask);
-    m512 hi = and512(rshift64_m512(load512(ptr), 4), *lo_mask);
-    *c_16 = *(ptr + 15);
-    *c_32 = *(ptr + 31);
-    *c_48 = *(ptr + 47);
-    m512 r_msk = set8x64(0ULL, r_msk_base[*c_48], 0ULL, r_msk_base[*c_32],
-                           0ULL, r_msk_base[*c_16], 0ULL, r_msk_base[*c_0]);
-    *c_0 = *(ptr + 63);
-    return or512(shift_or_512_m1(dup_mask, lo, hi), r_msk);
-}
-
-static really_inline
-m512 prep_conf_teddy_512_m2(const m512 *lo_mask, const m512 *dup_mask,
-                        const u8 *ptr, const u64a *r_msk_base,
-                        u32 *c_0, u32 *c_16, u32 *c_32, u32 *c_48) {
-    // PREP_SHUF_MASK;
-    m512 lo = and512(load512(ptr), *lo_mask);
-    m512 hi = and512(rshift64_m512(load512(ptr), 4), *lo_mask);
-    *c_16 = *(ptr + 15);
-    *c_32 = *(ptr + 31);
-    *c_48 = *(ptr + 47);
-    m512 r_msk = set8x64(0ULL, r_msk_base[*c_48], 0ULL, r_msk_base[*c_32],
-                           0ULL, r_msk_base[*c_16], 0ULL, r_msk_base[*c_0]);
-    *c_0 = *(ptr + 63);
-    return or512(shift_or_512_m2(dup_mask, lo, hi), r_msk);
-}
-
-static really_inline
-m512 prep_conf_teddy_512_m3(const m512 *lo_mask, const m512 *dup_mask,
-                        const u8 *ptr, const u64a *r_msk_base,
-                        u32 *c_0, u32 *c_16, u32 *c_32, u32 *c_48) {
-    // PREP_SHUF_MASK;
-    m512 lo = and512(load512(ptr), *lo_mask);
-    m512 hi = and512(rshift64_m512(load512(ptr), 4), *lo_mask);
-    *c_16 = *(ptr + 15);
-    *c_32 = *(ptr + 31);
-    *c_48 = *(ptr + 47);
-    m512 r_msk = set8x64(0ULL, r_msk_base[*c_48], 0ULL, r_msk_base[*c_32],
-                           0ULL, r_msk_base[*c_16], 0ULL, r_msk_base[*c_0]);
-    *c_0 = *(ptr + 63);
-    return or512(shift_or_512_m3(dup_mask, lo, hi), r_msk);
-}
-
-static really_inline
-m512 prep_conf_teddy_512_m4(const m512 *lo_mask, const m512 *dup_mask,
-                        const u8 *ptr, const u64a *r_msk_base,
-                        u32 *c_0, u32 *c_16, u32 *c_32, u32 *c_48) {
-    // PREP_SHUF_MASK;
-    m512 lo = and512(load512(ptr), *lo_mask);
-    m512 hi = and512(rshift64_m512(load512(ptr), 4), *lo_mask);
-    *c_16 = *(ptr + 15);
-    *c_32 = *(ptr + 31);
-    *c_48 = *(ptr + 47);
-    m512 r_msk = set8x64(0ULL, r_msk_base[*c_48], 0ULL, r_msk_base[*c_32],
-                           0ULL, r_msk_base[*c_16], 0ULL, r_msk_base[*c_0]);
-    *c_0 = *(ptr + 63);
-    return or512(shift_or_512_m4(dup_mask, lo, hi), r_msk);
-}
-*/
 
 template <int NMSK>
 static really_inline
