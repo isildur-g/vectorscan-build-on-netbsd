@@ -228,65 +228,6 @@ hwlm_error_t confirm_teddy_32_512(m512 var, u8 bucket, u8 offset,
 #define TEDDY_VBMI_SL2_MASK   0xfffffffffffffffcULL
 #define TEDDY_VBMI_SL3_MASK   0xfffffffffffffff8ULL
 
-/* 
-static really_inline
-m512 prep_conf_teddy_512vbmi_m1(const m512 *lo_mask, const m512 *dup_mask,
-                        UNUSED const m512 *sl_msk, const m512 val) {
-    m512 lo = and512(val, *lo_mask);                               
-    m512 hi = and512(rshift64_m512(val, 4), *lo_mask);
-    m512 shuf_or_b0 = or512(pshufb_m512(dup_mask[0], lo), 
-                            pshufb_m512(dup_mask[1], hi));
-    return shuf_or_b0;
-}
-
-static really_inline
-m512 prep_conf_teddy_512vbmi_m2(const m512 *lo_mask, const m512 *dup_mask,
-                        const m512 *sl_msk, const m512 val) {
-    m512 lo = and512(val, *lo_mask);                               
-    m512 hi = and512(rshift64_m512(val, 4), *lo_mask);
-    m512 shuf_or_b0 = or512(pshufb_m512(dup_mask[0], lo), 
-                            pshufb_m512(dup_mask[1], hi));
-    m512 shuf_or_b1 = or512(pshufb_m512(dup_mask[2], lo),
-                            pshufb_m512(dup_mask[3], hi));
-    m512 sl1 = maskz_vpermb512(TEDDY_VBMI_SL1_MASK, sl_msk[0], shuf_or_b1);
-    return (or512(sl1, shuf_or_b0));
-}
-
-static really_inline
-m512 prep_conf_teddy_512vbmi_m3(const m512 *lo_mask, const m512 *dup_mask,
-                        const m512 *sl_msk, const m512 val) {
-    m512 lo = and512(val, *lo_mask);                               
-    m512 hi = and512(rshift64_m512(val, 4), *lo_mask);
-    m512 shuf_or_b0 = or512(pshufb_m512(dup_mask[0], lo), 
-                            pshufb_m512(dup_mask[1], hi));
-    m512 shuf_or_b1 = or512(pshufb_m512(dup_mask[2], lo),
-                            pshufb_m512(dup_mask[3], hi));
-    m512 sl1 = maskz_vpermb512(TEDDY_VBMI_SL1_MASK, sl_msk[0], shuf_or_b1);
-    m512 shuf_or_b2 = or512(pshufb_m512(dup_mask[4], lo),
-                            pshufb_m512(dup_mask[5], hi));
-    m512 sl2 = maskz_vpermb512(TEDDY_VBMI_SL2_MASK, sl_msk[1], shuf_or_b2);
-    return (or512(sl2, or512(sl1, shuf_or_b0)));
-}
-
-static really_inline
-m512 prep_conf_teddy_512vbmi_m4(const m512 *lo_mask, const m512 *dup_mask,
-                        const m512 *sl_msk, const m512 val) {
-    m512 lo = and512(val, *lo_mask);                               
-    m512 hi = and512(rshift64_m512(val, 4), *lo_mask);
-    m512 shuf_or_b0 = or512(pshufb_m512(dup_mask[0], lo), 
-                            pshufb_m512(dup_mask[1], hi));
-    m512 shuf_or_b1 = or512(pshufb_m512(dup_mask[2], lo),
-                            pshufb_m512(dup_mask[3], hi));
-    m512 sl1 = maskz_vpermb512(TEDDY_VBMI_SL1_MASK, sl_msk[0], shuf_or_b1);
-    m512 shuf_or_b2 = or512(pshufb_m512(dup_mask[4], lo),
-                            pshufb_m512(dup_mask[5], hi));
-    m512 sl2 = maskz_vpermb512(TEDDY_VBMI_SL2_MASK, sl_msk[1], shuf_or_b2);
-    m512 shuf_or_b3 = or512(pshufb_m512(dup_mask[6], lo),
-                            pshufb_m512(dup_mask[7], hi));
-    m512 sl3 = maskz_vpermb512(TEDDY_VBMI_SL3_MASK, sl_msk[2], shuf_or_b3);
-    return (or512(sl3, or512(sl2, or512(sl1, shuf_or_b0))));
-}
-*/
 
 template<int NMSK>
 static really_inline
