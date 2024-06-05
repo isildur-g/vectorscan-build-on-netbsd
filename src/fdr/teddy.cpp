@@ -439,6 +439,7 @@ m512 prep_conf_teddy_no_reinforcement_512_templ(const m512 *lo_mask,
 }
 
 
+/*
 static really_inline
 m512 prep_conf_teddy_512_m1(const m512 *lo_mask, const m512 *dup_mask,
                         const u8 *ptr, const u64a *r_msk_base,
@@ -502,12 +503,34 @@ m512 prep_conf_teddy_512_m4(const m512 *lo_mask, const m512 *dup_mask,
     *c_0 = *(ptr + 63);
     return or512(shift_or_512_m4(dup_mask, lo, hi), r_msk);
 }
+*/
+
+template <int NMSK>
+static really_inline
+m512 prep_conf_teddy_512_templ(const m512 *lo_mask, const m512 *dup_mask,
+                               const u8 *ptr, const u64a *r_msk_base,
+                               u32 *c_0, u32 *c_16, u32 *c_32, u32 *c_48) {
+    m512 lo = and512(load512(ptr), *lo_mask);
+    m512 hi = and512(rshift64_m512(load512(ptr), 4), *lo_mask);
+    *c_16 = *(ptr + 15);
+    *c_32 = *(ptr + 31);
+    *c_48 = *(ptr + 47);
+    m512 r_msk = set8x64(0ULL, r_msk_base[*c_48], 0ULL, r_msk_base[*c_32],
+                           0ULL, r_msk_base[*c_16], 0ULL, r_msk_base[*c_0]);
+    *c_0 = *(ptr + 63);
+    switch(NMSK){
+    case 1: return or512(shift_or_512_m1(dup_mask, lo, hi), r_msk); break;
+    case 2: return or512(shift_or_512_m2(dup_mask, lo, hi), r_msk); break;
+    case 3: return or512(shift_or_512_m3(dup_mask, lo, hi), r_msk); break;
+    case 4: return or512(shift_or_512_m4(dup_mask, lo, hi), r_msk); 
+    }
+}
 
 #define PREP_CONF_FN_NO_REINFORCEMENT(val, n)                                 \
     prep_conf_teddy_no_reinforcement_512_templ<n>(&lo_mask, dup_mask, val)
 
 #define PREP_CONF_FN(ptr, n)                                                  \
-    prep_conf_teddy_512_m##n(&lo_mask, dup_mask, ptr, r_msk_base,             \
+    prep_conf_teddy_512_templ<n>(&lo_mask, dup_mask, ptr, r_msk_base,             \
                          &c_0, &c_16, &c_32, &c_48)
 
 
