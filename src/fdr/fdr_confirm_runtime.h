@@ -47,7 +47,7 @@ void confWithBit(const struct FDRConfirm *fdrc, const struct FDR_Runtime_Args *a
     assert(i >= a->start_offset);
     assert(ISALIGNED(fdrc));
 
-    const u8 * buf = a->buf;
+    // const u8 * buf = a->buf;
     u32 c = CONF_HASH_CALL(conf_key, fdrc->andmsk, fdrc->mult,
                            fdrc->nBits);
     u32 start = getConfirmLitIndex(fdrc)[c];
@@ -74,18 +74,20 @@ void confWithBit(const struct FDRConfirm *fdrc, const struct FDR_Runtime_Args *a
             goto out;
         }
 
-        const u8 *loc = buf + i - li->size + 1;
+        do{  // this do while is to block off the line below from the goto
+            u8 *loc = buf + i - li->size + 1;
+        
+            if (loc < buf) {
+                u32 full_overhang = buf - loc;
+                size_t len_history = a->len_history;
 
-        if (loc < buf) {
-            u32 full_overhang = buf - loc;
-            size_t len_history = a->len_history;
-
-            // can't do a vectored confirm either if we don't have
-            // the bytes
-            if (full_overhang > len_history) {
-                goto out;
+                // can't do a vectored confirm either if we don't have
+                // the bytes
+                if (full_overhang > len_history) {
+                    goto out;
+                }
             }
-        }
+        }while(0);
         assert(li->size <= sizeof(CONF_TYPE));
 
         if (unlikely(!(li->groups & *control))) {

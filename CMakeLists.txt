@@ -298,6 +298,7 @@ set (hs_exec_SRCS
     src/fdr/flood_runtime.h
     src/fdr/fdr_loadval.h
     src/fdr/teddy.c
+    src/fdr/teddy.cpp
     src/fdr/teddy.h
     src/fdr/teddy_internal.h
     src/fdr/teddy_runtime_common.h
