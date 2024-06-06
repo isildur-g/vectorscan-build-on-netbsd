@@ -39,6 +39,10 @@
 struct FDR; // forward declaration from fdr_internal.h
 struct FDR_Runtime_Args;
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 hwlm_error_t fdr_exec_teddy_msks1(const struct FDR *fdr,
                                   const struct FDR_Runtime_Args *a,
                                   hwlm_group_t control);
@@ -106,5 +110,8 @@ hwlm_error_t fdr_exec_fat_teddy_msks4_pck(const struct FDR *fdr,
                                           hwlm_group_t control);
 
 #endif /* HAVE_AVX2 */
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* TEDDY_H_ */

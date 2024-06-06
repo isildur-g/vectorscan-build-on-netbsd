@@ -1002,6 +1002,9 @@ hwlm_error_t fdr_exec_teddy_128_templ(const struct FDR *fdr,
 
 #endif // HAVE_AVX2 HAVE_AVX512
 
+
+extern "C" {
+
 hwlm_error_t fdr_exec_teddy_msks1(const struct FDR *fdr,
                                   const struct FDR_Runtime_Args *a,
                                   hwlm_group_t control) {
@@ -1054,4 +1057,4 @@ hwlm_error_t fdr_exec_teddy_msks4_pck(const struct FDR *fdr,
 }
 
 
-
+}
