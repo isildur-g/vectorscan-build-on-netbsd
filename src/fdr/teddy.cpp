@@ -238,15 +238,15 @@ m512 prep_conf_teddy_512vbmi_templ(const m512 *lo_mask, const m512 *dup_mask,
     m512 shuf_or_b0 = or512(pshufb_m512(dup_mask[0], lo),
                             pshufb_m512(dup_mask[1], hi));
 
-    if(NMSK == 1) return shuf_or_b0;
+    if constexpr (NMSK == 1) return shuf_or_b0;
     m512 shuf_or_b1 = or512(pshufb_m512(dup_mask[2], lo),
                             pshufb_m512(dup_mask[3], hi));
     m512 sl1 = maskz_vpermb512(TEDDY_VBMI_SL1_MASK, sl_msk[0], shuf_or_b1);
-    if(NMSK == 2) return (or512(sl1, shuf_or_b0));
+    if constexpr (NMSK == 2) return (or512(sl1, shuf_or_b0));
     m512 shuf_or_b2 = or512(pshufb_m512(dup_mask[4], lo),
                             pshufb_m512(dup_mask[5], hi));
     m512 sl2 = maskz_vpermb512(TEDDY_VBMI_SL2_MASK, sl_msk[1], shuf_or_b2);
-    if(NMSK == 3) return (or512(sl2, or512(sl1, shuf_or_b0)));
+    if constexpr (NMSK == 3) return (or512(sl2, or512(sl1, shuf_or_b0)));
     m512 shuf_or_b3 = or512(pshufb_m512(dup_mask[6], lo),
                             pshufb_m512(dup_mask[7], hi));
     m512 sl3 = maskz_vpermb512(TEDDY_VBMI_SL3_MASK, sl_msk[2], shuf_or_b3);
@@ -292,17 +292,17 @@ hwlm_error_t fdr_exec_teddy_512vbmi_templ(const struct FDR *fdr,
     m512 sl_msk[NMSK - 1];
     dup_mask[0] = set1_4x128(maskBase[0]);
     dup_mask[1] = set1_4x128(maskBase[1]);
-    if(NMSK > 1){
+    if constexpr (NMSK > 1){
     dup_mask[2] = set1_4x128(maskBase[2]);
     dup_mask[3] = set1_4x128(maskBase[3]);
     sl_msk[0] = loadu512(p_sh_mask_arr + TEDDY_VBMI_SL1_POS);
     }
-    if(NMSK > 2){
+    if constexpr (NMSK > 2){
     dup_mask[4] = set1_4x128(maskBase[4]);
     dup_mask[5] = set1_4x128(maskBase[5]);
     sl_msk[1] = loadu512(p_sh_mask_arr + TEDDY_VBMI_SL2_POS);
     }
-    if(NMSK > 3){
+    if constexpr (NMSK > 3){
     dup_mask[6] = set1_4x128(maskBase[6]);
     dup_mask[7] = set1_4x128(maskBase[7]);
     sl_msk[2] = loadu512(p_sh_mask_arr + TEDDY_VBMI_SL3_POS);
@@ -383,12 +383,10 @@ m512 prep_conf_teddy_no_reinforcement_512_templ(const m512 *lo_mask,
                                                 const m512 val) {
     m512 lo = and512(val, *lo_mask);
     m512 hi = and512(rshift64_m512(val, 4), *lo_mask);
-    switch(NMSK) {
-        case 1: return shift_or_512_m1(dup_mask, lo, hi); break;
-        case 2: return shift_or_512_m2(dup_mask, lo, hi); break;
-        case 3: return shift_or_512_m3(dup_mask, lo, hi); break;
-        case 4: return shift_or_512_m4(dup_mask, lo, hi); break;
-    }
+    if constexpr (NMSK == 1) return shift_or_512_m1(dup_mask, lo, hi);
+    if constexpr (NMSK == 2) return shift_or_512_m2(dup_mask, lo, hi);
+    if constexpr (NMSK == 3) return shift_or_512_m3(dup_mask, lo, hi);
+    if constexpr (NMSK == 4) return shift_or_512_m4(dup_mask, lo, hi);
 }
 
 
@@ -405,12 +403,10 @@ m512 prep_conf_teddy_512_templ(const m512 *lo_mask, const m512 *dup_mask,
     m512 r_msk = set8x64(0ULL, r_msk_base[*c_48], 0ULL, r_msk_base[*c_32],
                            0ULL, r_msk_base[*c_16], 0ULL, r_msk_base[*c_0]);
     *c_0 = *(ptr + 63);
-    switch(NMSK){
-    case 1: return or512(shift_or_512_m1(dup_mask, lo, hi), r_msk); break;
-    case 2: return or512(shift_or_512_m2(dup_mask, lo, hi), r_msk); break;
-    case 3: return or512(shift_or_512_m3(dup_mask, lo, hi), r_msk); break;
-    case 4: return or512(shift_or_512_m4(dup_mask, lo, hi), r_msk);
-    }
+    if constexpr (NMSK == 1) return or512(shift_or_512_m1(dup_mask, lo, hi), r_msk);
+    if constexpr (NMSK == 2) return or512(shift_or_512_m2(dup_mask, lo, hi), r_msk);
+    if constexpr (NMSK == 3) return or512(shift_or_512_m3(dup_mask, lo, hi), r_msk);
+    if constexpr (NMSK == 4) return or512(shift_or_512_m4(dup_mask, lo, hi), r_msk);
 }
 
 #define PREP_CONF_FN_NO_REINFORCEMENT(val, n)                                 \
@@ -441,15 +437,15 @@ hwlm_error_t fdr_exec_teddy_512_templ(const struct FDR *fdr,
 
     dup_mask[0] = set1_4x128(maskBase[0]);
     dup_mask[1] = set1_4x128(maskBase[1]);
-    if(NMSK > 1){
+    if constexpr (NMSK > 1){
     dup_mask[2] = set1_4x128(maskBase[2]);
     dup_mask[3] = set1_4x128(maskBase[3]);
     }
-    if(NMSK > 2){
+    if constexpr (NMSK > 2){
     dup_mask[4] = set1_4x128(maskBase[4]);
     dup_mask[5] = set1_4x128(maskBase[5]);
     }
-    if(NMSK > 3){
+    if constexpr (NMSK > 3){
     dup_mask[6] = set1_4x128(maskBase[6]);
     dup_mask[7] = set1_4x128(maskBase[7]);
     }
@@ -686,31 +682,74 @@ m256 prep_conf_teddy_m4(const m256 *lo_mask, const m256 *dup_mask,
     prep_conf_teddy_no_reinforcement_256_templ<n>(&lo_mask, dup_mask, val)
 
 template <int NMSK>
+static
 m256 prep_conf_teddy_no_reinforcement_256_templ(const m256 *lo_mask,
                                            const m256 *dup_mask,
+                                           const m256 val);
+
+template <>
+m256 prep_conf_teddy_no_reinforcement_256_templ<1>(const m256 *lo_mask,
+                                           const m256 *dup_mask,
                                            const m256 val) {
-    switch(NMSK){
-    case 1:
-    return prep_conf_teddy_no_reinforcement_m1(lo_mask,dup_mask,val); break;
-    case 2:
-    return prep_conf_teddy_no_reinforcement_m2(lo_mask,dup_mask,val); break;
-    case 3:
-    return prep_conf_teddy_no_reinforcement_m3(lo_mask,dup_mask,val); break;
-    case 4:
-    return prep_conf_teddy_no_reinforcement_m4(lo_mask,dup_mask,val); break;
-    }
+    return prep_conf_teddy_no_reinforcement_m1(lo_mask,dup_mask,val);
 }
 
+template <>
+m256 prep_conf_teddy_no_reinforcement_256_templ<2>(const m256 *lo_mask,
+                                           const m256 *dup_mask,
+                                           const m256 val) {
+    return prep_conf_teddy_no_reinforcement_m2(lo_mask,dup_mask,val);
+}
+
+template <>
+m256 prep_conf_teddy_no_reinforcement_256_templ<3>(const m256 *lo_mask,
+                                           const m256 *dup_mask,
+                                           const m256 val) {
+    return prep_conf_teddy_no_reinforcement_m3(lo_mask,dup_mask,val);
+}
+
+template <>
+m256 prep_conf_teddy_no_reinforcement_256_templ<4>(const m256 *lo_mask,
+                                           const m256 *dup_mask,
+                                           const m256 val) {
+    return prep_conf_teddy_no_reinforcement_m4(lo_mask,dup_mask,val);
+}
+
+
 template <int NMSK>
+static
 m256 prep_conf_teddy_256_templ(const m256 *lo_mask, const m256 *dup_mask,
                                const u8 *ptr, const u64a *r_msk_base,
+                               u32 *c_0, u32 *c_128); 
+
+template <>
+m256 prep_conf_teddy_256_templ<1>(const m256 *lo_mask, const m256 *dup_mask,
+                               const u8 *ptr, const u64a *r_msk_base,
                                u32 *c_0, u32 *c_128) {
-    switch(NMSK){
-    case 1: return prep_conf_teddy_m1(lo_mask, dup_mask, ptr, r_msk_base, c_0, c_128); break;
-    case 2: return prep_conf_teddy_m2(lo_mask, dup_mask, ptr, r_msk_base, c_0, c_128); break;
-    case 3: return prep_conf_teddy_m3(lo_mask, dup_mask, ptr, r_msk_base, c_0, c_128); break;
-    case 4: return prep_conf_teddy_m4(lo_mask, dup_mask, ptr, r_msk_base, c_0, c_128); break;
-    }
+    return prep_conf_teddy_m1(lo_mask, dup_mask, ptr, r_msk_base, c_0, c_128);
+}
+
+
+template <>
+m256 prep_conf_teddy_256_templ<2>(const m256 *lo_mask, const m256 *dup_mask,
+                               const u8 *ptr, const u64a *r_msk_base,
+                               u32 *c_0, u32 *c_128) {
+    return prep_conf_teddy_m2(lo_mask, dup_mask, ptr, r_msk_base, c_0, c_128);
+}
+
+
+template <>
+m256 prep_conf_teddy_256_templ<3>(const m256 *lo_mask, const m256 *dup_mask,
+                               const u8 *ptr, const u64a *r_msk_base,
+                               u32 *c_0, u32 *c_128) {
+    return prep_conf_teddy_m3(lo_mask, dup_mask, ptr, r_msk_base, c_0, c_128);
+}
+
+template <>
+m256 prep_conf_teddy_256_templ<4>(const m256 *lo_mask, const m256 *dup_mask,
+                               const u8 *ptr, const u64a *r_msk_base,
+                               u32 *c_0, u32 *c_128) {
+    return prep_conf_teddy_m4(lo_mask, dup_mask, ptr, r_msk_base, c_0, c_128);
 }
 
 
@@ -738,15 +777,15 @@ hwlm_error_t fdr_exec_teddy_256_templ(const struct FDR *fdr,
     m256 dup_mask[NMSK * 2];
     dup_mask[0] = set1_2x128(maskBase[0]);
     dup_mask[1] = set1_2x128(maskBase[1]);
-    if(NMSK > 1){
+    if constexpr (NMSK > 1){
     dup_mask[2] = set1_2x128(maskBase[2]);
     dup_mask[3] = set1_2x128(maskBase[3]);
     }
-    if(NMSK > 2){
+    if constexpr (NMSK > 2){
     dup_mask[4] = set1_2x128(maskBase[4]);
     dup_mask[5] = set1_2x128(maskBase[5]);
     }
-    if(NMSK > 3){
+    if constexpr (NMSK > 3){
     dup_mask[6] = set1_2x128(maskBase[6]);
     dup_mask[7] = set1_2x128(maskBase[7]);
     }
@@ -912,25 +951,58 @@ m128 prep_conf_teddy_128_m4(const m128 *maskBase, m128 *old_1, m128 *old_2,
     return or128(r, res_shifted_3);
 }
 
-
 template <int NMSK>
+static
 m128 prep_conf_teddy_128_templ(const m128 *maskBase, m128 val) {
     m128 res_old_1;
     m128 res_old_2;
     m128 res_old_3;
-    switch(NMSK) {
-        case 1: return prep_conf_teddy_128_m1(maskBase, val); break;
-        case 2: res_old_1 = zeroes128();
-                return prep_conf_teddy_128_m2(maskBase, &res_old_1, val); break;
-        case 3: res_old_1 = zeroes128();
-                res_old_2 = zeroes128();
-                return prep_conf_teddy_128_m3(maskBase, &res_old_1, &res_old_2, val); break;
-        case 4: res_old_1 = zeroes128();
-                res_old_2 = zeroes128();
-                res_old_3 = zeroes128();
-                return prep_conf_teddy_128_m4(maskBase, &res_old_1, &res_old_2, &res_old_3, val);
+    if constexpr (NMSK == 1)
+        return prep_conf_teddy_128_m1(maskBase, val);
+    if constexpr (NMSK == 2) {
+        res_old_1 = zeroes128();
+        return prep_conf_teddy_128_m2(maskBase, &res_old_1, val);
+    }
+    if constexpr (NMSK == 3) {
+        res_old_1 = zeroes128();
+        res_old_2 = zeroes128();
+        return prep_conf_teddy_128_m3(maskBase, &res_old_1, &res_old_2, val);
+    }
+    if constexpr (NMSK == 4) {
+        res_old_1 = zeroes128();
+        res_old_2 = zeroes128();
+        res_old_3 = zeroes128();
+        return prep_conf_teddy_128_m4(maskBase, &res_old_1, &res_old_2, &res_old_3, val);
     }
 }
+
+/*
+template <>
+m128 prep_conf_teddy_128_templ<1>(const m128 *maskBase, m128 val) {
+    return prep_conf_teddy_128_m1(maskBase, val);
+}
+
+template <>
+m128 prep_conf_teddy_128_templ<2>(const m128 *maskBase, m128 val) {
+    m128 res_old_1 = zeroes128();
+    return prep_conf_teddy_128_m2(maskBase, &res_old_1, val);
+}
+
+template <>
+m128 prep_conf_teddy_128_templ<3>(const m128 *maskBase, m128 val) {
+    m128 res_old_1 = zeroes128();
+    m128 res_old_2 = zeroes128();
+    return prep_conf_teddy_128_m3(maskBase, &res_old_1, &res_old_2, val);
+}
+
+template <>
+m128 prep_conf_teddy_128_templ<4>(const m128 *maskBase, m128 val) {
+    m128 res_old_1 = zeroes128();
+    m128 res_old_2 = zeroes128();
+    m128 res_old_3 = zeroes128();
+    return prep_conf_teddy_128_m4(maskBase, &res_old_1, &res_old_2, &res_old_3, val);
+}
+*/
 
 template <int NMSK>
 hwlm_error_t fdr_exec_teddy_128_templ(const struct FDR *fdr,
