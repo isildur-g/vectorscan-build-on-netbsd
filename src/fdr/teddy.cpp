@@ -254,11 +254,6 @@ m512 prep_conf_teddy_512vbmi_templ(const m512 *lo_mask, const m512 *dup_mask,
 }
 
 
-
-#define PREP_CONF_FN_512(val, n)                                          \
-    prep_conf_teddy_512vbmi_m##n(&lo_mask, dup_mask, sl_msk, val)
-
-
 #define TEDDY_VBMI_SL1_POS    15
 #define TEDDY_VBMI_SL2_POS    14
 #define TEDDY_VBMI_SL3_POS    13
@@ -412,8 +407,6 @@ m512 prep_conf_teddy_512_templ(const m512 *lo_mask, const m512 *dup_mask,
     return or512(shift_or_512_templ<NMSK>(dup_mask, lo, hi), r_msk);
 }
 
-#define PREP_CONF_FN_NO_REINFORCEMENT(val, n)                                 \
-    prep_conf_teddy_no_reinforcement_512_templ<n>(&lo_mask, dup_mask, val)
 
 #define PREP_CONF_FN(ptr, n)                                                  \
     prep_conf_teddy_512_templ<n>(&lo_mask, dup_mask, ptr, r_msk_base,             \
@@ -467,7 +460,7 @@ hwlm_error_t fdr_exec_teddy_512_templ(const struct FDR *fdr,
         m512 val_0 = vectoredLoad512(&p_mask, ptr, a->start_offset,
                                      a->buf, buf_end,
                                      a->buf_history, a->len_history, NMSK);
-        m512 r_0 = PREP_CONF_FN_NO_REINFORCEMENT(val_0, NMSK);
+        m512 r_0 = prep_conf_teddy_no_reinforcement_512_templ<NMSK>(&lo_mask, dup_mask, val_0);
         r_0 = or512(r_0, p_mask);
         CONFIRM_TEDDY_512(r_0, 8, 0, VECTORING, ptr);
         ptr += 64;
@@ -499,7 +492,7 @@ hwlm_error_t fdr_exec_teddy_512_templ(const struct FDR *fdr,
         m512 p_mask;
         m512 val_0 = vectoredLoad512(&p_mask, ptr, 0, ptr, buf_end,
                                      a->buf_history, a->len_history, NMSK);
-        m512 r_0 = PREP_CONF_FN_NO_REINFORCEMENT(val_0, NMSK);
+        m512 r_0 = prep_conf_teddy_no_reinforcement_512_templ<NMSK>(&lo_mask, dup_mask,val_0);
         r_0 = or512(r_0, p_mask);
         CONFIRM_TEDDY_512(r_0, 8, 0, VECTORING, ptr);
     }
@@ -853,33 +846,6 @@ m128 prep_conf_teddy_128_templ(const m128 *maskBase, m128 val) {
     }
 }
 
-/*
-template <>
-m128 prep_conf_teddy_128_templ<1>(const m128 *maskBase, m128 val) {
-    return prep_conf_teddy_128_m1(maskBase, val);
-}
-
-template <>
-m128 prep_conf_teddy_128_templ<2>(const m128 *maskBase, m128 val) {
-    m128 res_old_1 = zeroes128();
-    return prep_conf_teddy_128_m2(maskBase, &res_old_1, val);
-}
-
-template <>
-m128 prep_conf_teddy_128_templ<3>(const m128 *maskBase, m128 val) {
-    m128 res_old_1 = zeroes128();
-    m128 res_old_2 = zeroes128();
-    return prep_conf_teddy_128_m3(maskBase, &res_old_1, &res_old_2, val);
-}
-
-template <>
-m128 prep_conf_teddy_128_templ<4>(const m128 *maskBase, m128 val) {
-    m128 res_old_1 = zeroes128();
-    m128 res_old_2 = zeroes128();
-    m128 res_old_3 = zeroes128();
-    return prep_conf_teddy_128_m4(maskBase, &res_old_1, &res_old_2, &res_old_3, val);
-}
-*/
 
 template <int NMSK>
 hwlm_error_t fdr_exec_teddy_128_templ(const struct FDR *fdr,
