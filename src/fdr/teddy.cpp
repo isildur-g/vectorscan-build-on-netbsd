@@ -354,27 +354,36 @@ hwlm_error_t fdr_exec_teddy_512vbmi_templ(const struct FDR *fdr,
 
 /* both 512b versions use the same confirm teddy */
 
-m512 shift_or_512_m1(const m512 *dup_mask, m512 lo, m512 hi){
+template <int NMSK>
+static inline
+m512 shift_or_512_templ(const m512 *dup_mask, m512 lo, m512 hi);
+
+template <>
+m512 shift_or_512_templ<1>(const m512 *dup_mask, m512 lo, m512 hi){
     return or512(pshufb_m512(dup_mask[0], lo), pshufb_m512(dup_mask[1], hi));
 }
 
-m512 shift_or_512_m2(const m512 *dup_mask, m512 lo, m512 hi){
+template <>
+m512 shift_or_512_templ<2>(const m512 *dup_mask, m512 lo, m512 hi){
     return or512(lshift128_m512(or512(pshufb_m512(dup_mask[2], lo),
                                 pshufb_m512(dup_mask[3], hi)),
-                                1), shift_or_512_m1(dup_mask, lo, hi));
+                                1), shift_or_512_templ<1>(dup_mask, lo, hi));
 }
 
-m512 shift_or_512_m3(const m512 *dup_mask, m512 lo, m512 hi){
+template <>
+m512 shift_or_512_templ<3>(const m512 *dup_mask, m512 lo, m512 hi){
     return or512(lshift128_m512(or512(pshufb_m512(dup_mask[4], lo),
                                 pshufb_m512(dup_mask[5], hi)),
-                                2), shift_or_512_m2(dup_mask, lo, hi));
+                                2), shift_or_512_templ<2>(dup_mask, lo, hi));
 }
 
-m512 shift_or_512_m4(const m512 *dup_mask, m512 lo, m512 hi){
+template <>
+m512 shift_or_512_templ<4>(const m512 *dup_mask, m512 lo, m512 hi){
     return or512(lshift128_m512(or512(pshufb_m512(dup_mask[6], lo),
                                 pshufb_m512(dup_mask[7], hi)),
-                                3), shift_or_512_m3(dup_mask, lo, hi));
+                                3), shift_or_512_templ<3>(dup_mask, lo, hi));
 }
+
 
 template <int NMSK>
 static really_inline
@@ -383,10 +392,7 @@ m512 prep_conf_teddy_no_reinforcement_512_templ(const m512 *lo_mask,
                                                 const m512 val) {
     m512 lo = and512(val, *lo_mask);
     m512 hi = and512(rshift64_m512(val, 4), *lo_mask);
-    if constexpr (NMSK == 1) return shift_or_512_m1(dup_mask, lo, hi);
-    if constexpr (NMSK == 2) return shift_or_512_m2(dup_mask, lo, hi);
-    if constexpr (NMSK == 3) return shift_or_512_m3(dup_mask, lo, hi);
-    if constexpr (NMSK == 4) return shift_or_512_m4(dup_mask, lo, hi);
+    return shift_or_512_templ<NMSK>(dup_mask, lo, hi);
 }
 
 
@@ -403,10 +409,7 @@ m512 prep_conf_teddy_512_templ(const m512 *lo_mask, const m512 *dup_mask,
     m512 r_msk = set8x64(0ULL, r_msk_base[*c_48], 0ULL, r_msk_base[*c_32],
                            0ULL, r_msk_base[*c_16], 0ULL, r_msk_base[*c_0]);
     *c_0 = *(ptr + 63);
-    if constexpr (NMSK == 1) return or512(shift_or_512_m1(dup_mask, lo, hi), r_msk);
-    if constexpr (NMSK == 2) return or512(shift_or_512_m2(dup_mask, lo, hi), r_msk);
-    if constexpr (NMSK == 3) return or512(shift_or_512_m3(dup_mask, lo, hi), r_msk);
-    if constexpr (NMSK == 4) return or512(shift_or_512_m4(dup_mask, lo, hi), r_msk);
+    return or512(shift_or_512_templ<NMSK>(dup_mask, lo, hi), r_msk);
 }
 
 #define PREP_CONF_FN_NO_REINFORCEMENT(val, n)                                 \
