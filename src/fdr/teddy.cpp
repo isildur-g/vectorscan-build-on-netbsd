@@ -75,6 +75,12 @@ const u8 ALIGN_DIRECTIVE p_mask_arr[17][32] = {
      0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00}
 };
 
+typedef enum {
+    SIMPLE_128,
+    AVX_256,
+    AVX_512,
+    AVX_512VBMI,
+} enginevariant;
 
 #ifdef ARCH_64_BIT
 static really_inline
@@ -351,34 +357,16 @@ hwlm_error_t fdr_exec_teddy_512vbmi_templ(const struct FDR *fdr,
 
 template <int NMSK>
 static inline
-m512 shift_or_512_templ(const m512 *dup_mask, m512 lo, m512 hi);
+m512 shift_or_512_templ(const m512 *dup_mask, m512 lo, m512 hi) {
+    return or512(lshift128_m512(or512(pshufb_m512(dup_mask[(NMSK - 1) * 2], lo),
+                                pshufb_m512(dup_mask[(NMSK * 2) - 1], hi)),
+                                NMSK - 1), shift_or_512_templ<NMSK - 1>(dup_mask, lo, hi));
+}
 
 template <>
 m512 shift_or_512_templ<1>(const m512 *dup_mask, m512 lo, m512 hi){
     return or512(pshufb_m512(dup_mask[0], lo), pshufb_m512(dup_mask[1], hi));
 }
-
-template <>
-m512 shift_or_512_templ<2>(const m512 *dup_mask, m512 lo, m512 hi){
-    return or512(lshift128_m512(or512(pshufb_m512(dup_mask[2], lo),
-                                pshufb_m512(dup_mask[3], hi)),
-                                1), shift_or_512_templ<1>(dup_mask, lo, hi));
-}
-
-template <>
-m512 shift_or_512_templ<3>(const m512 *dup_mask, m512 lo, m512 hi){
-    return or512(lshift128_m512(or512(pshufb_m512(dup_mask[4], lo),
-                                pshufb_m512(dup_mask[5], hi)),
-                                2), shift_or_512_templ<2>(dup_mask, lo, hi));
-}
-
-template <>
-m512 shift_or_512_templ<4>(const m512 *dup_mask, m512 lo, m512 hi){
-    return or512(lshift128_m512(or512(pshufb_m512(dup_mask[6], lo),
-                                pshufb_m512(dup_mask[7], hi)),
-                                3), shift_or_512_templ<3>(dup_mask, lo, hi));
-}
-
 
 template <int NMSK>
 static really_inline
@@ -389,7 +377,6 @@ m512 prep_conf_teddy_no_reinforcement_512_templ(const m512 *lo_mask,
     m512 hi = and512(rshift64_m512(val, 4), *lo_mask);
     return shift_or_512_templ<NMSK>(dup_mask, lo, hi);
 }
-
 
 template <int NMSK>
 static really_inline
@@ -768,83 +755,33 @@ hwlm_error_t confirm_teddy_32_128(m128 var, u8 bucket, u8 offset,
 
 #define CONFIRM_TEDDY_128(...) if(confirm_teddy_128_f(__VA_ARGS__, a, confBase, &control, &last_match) == HWLM_TERMINATED)return HWLM_TERMINATED;
 
+template <int NMSK>
 static really_inline
-m128 prep_conf_teddy_128_m1(const m128 *maskBase, m128 val) {
+m128 prep_conf_teddy_128_templ(const m128 *maskBase, m128 val) {
     m128 mask = set1_16x8(0xf);
     m128 lo = and128(val, mask);
     m128 hi = and128(rshift64_m128(val, 4), mask);
-    return or128(pshufb_m128(maskBase[0 * 2], lo),
-                 pshufb_m128(maskBase[0 * 2 + 1], hi));
-}
-
-static really_inline
-m128 prep_conf_teddy_128_m2(const m128 *maskBase, m128 *old_1, m128 val) {
-    m128 mask = set1_16x8(0xf);
-    m128 lo = and128(val, mask);
-    m128 hi = and128(rshift64_m128(val, 4), mask);
-    m128 r = prep_conf_teddy_128_m1(maskBase, val);
-
+    m128 r1 = or128(pshufb_m128(maskBase[0 * 2], lo),
+                             pshufb_m128(maskBase[0 * 2 + 1], hi));
+    if constexpr (NMSK == 1) return r1;
     m128 res_1 = or128(pshufb_m128(maskBase[1 * 2], lo),
                        pshufb_m128(maskBase[1 * 2 + 1], hi));
-    m128 res_shifted_1 = palignr(res_1, *old_1, 16 - 1);
-    *old_1 = res_1;
-    return or128(r, res_shifted_1);
-}
 
-static really_inline
-m128 prep_conf_teddy_128_m3(const m128 *maskBase, m128 *old_1, m128 *old_2,
-                        m128 val) {
-    m128 mask = set1_16x8(0xf);
-    m128 lo = and128(val, mask);
-    m128 hi = and128(rshift64_m128(val, 4), mask);
-    m128 r = prep_conf_teddy_128_m2(maskBase, old_1, val);
-
+    m128 old_1 = zeroes128();
+    m128 res_shifted_1 = palignr(res_1, old_1, 16 - 1);
+    m128 r2 = or128(r1, res_shifted_1);
+    if constexpr (NMSK == 2) return r2;
     m128 res_2 = or128(pshufb_m128(maskBase[2 * 2], lo),
                        pshufb_m128(maskBase[2 * 2 + 1], hi));
-    m128 res_shifted_2 = palignr(res_2, *old_2, 16 - 2);
-    *old_2 = res_2;
-    return or128(r, res_shifted_2);
-}
-
-static really_inline
-m128 prep_conf_teddy_128_m4(const m128 *maskBase, m128 *old_1, m128 *old_2,
-                        m128 *old_3, m128 val) {
-    m128 mask = set1_16x8(0xf);
-    m128 lo = and128(val, mask);
-    m128 hi = and128(rshift64_m128(val, 4), mask);
-    m128 r = prep_conf_teddy_128_m3(maskBase, old_1, old_2, val);
-
+    m128 res_shifted_2 = palignr(res_2, old_1, 16 - 2);
+    m128 r3 = or128(r2, res_shifted_2);
+    if constexpr (NMSK == 3) return r3;
     m128 res_3 = or128(pshufb_m128(maskBase[3 * 2], lo),
                        pshufb_m128(maskBase[3 * 2 + 1], hi));
-    m128 res_shifted_3 = palignr(res_3, *old_3, 16 - 3);
-    *old_3 = res_3;
-    return or128(r, res_shifted_3);
+    m128 res_shifted_3 = palignr(res_3, old_1, 16 - 3);
+    return or128(r3, res_shifted_3);
 }
 
-template <int NMSK>
-static
-m128 prep_conf_teddy_128_templ(const m128 *maskBase, m128 val) {
-    m128 res_old_1;
-    m128 res_old_2;
-    m128 res_old_3;
-    if constexpr (NMSK == 1)
-        return prep_conf_teddy_128_m1(maskBase, val);
-    if constexpr (NMSK == 2) {
-        res_old_1 = zeroes128();
-        return prep_conf_teddy_128_m2(maskBase, &res_old_1, val);
-    }
-    if constexpr (NMSK == 3) {
-        res_old_1 = zeroes128();
-        res_old_2 = zeroes128();
-        return prep_conf_teddy_128_m3(maskBase, &res_old_1, &res_old_2, val);
-    }
-    if constexpr (NMSK == 4) {
-        res_old_1 = zeroes128();
-        res_old_2 = zeroes128();
-        res_old_3 = zeroes128();
-        return prep_conf_teddy_128_m4(maskBase, &res_old_1, &res_old_2, &res_old_3, val);
-    }
-}
 
 
 template <int NMSK>
