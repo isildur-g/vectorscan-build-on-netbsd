@@ -33,6 +33,7 @@
 #ifndef TEDDY_RUNTIME_COMMON_H_
 #define TEDDY_RUNTIME_COMMON_H_
 
+#include <stdio.h>
 #include "fdr_confirm.h"
 #include "fdr_confirm_runtime.h"
 #include "ue2common.h"
@@ -142,6 +143,59 @@ void copyRuntBlock128(u8 *dst, const u8 *src, size_t len) {
 //          |----------|-------|----------------|............|
 //          0          start   start+offset     end(<=16)
 // p_mask   ffff.....ffffff..ff0000...........00ffff..........
+
+/*
+static
+void print_128(m128 m){
+    int foo=0;
+    union {
+     unsigned char *c;
+     m128 *m;
+    } p;
+    p.m=&m;
+    while(foo<16){
+        printf("%02x%02x%02x%02x ", p.c[foo], p.c[foo+1], p.c[foo+2], p.c[foo+3]);
+        foo+=4;
+    }
+    printf("\n");
+}
+*/
+// replace the p_mask_arr table.
+// m is the length of the zone of bytes==0 , n is
+// the offset where that zone begins. more specifically, there are
+// 16-n bytes of 1's before the zone begins.
+// m,n 4,7  - 4 bytes of 0s, and 16-7 bytes of 1's before that.
+// 00 00 00 00 ff..ff
+// ff ff ff ff ff ff ff ff 00 00 00 00 ff..ff
+// m,n 15,15 - 15 bytes of 0s , f's high, but also with 16-15=1 byte of 1s
+// in the beginning - which push the ff at the end off the high end , leaving
+// ff 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+// m,n 15,16 - 15 bytes of 0s, ff high , with 16-16 = 0 ones on the low end
+// before that, so,
+// 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 ff
+// so to get the one part, with the f's high, we start out with 1's and
+// shift them up (right) by m+n.
+// now to fill in any ones that belong on the low end we have to take
+// some 1's and shift them down. the ones zone there needs to be 16-n long,
+// meaning shifted down by 16-(16-n) , or of course just n.
+// then we should be able to or these together.
+static really_inline
+m128 p_mask_gen(u8 m, u8 n){
+    m128 a = ones128();
+    m128 b = ones128();
+    // static int ashifts[17]={0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16};
+    //printf("gen 0: m,n %d %d\n", m,n);
+
+    m%=17; n%=17;
+    m+=(16-n); m%=17;
+    //printf("gen 1: m,n %d %d\n", m,n);
+    a = rshiftbyte_m128(a, n);
+    //printf("g a lowfs: shifted %d, ", n); //print_128(a);
+    b = lshiftbyte_m128(b, m);
+    //printf("g b highfs: shifted %d, ", m); print_128(b);
+    return or128(a, b);
+}
+
 static really_inline
 m128 vectoredLoad128(m128 *p_mask, const u8 *ptr, const size_t start_offset,
                      const u8 *lo, const u8 *hi,
@@ -161,13 +215,23 @@ m128 vectoredLoad128(m128 *p_mask, const u8 *ptr, const size_t start_offset,
         uintptr_t avail = (uintptr_t)(hi - ptr);
         if (avail >= 16) {
             assert(start_offset - start <= 16);
-            *p_mask = loadu128(p_mask_arr[16 - start_offset + start]
-                               + 16 - start_offset + start);
+            //printf("203: %ld\n", 16 - start_offset + start);
+            // *p_mask = loadu128(p_mask_arr[16 - start_offset + start]
+            //                    + 16 - start_offset + start);
+            //printf("load: "); print_128(*p_mask);
+            *p_mask = p_mask_gen(16 - start_offset + start, 16 - start_offset + start);
+            //printf("a %ld b %ld\n", 16 - start_offset + start, 16 - start_offset + start);
+            //printf("gen: "); print_128(*p_mask);
             return loadu128(ptr);
         }
         assert(start_offset - start <= avail);
-        *p_mask = loadu128(p_mask_arr[avail - start_offset + start]
-                           + 16 - start_offset + start);
+        //printf("213: %ld %ld\n", avail - start_offset + start , 16 - start_offset + start);
+        // *p_mask = loadu128(p_mask_arr[avail - start_offset + start]
+        //                    + 16 - start_offset + start);
+        //printf("load: "); print_128(*p_mask);
+        *p_mask = p_mask_gen(avail - start_offset + start, 16 - start_offset + start);
+        //printf("a %ld b %ld\n", avail - start_offset + start, 16 - start_offset + start);
+        //printf("gen: "); print_128(*p_mask);
         copy_start = 0;
         copy_len = avail;
     } else { // start zone
@@ -180,8 +244,10 @@ m128 vectoredLoad128(m128 *p_mask, const u8 *ptr, const size_t start_offset,
         }
         uintptr_t end = MIN(16, (uintptr_t)(hi - ptr));
         assert(start + start_offset <= end);
-        *p_mask = loadu128(p_mask_arr[end - start - start_offset]
-                           + 16 - start - start_offset);
+        //printf("223: %ld %ld\n", end - start - start_offset, 16 - start - start_offset );
+        // *p_mask = loadu128(p_mask_arr[end - start - start_offset]
+        //                    + 16 - start - start_offset);
+        *p_mask = p_mask_gen(end - start - start_offset, 16 - start - start_offset);
         copy_start = start;
         copy_len = end - start;
     }
