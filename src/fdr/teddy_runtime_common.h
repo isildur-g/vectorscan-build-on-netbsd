@@ -500,7 +500,7 @@ const u64a *getReinforcedMaskBase(const struct Teddy *teddy, u8 numMask) {
 static really_inline
 const u32 *getConfBase(const struct Teddy *teddy) {
 #ifdef __cplusplus
-    return reinterpret_cast<const u32 *>((const u8 *)teddy + teddy->confOffset);
+    return reinterpret_cast<const u32 *>(reinterpret_cast<const u8 *>(teddy) + teddy->confOffset);
 #else
     return (const u32 *)((const u8 *)teddy + teddy->confOffset);
 #endif
