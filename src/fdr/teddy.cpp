@@ -754,7 +754,7 @@ hwlm_error_t fdr_exec_teddy_128_templ(const struct FDR *fdr,
     u32 floodBackoff = FLOOD_BACKOFF_START;
     const u8 *tryFloodDetect = a->firstFloodDetect;
     u32 last_match = ones_u32;
-    const struct Teddy *teddy = (const struct Teddy *)fdr;
+    const struct Teddy *teddy = reinterpret_cast<const struct Teddy *>(fdr);
     const size_t iterBytes = 32;
     DEBUG_PRINTF("params: buf %p len %zu start_offset %zu\n",
                  a->buf, a->len, a->start_offset);

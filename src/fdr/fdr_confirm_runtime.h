@@ -54,9 +54,13 @@ void confWithBit(const struct FDRConfirm *fdrc, const struct FDR_Runtime_Args *a
     if (likely(!start)) {
         return;
     }
-
+#ifdef __cplusplus
+    const struct LitInfo *li
+        = reinterpret_cast<const struct LitInfo *>((const u8 *)fdrc + start);
+#else
     const struct LitInfo *li
         = (const struct LitInfo *)((const u8 *)fdrc + start);
+#endif
 
     struct hs_scratch *scratch = a->scratch;
     assert(!scratch->fdr_conf);

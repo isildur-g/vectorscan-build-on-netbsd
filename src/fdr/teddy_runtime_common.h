@@ -459,8 +459,13 @@ void do_confWithBit_teddy(TEDDY_CONF_TYPE *conf, u8 bucket, u8 offset,
         if (!cf) {
             continue;
         }
+#ifdef __cplusplus
+        const struct FDRConfirm *fdrc = reinterpret_cast<const struct FDRConfirm *>
+                                        (reinterpret_cast<const u8 *>(confBase) + cf);
+#else
         const struct FDRConfirm *fdrc = (const struct FDRConfirm *)
                                         ((const u8 *)confBase + cf);
+#endif
         if (!(fdrc->groups & *control)) {
             continue;
         }
@@ -473,13 +478,22 @@ void do_confWithBit_teddy(TEDDY_CONF_TYPE *conf, u8 bucket, u8 offset,
 
 static really_inline
 const m128 *getMaskBase(const struct Teddy *teddy) {
+#ifdef __cplusplus
+    return reinterpret_cast<const m128 *>(reinterpret_cast<const u8 *>(teddy) + ROUNDUP_CL(sizeof(struct Teddy)));
+#else
     return (const m128 *)((const u8 *)teddy + ROUNDUP_CL(sizeof(struct Teddy)));
+#endif
 }
 
 static really_inline
 const u64a *getReinforcedMaskBase(const struct Teddy *teddy, u8 numMask) {
+#ifdef __cplusplus
+    return reinterpret_cast<const u64a *>(reinterpret_cast<const u8 *>(getMaskBase(teddy))
+                          + ROUNDUP_CL(2 * numMask * sizeof(m128)));
+#else
     return (const u64a *)((const u8 *)getMaskBase(teddy)
                           + ROUNDUP_CL(2 * numMask * sizeof(m128)));
+#endif
 }
 
 static really_inline
