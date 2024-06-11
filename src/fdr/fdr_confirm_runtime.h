@@ -1,5 +1,6 @@
 /*
  * Copyright (c) 2015-2019, Intel Corporation
+ * Copyright (c) 2024, VectorCamp PC
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -56,7 +57,7 @@ void confWithBit(const struct FDRConfirm *fdrc, const struct FDR_Runtime_Args *a
     }
 #ifdef __cplusplus
     const struct LitInfo *li
-        = reinterpret_cast<const struct LitInfo *>((const u8 *)fdrc + start);
+        = reinterpret_cast<const struct LitInfo *>(reinterpret_cast<const u8 *>(fdrc) + start);
 #else
     const struct LitInfo *li
         = (const struct LitInfo *)((const u8 *)fdrc + start);

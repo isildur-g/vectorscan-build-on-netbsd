@@ -1,5 +1,6 @@
 /*
  * Copyright (c) 2015-2017, Intel Corporation
+ * Copyright (c) 2024, VectorCamp PC
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -112,9 +113,15 @@ const u8 * floodDetect(const struct FDR * fdr,
 
     // go from c to our FDRFlood structure
     u8 c = buf[i];
+#ifdef __cplusplus
+    const u8 * fBase = (reinterpret_cast<const u8 *>(fdr)) + fdr->floodOffset;
+    u32 fIdx = (reinterpret_cast<const u32 *>(fBase))[c];
+    const struct FDRFlood * fsb = reinterpret_cast<const struct FDRFlood *>(fBase + sizeof(u32) * 256);
+#else
     const u8 * fBase = ((const u8 *)fdr) + fdr->floodOffset;
     u32 fIdx = ((const u32 *)fBase)[c];
     const struct FDRFlood * fsb = (const struct FDRFlood *)(fBase + sizeof(u32) * 256);
+#endif
     const struct FDRFlood * fl = &fsb[fIdx];
 
 #ifndef FLOOD_32
@@ -178,7 +185,11 @@ const u8 * floodDetect(const struct FDR * fdr,
     }
 #endif
     for (; j < mainLoopLen; j++) {
+#ifdef __cplusplus
+        u8 v = *(reinterpret_cast<const u8 *>(buf + j));
+#else
         u8 v = *(const u8 *)(buf + j);
+#endif
         if (v != c) {
             break;
         }

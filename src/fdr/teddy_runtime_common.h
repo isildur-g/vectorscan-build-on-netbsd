@@ -1,5 +1,6 @@
 /*
  * Copyright (c) 2016-2020, Intel Corporation
+ * Copyright (c) 2024, VectorCamp PC
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -498,7 +499,11 @@ const u64a *getReinforcedMaskBase(const struct Teddy *teddy, u8 numMask) {
 
 static really_inline
 const u32 *getConfBase(const struct Teddy *teddy) {
+#ifdef __cplusplus
+    return reinterpret_cast<const u32 *>((const u8 *)teddy + teddy->confOffset);
+#else
     return (const u32 *)((const u8 *)teddy + teddy->confOffset);
+#endif
 }
 
 #endif /* TEDDY_RUNTIME_COMMON_H_ */
