@@ -38,13 +38,6 @@
 #include "teddy_runtime_common.h"
 #include "util/simd_utils.h"
 
-typedef enum {
-    SIMPLE_128,
-    AVX_256,
-    AVX_512,
-    AVX_512VBMI,
-} enginevariant;
-
 #ifdef ARCH_64_BIT
 static really_inline
 hwlm_error_t conf_chunk_64(u64a chunk, u8 bucket, u8 offset,
