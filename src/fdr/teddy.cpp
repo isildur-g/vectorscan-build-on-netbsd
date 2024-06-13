@@ -36,6 +36,7 @@
 #include "teddy.h"
 #include "teddy_internal.h"
 #include "teddy_runtime_common.h"
+#include "util/arch.h"
 #include "util/simd_utils.h"
 
 #if defined(HAVE_AVX2)
