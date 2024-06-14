@@ -34,7 +34,6 @@
 #ifndef TEDDY_RUNTIME_COMMON_H_
 #define TEDDY_RUNTIME_COMMON_H_
 
-#include <stdio.h>
 #include "fdr_confirm.h"
 #include "fdr_confirm_runtime.h"
 #include "ue2common.h"
@@ -170,10 +169,8 @@ m128 p_mask_gen(u8 m, u8 n){
     m128 b = ones128();
     m%=17; n%=17;
     m+=(16-n); m%=17;
-    if(n==16)a=zeroes128();
-    else a = rshiftbyte_m128(a, n);
-    if(m==16)b=zeroes128(); 
-    else b = lshiftbyte_m128(b, m);
+    a = rshiftbyte_m128(a, n);
+    b = lshiftbyte_m128(b, m);
     return or128(a, b);
 }
 

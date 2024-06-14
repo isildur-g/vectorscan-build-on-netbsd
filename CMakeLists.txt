@@ -443,6 +443,7 @@ endif()
 
 if (ARCH_IA32 OR ARCH_X86_64)
     set (hs_exec_avx2_SRCS
+        src/fdr/teddy.cpp
         src/util/arch/x86/masked_move.c
         src/util/arch/x86/masked_move.h
     )
