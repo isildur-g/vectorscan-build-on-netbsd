@@ -178,13 +178,6 @@ const m512 *getDupMaskBase(const struct Teddy *teddy, u8 numMask) {
                           + ROUNDUP_CL(2 * numMask * sizeof(m256)));
 }
 
-const u8 ALIGN_AVX_DIRECTIVE p_mask_interleave[64] = {
-    0, 32, 1, 33, 2, 34, 3, 35, 4, 36, 5, 37, 6, 38, 7, 39,
-    8, 40, 9, 41, 10, 42, 11, 43, 12, 44, 13, 45, 14, 46, 15, 47,
-    16, 48, 17, 49, 18, 50, 19, 51, 20, 52, 21, 53, 22, 54, 23, 55,
-    24, 56, 25, 57, 26, 58, 27, 59, 28, 60, 29, 61, 30, 62, 31, 63
-};
-
 
 #ifdef ARCH_64_BIT
 
@@ -283,6 +276,14 @@ hwlm_error_t confirm_teddy_32_512(m512 var, u8 bucket, u8 offset,
 #if defined(HAVE_AVX512VBMI) // VBMI strong teddy
 
  // fat 512 teddy is only with vbmi
+
+const u8 ALIGN_AVX_DIRECTIVE p_mask_interleave[64] = {
+    0, 32, 1, 33, 2, 34, 3, 35, 4, 36, 5, 37, 6, 38, 7, 39,
+    8, 40, 9, 41, 10, 42, 11, 43, 12, 44, 13, 45, 14, 46, 15, 47,
+    16, 48, 17, 49, 18, 50, 19, 51, 20, 52, 21, 53, 22, 54, 23, 55,
+    24, 56, 25, 57, 26, 58, 27, 59, 28, 60, 29, 61, 30, 62, 31, 63
+};
+
 #ifdef ARCH_64_BIT
 hwlm_error_t confirm_fat_teddy_64_512(m512 var, u8 bucket, u8 offset,
                                   CautionReason reason, const u8 *ptr,
@@ -369,10 +370,6 @@ hwlm_error_t confirm_fat_teddy_32_512(m512 var, u8 bucket, u8 offset,
 #endif // 32/64
 
 #define CONFIRM_FAT_TEDDY_512(...) if(confirm_fat_teddy_512_f(__VA_ARGS__, a, confBase, &control, &last_match) == HWLM_TERMINATED)return HWLM_TERMINATED;
-
-#define PREP_SHUF_MASK                                                      \
-    m512 lo = and512(val, *lo_mask);                                        \
-    m512 hi = and512(rshift64_m512(val, 4), *lo_mask)
 
 #define TEDDY_VBMI_SL1_MASK   0xfffffffffffffffeULL
 #define TEDDY_VBMI_SL2_MASK   0xfffffffffffffffcULL
@@ -879,30 +876,31 @@ m256 vectoredLoad2x128(m256 *p_mask, const u8 *ptr, const size_t start_offset,
 
 template<int NMSK>
 static really_inline
-m256 prep_conf_fat_teddy_256_templ(const m256 *maskBase, m256 val){
+m256 prep_conf_fat_teddy_256_templ(const m256 *maskBase, m256 val,
+                                   m256* old_1, m256* old_2, m256* old_3){
     m256 mask = set1_32x8(0xf);
     m256 lo = and256(val, mask);
     m256 hi = and256(rshift64_m256(val, 4), mask);
     m256 r = or256(pshufb_m256(maskBase[0 * 2], lo),
                      pshufb_m256(maskBase[0 * 2 + 1], hi));
     if constexpr (NMSK == 1) return r;
-    m256 old_1 = zeroes256();
+    // m256 old_1 = zeroes256();
     m256 res_1 = or256(pshufb_m256(maskBase[(NMSK-1) * 2], lo),
                        pshufb_m256(maskBase[(NMSK-1) * 2 + 1], hi));
-    m256 res_shifted_1 = vpalignr(res_1, old_1, 16 - (NMSK-1));
-    old_1 = res_1;
+    m256 res_shifted_1 = vpalignr(res_1, *old_1, 16 - (NMSK-1));
+    *old_1 = res_1;
     r = or256(r, res_shifted_1);
     if constexpr (NMSK == 2) return r;
     m256 res_2 = or256(pshufb_m256(maskBase[(NMSK-1) * 2], lo),
                        pshufb_m256(maskBase[(NMSK-1) * 2 + 1], hi));
-    m256 res_shifted_2 = vpalignr(res_2, old_1, 16 - (NMSK-1));
-    old_1 = res_2;
+    m256 res_shifted_2 = vpalignr(res_2, *old_2, 16 - (NMSK-1));
+    *old_2 = res_2;
     r = or256(r, res_shifted_2);
     if constexpr (NMSK == 3) return r;
     m256 res_3 = or256(pshufb_m256(maskBase[(NMSK-1) * 2], lo),
                        pshufb_m256(maskBase[(NMSK-1) * 2 + 1], hi));
-    m256 res_shifted_3 = vpalignr(res_3, old_1, 16 - (NMSK-1));
-    //old_1 = res_3;
+    m256 res_shifted_3 = vpalignr(res_3, *old_3, 16 - (NMSK-1));
+    *old_3 = res_3;
     return or256(r, res_shifted_3);
 }
 
@@ -1086,6 +1084,15 @@ hwlm_error_t fdr_exec_fat_teddy_256_templ(const struct FDR *fdr,
     const u32 *confBase = getConfBase(teddy);
 
     //  FDR_EXEC_FAT_TEDDY_RES_OLD(n_msk);
+    // if constexpr (NMSK >1){
+    m256 res_old_1 = zeroes256();
+    // }
+    // if constexpr (NMSK >2){
+    m256 res_old_2 = zeroes256();
+    // }
+    // if constexpr (NMSK >3){
+    m256 res_old_3 = zeroes256();
+    // }
     const u8 *mainStart = ROUNDUP_PTR(ptr, 16);
     DEBUG_PRINTF("derive: ptr: %p mainstart %p\n", ptr, mainStart);
     if (ptr < mainStart) {
@@ -1095,14 +1102,14 @@ hwlm_error_t fdr_exec_fat_teddy_256_templ(const struct FDR *fdr,
                                        a->buf, buf_end,
                                        a->buf_history, a->len_history,
                                        NMSK);
-        m256 r_0 = prep_conf_fat_teddy_256_templ<NMSK>(maskBase, val_0);
+        m256 r_0 = prep_conf_fat_teddy_256_templ<NMSK>(maskBase, val_0, &res_old_1, &res_old_2, &res_old_3);
         r_0 = or256(r_0, p_mask);
         CONFIRM_FAT_TEDDY_256(r_0, 16, 0, VECTORING, ptr);
         ptr += 16;
     }
 
     if (ptr + 16 <= buf_end) {
-        m256 r_0 = prep_conf_fat_teddy_256_templ<NMSK>(maskBase, load2x128(ptr));
+        m256 r_0 = prep_conf_fat_teddy_256_templ<NMSK>(maskBase, load2x128(ptr), &res_old_1, &res_old_2, &res_old_3);
         CONFIRM_FAT_TEDDY_256(r_0, 16, 0, VECTORING, ptr);
         ptr += 16;
     }
@@ -1110,14 +1117,14 @@ hwlm_error_t fdr_exec_fat_teddy_256_templ(const struct FDR *fdr,
     for ( ; ptr + iterBytes <= buf_end; ptr += iterBytes) {
         __builtin_prefetch(ptr + (iterBytes * 4));
         CHECK_FLOOD;
-        m256 r_0 = prep_conf_fat_teddy_256_templ<NMSK>(maskBase, load2x128(ptr));
+        m256 r_0 = prep_conf_fat_teddy_256_templ<NMSK>(maskBase, load2x128(ptr), &res_old_1, &res_old_2, &res_old_3);
         CONFIRM_FAT_TEDDY_256(r_0, 16, 0, NOT_CAUTIOUS, ptr);
-        m256 r_1 = prep_conf_fat_teddy_256_templ<NMSK>(maskBase, load2x128(ptr + 16));
+        m256 r_1 = prep_conf_fat_teddy_256_templ<NMSK>(maskBase, load2x128(ptr + 16), &res_old_1, &res_old_2, &res_old_3);
         CONFIRM_FAT_TEDDY_256(r_1, 16, 16, NOT_CAUTIOUS, ptr);
     }
 
     if (ptr + 16 <= buf_end) {
-        m256 r_0 = prep_conf_fat_teddy_256_templ<NMSK>(maskBase, load2x128(ptr));
+        m256 r_0 = prep_conf_fat_teddy_256_templ<NMSK>(maskBase, load2x128(ptr), &res_old_1, &res_old_2, &res_old_3);
         CONFIRM_FAT_TEDDY_256(r_0, 16, 0, NOT_CAUTIOUS, ptr);
         ptr += 16;
     }
@@ -1128,7 +1135,7 @@ hwlm_error_t fdr_exec_fat_teddy_256_templ(const struct FDR *fdr,
         m256 val_0 = vectoredLoad2x128(&p_mask, ptr, 0, ptr, buf_end,
                                        a->buf_history, a->len_history,
                                        NMSK);
-        m256 r_0 = prep_conf_fat_teddy_256_templ<NMSK>(maskBase, val_0);
+        m256 r_0 = prep_conf_fat_teddy_256_templ<NMSK>(maskBase, val_0, &res_old_1, &res_old_2, &res_old_3);
         r_0 = or256(r_0, p_mask);
         CONFIRM_FAT_TEDDY_256(r_0, 16, 0, VECTORING, ptr);
     }
