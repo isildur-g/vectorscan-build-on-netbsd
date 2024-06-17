@@ -55,6 +55,7 @@ void confWithBit(const struct FDRConfirm *fdrc, const struct FDR_Runtime_Args *a
     if (likely(!start)) {
         return;
     }
+// these cplusplus checks are needed because this is included in both fdr.c and teddy.cpp
 #ifdef __cplusplus
     const struct LitInfo *li
         = reinterpret_cast<const struct LitInfo *>(reinterpret_cast<const u8 *>(fdrc) + start);

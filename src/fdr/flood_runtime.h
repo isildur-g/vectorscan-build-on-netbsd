@@ -38,6 +38,7 @@
 #define FLOOD_MINIMUM_SIZE 256
 #define FLOOD_BACKOFF_START 32
 
+// this is because this file is included in both fdr.c and teddy.cpp
 #if defined __cplusplus
 #define CU64A_P_CAST(X) reinterpret_cast<const u64a*>(X)
 #else
