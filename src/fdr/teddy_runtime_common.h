@@ -169,6 +169,7 @@ m128 p_mask_gen(u8 m, u8 n){
     m128 b = ones128();
     m%=17; n%=17;
     m+=(16-n); m%=17;
+    // this ==16 check is necessary as shifting by 16 is not allowed on arm
     if(n==16)a=zeroes128();
     else a = rshiftbyte_m128(a, n);
     if(m==16)b=zeroes128();
