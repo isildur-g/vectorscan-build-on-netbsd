@@ -383,7 +383,7 @@ void copyRuntBlock256(u8 *dst, const u8 *src, size_t len) {
  * here because avx2 does not have a full m256 shift. 
  * note that the shift is in byte units, not bits. */
 
-static really_inline m256 rshiftbyte_m256(m256 v, u8 n){
+static really_inline m256 lshiftbyte_m256(m256 v, u8 n){
     if(n==0)return v;
     else {
         union {
@@ -408,7 +408,7 @@ static really_inline m256 rshiftbyte_m256(m256 v, u8 n){
     }
 }
 
-static really_inline m256 lshiftbyte_m256(m256 v, u8 n){
+static really_inline m256 rshiftbyte_m256(m256 v, u8 n){
     if(n==0)return v;
     else {
         union {
