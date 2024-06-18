@@ -40,6 +40,7 @@
 #include "util/bitutils.h"
 #include "util/simd_utils.h"
 #include "util/uniform_ops.h"
+#include <stdio.h>
 
 /*
 extern const u8 ALIGN_DIRECTIVE p_mask_arr[17][32];
