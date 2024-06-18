@@ -314,6 +314,8 @@ hwlm_error_t confirm_fat_teddy_32_512(m512 var, u8 bucket, u8 offset,
 #define FAT_TEDDY_VBMI_CONF_MASK_VAR(n) (0xffffffffULL >> (32 - n) << overlap)
 #define FAT_TEDDY_VBMI_LOAD_MASK_PATCH  (0xffffffffULL >> (32 - n_sh))
 
+// the only difference between these two is the mask they use. when
+// we templatize the vector/engine variants in the next stage they can be rolled together.
 template<int NMSK>
 static really_inline
 m512 prep_conf_fat_teddy_512vbmi_templ(const m512 *lo_mask, const m512 *dup_mask,
@@ -372,7 +374,6 @@ m512 prep_conf_teddy_512vbmi_templ(const m512 *lo_mask, const m512 *dup_mask,
 #define TEDDY_VBMI_CONF_MASK_VAR(n) (0xffffffffffffffffULL >> (64 - n) << overlap)
 #define TEDDY_VBMI_LOAD_MASK_PATCH  (0xffffffffffffffffULL >> (64 - n_sh))
 
-// template for N_MSK
 template<int NMSK>
 hwlm_error_t fdr_exec_teddy_512vbmi_templ(const struct FDR *fdr,
                                       const struct FDR_Runtime_Args *a,
@@ -523,9 +524,7 @@ hwlm_error_t fdr_exec_fat_teddy_512vbmi_templ(const struct FDR *fdr,
 #define FDR_EXEC_FAT_TEDDY_FN fdr_exec_fat_teddy_512vbmi_templ
 
 
-
 #elif defined(HAVE_AVX512) // AVX512 reinforced teddy
-
 
 /* both 512b versions use the same confirm teddy */
 
@@ -963,7 +962,6 @@ hwlm_error_t fdr_exec_teddy_256_templ(const struct FDR *fdr,
 }
 
 #define FDR_EXEC_TEDDY_FN fdr_exec_teddy_256_templ
-
 #endif // was FDR_EXEC_TEDDY_FN already defined up in AVX512 if both are defined
 
 template<int NMSK>
@@ -1193,59 +1191,55 @@ hwlm_error_t fdr_exec_teddy_128_templ(const struct FDR *fdr,
 #endif // HAVE_AVX2 HAVE_AVX512
 
 
-#define FDR_EXEC_TEDDY(fdr, a, control, n) return FDR_EXEC_TEDDY_FN<n>(fdr, a, control)
 
 extern "C" {
 
 hwlm_error_t fdr_exec_teddy_msks1(const struct FDR *fdr,
                                   const struct FDR_Runtime_Args *a,
                                   hwlm_group_t control) {
-    // FDR_EXEC_TEDDY(fdr, a, control, 1, do_confWithBit_teddy);
-    FDR_EXEC_TEDDY(fdr, a, control, 1);
+    return FDR_EXEC_TEDDY_FN<1>(fdr, a, control);
 }
 
 hwlm_error_t fdr_exec_teddy_msks1_pck(const struct FDR *fdr,
                                       const struct FDR_Runtime_Args *a,
                                       hwlm_group_t control) {
-    // FDR_EXEC_TEDDY(fdr, a, control, 1, do_confWithBit_teddy);
-    FDR_EXEC_TEDDY(fdr, a, control, 1);
+    return FDR_EXEC_TEDDY_FN<1>(fdr, a, control);
 }
 
 hwlm_error_t fdr_exec_teddy_msks2(const struct FDR *fdr,
                                   const struct FDR_Runtime_Args *a,
                                   hwlm_group_t control) {
-    // FDR_EXEC_TEDDY(fdr, a, control, 2, do_confWithBit_teddy);
-    FDR_EXEC_TEDDY(fdr, a, control, 2);
+    return FDR_EXEC_TEDDY_FN<2>(fdr, a, control);
 }
 
 hwlm_error_t fdr_exec_teddy_msks2_pck(const struct FDR *fdr,
                                       const struct FDR_Runtime_Args *a,
                                       hwlm_group_t control) {
-    FDR_EXEC_TEDDY(fdr, a, control, 2);
+    return FDR_EXEC_TEDDY_FN<2>(fdr, a, control);
 }
 
 hwlm_error_t fdr_exec_teddy_msks3(const struct FDR *fdr,
                                   const struct FDR_Runtime_Args *a,
                                   hwlm_group_t control) {
-    FDR_EXEC_TEDDY(fdr, a, control, 3);
+    return FDR_EXEC_TEDDY_FN<3>(fdr, a, control);
 }
 
 hwlm_error_t fdr_exec_teddy_msks3_pck(const struct FDR *fdr,
                                       const struct FDR_Runtime_Args *a,
                                       hwlm_group_t control) {
-    FDR_EXEC_TEDDY(fdr, a, control, 3);
+    return FDR_EXEC_TEDDY_FN<3>(fdr, a, control);
 }
 
 hwlm_error_t fdr_exec_teddy_msks4(const struct FDR *fdr,
                                   const struct FDR_Runtime_Args *a,
                                   hwlm_group_t control) {
-    FDR_EXEC_TEDDY(fdr, a, control, 4);
+    return FDR_EXEC_TEDDY_FN<4>(fdr, a, control);
 }
 
 hwlm_error_t fdr_exec_teddy_msks4_pck(const struct FDR *fdr,
                                       const struct FDR_Runtime_Args *a,
                                       hwlm_group_t control) {
-    FDR_EXEC_TEDDY(fdr, a, control, 4);
+    return FDR_EXEC_TEDDY_FN<4>(fdr, a, control);
 }
 
 } // extern
@@ -1253,55 +1247,53 @@ hwlm_error_t fdr_exec_teddy_msks4_pck(const struct FDR *fdr,
 /* we only have fat teddy in these two modes */
 #if defined(HAVE_AVX2) || defined(HAVE_AVX512VBMI)
 
-#define FDR_EXEC_FAT_TEDDY(fdr, a, control, n) return FDR_EXEC_FAT_TEDDY_FN<n>(fdr, a, control)
-
 extern "C" {
 hwlm_error_t fdr_exec_fat_teddy_msks1(const struct FDR *fdr,
                                       const struct FDR_Runtime_Args *a,
                                       hwlm_group_t control) {
-    FDR_EXEC_FAT_TEDDY(fdr, a, control, 1);
+    return FDR_EXEC_FAT_TEDDY_FN<1>(fdr, a, control);
 }
 
 hwlm_error_t fdr_exec_fat_teddy_msks1_pck(const struct FDR *fdr,
                                           const struct FDR_Runtime_Args *a,
                                           hwlm_group_t control) {
-    FDR_EXEC_FAT_TEDDY(fdr, a, control, 1);
+    return FDR_EXEC_FAT_TEDDY_FN<1>(fdr, a, control);
 }
 
 hwlm_error_t fdr_exec_fat_teddy_msks2(const struct FDR *fdr,
                                       const struct FDR_Runtime_Args *a,
                                       hwlm_group_t control) {
-    FDR_EXEC_FAT_TEDDY(fdr, a, control, 2);
+    return FDR_EXEC_FAT_TEDDY_FN<2>(fdr, a, control);
 }
 
 hwlm_error_t fdr_exec_fat_teddy_msks2_pck(const struct FDR *fdr,
                                           const struct FDR_Runtime_Args *a,
                                           hwlm_group_t control) {
-    FDR_EXEC_FAT_TEDDY(fdr, a, control, 2);
+    return FDR_EXEC_FAT_TEDDY_FN<2>(fdr, a, control);
 }
 
 hwlm_error_t fdr_exec_fat_teddy_msks3(const struct FDR *fdr,
                                       const struct FDR_Runtime_Args *a,
                                       hwlm_group_t control) {
-    FDR_EXEC_FAT_TEDDY(fdr, a, control, 3);
+    return FDR_EXEC_FAT_TEDDY_FN<3>(fdr, a, control);
 }
 
 hwlm_error_t fdr_exec_fat_teddy_msks3_pck(const struct FDR *fdr,
                                           const struct FDR_Runtime_Args *a,
                                           hwlm_group_t control) {
-    FDR_EXEC_FAT_TEDDY(fdr, a, control, 3);
+    return FDR_EXEC_FAT_TEDDY_FN<3>(fdr, a, control);
 }
 
 hwlm_error_t fdr_exec_fat_teddy_msks4(const struct FDR *fdr,
                                       const struct FDR_Runtime_Args *a,
                                       hwlm_group_t control) {
-    FDR_EXEC_FAT_TEDDY(fdr, a, control, 4);
+    return FDR_EXEC_FAT_TEDDY_FN<4>(fdr, a, control);
 }
 
 hwlm_error_t fdr_exec_fat_teddy_msks4_pck(const struct FDR *fdr,
                                           const struct FDR_Runtime_Args *a,
                                           hwlm_group_t control) {
-    FDR_EXEC_FAT_TEDDY(fdr, a, control, 4);
+    return FDR_EXEC_FAT_TEDDY_FN<4>(fdr, a, control);
 }
 
 } // extern c

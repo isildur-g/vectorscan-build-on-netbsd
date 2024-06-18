@@ -378,18 +378,73 @@ void copyRuntBlock256(u8 *dst, const u8 *src, size_t len) {
 //          0          start   start+offset     end(<=32)
 // p_mask   ffff.....ffffff..ff0000...........00ffff..........
 
+/* there ought to be a better place for this, but we are emulating an m256 shift
+ * here because avx2 does not have a full m256 shift. 
+ * note that the shift is in byte units, not bits. */
+
+static really_inline m256 rshiftbyte_m256(m256 v, u8 n){
+    if(n==0)return v;
+    else {
+        union {
+            u8 val8[32];
+            m128 val128[2];
+            m256 val256;
+        } u;
+        u.val256=v; 
+        if(n < 16){
+            m128 c = lshiftbyte_m128(u.val128[1], 32-n);
+            u.val128[1] = rshiftbyte_m128(u.val128[1], n);
+            u.val128[0] = or128(c, rshiftbyte_m128(u.val128[0], n));
+            return u.val256;
+        } else if(n==16){
+            u.val128[1] = u.val128[0]; u.val128[0]=zeroes128();
+            return u.val256;
+        } else if(n<32){
+            u.val128[1] = rshiftbyte_m128(u.val128[1], n);
+            u.val128[0]=zeroes128();
+            return u.val256;
+        } else return zeroes256();
+    }
+}
+
+static really_inline m256 lshiftbyte_m256(m256 v, u8 n){
+    if(n==0)return v;
+    else {
+        union {
+            u8 val8[32];
+            m128 val128[2];
+            m256 val256;
+        } u;
+        u.val256=v; 
+        if(n < 16){
+            m128 c = rshiftbyte_m128(u.val128[0], 32-n);
+            u.val128[0] = lshiftbyte_m128(u.val128[0], n);
+            u.val128[1] = or128(c, lshiftbyte_m128(u.val128[1], n));
+            return u.val256;
+        } else if(n==16){
+            u.val128[0] = u.val128[1]; u.val128[1]=zeroes128();
+            return u.val256;
+        } else if(n<32){
+            u.val128[0] = lshiftbyte_m128(u.val128[0], n);
+            u.val128[1]=zeroes128();
+            return u.val256;
+        } else return zeroes256();
+    }
+}
+
+
 // like the pmask gen above this replaces the large array.
 static really_inline
 m256 fat_pmask_gen(u8 m, u8 n){
-    return loadu256(p_mask_arr256[m] + n);
-/*
+    // return loadu256(p_mask_arr256[m] + n);
     m256 a=ones256();
     m256 b=ones256();
     m%=33; n%=33;
     m+=(32-n); m%=33;
-    a = rshift64_m256(a, n);
-    b = lshift64_m256(b, m);
+    a = rshiftbyte_m256(a, n);
+    b = lshiftbyte_m256(b, m);
     return or256(a, b);
+/*
 */
 }
 
