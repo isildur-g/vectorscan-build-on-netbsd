@@ -411,7 +411,7 @@ static really_inline m256 lshiftbyte_m256(m256 v, u8 n){
     if(n==0)return v;
     else {
         union {
-            u8 val8[32];
+            u32 i[8];
             m128 val128[2];
             m256 val256;
         } u;
@@ -436,13 +436,24 @@ static really_inline m256 lshiftbyte_m256(m256 v, u8 n){
 // like the pmask gen above this replaces the large array.
 static really_inline
 m256 fat_pmask_gen(u8 m, u8 n){
-    // return loadu256(p_mask_arr256[m] + n);
     m256 a=ones256();
     m256 b=ones256();
     m%=33; n%=33;
     m+=(32-n); m%=33;
     a = rshiftbyte_m256(a, n);
     b = lshiftbyte_m256(b, m);
+    // return or256(a, b);
+    union {
+        u32 i[8];    
+        m128 val128[2];
+        m256 val256;
+    } u;
+    u.val256 = or256(a, b);
+    printf("fpg: %0x %0x %0x %0x %0x %0x %0x %0x\n", u.i[0],  u.i[1], u.i[2], u.i[3], u.i[4], u.i[5], u.i[6], u.i[7]); 
+
+    // return loadu256(p_mask_arr256[m] + n);
+    u.val256 = loadu256(p_mask_arr256[m] + n);
+    printf("f l: %0x %0x %0x %0x %0x %0x %0x %0x\n", u.i[0],  u.i[1], u.i[2], u.i[3], u.i[4], u.i[5], u.i[6], u.i[7]); 
     return or256(a, b);
 /*
 */
