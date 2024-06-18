@@ -381,8 +381,8 @@ void copyRuntBlock256(u8 *dst, const u8 *src, size_t len) {
 // like the pmask gen above this replaces the large array.
 static really_inline
 m256 fat_pmask_gen(u8 m, u8 n){
-    //return loadu256(p_mask_arr256[m] + n);
-
+    return loadu256(p_mask_arr256[m] + n);
+/*
     m256 a=ones256();
     m256 b=ones256();
     m%=33; n%=33;
@@ -390,7 +390,7 @@ m256 fat_pmask_gen(u8 m, u8 n){
     a = rshift64_m256(a, n);
     b = lshift64_m256(b, m);
     return or256(a, b);
-/**/
+*/
 }
 
 static really_inline
