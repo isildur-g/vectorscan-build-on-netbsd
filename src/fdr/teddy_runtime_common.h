@@ -393,8 +393,18 @@ static really_inline m256 rshift_byte_m256(m256 v, u8 n){
         u.val256=v; 
         if(n < 16){
             m128 c = lshiftbyte_m128_notconst(u.val128[1], 16-n);
+            union {
+                u32 i[4];    
+                m128 val128;
+            } z;
+            z.val128=c;
+            printf("rsh c: %08x %08x %08x %08x\n", z.i[0],  z.i[1], z.i[2], z.i[3]); 
             u.val128[1] = rshiftbyte_m128_notconst(u.val128[1], n);
+            z.val128=u.val128[1];
+            printf("rsh 1: %08x %08x %08x %08x\n", z.i[0],  z.i[1], z.i[2], z.i[3]); 
             u.val128[0] = or128(c, rshiftbyte_m128_notconst(u.val128[0], n));
+            z.val128=u.val128[0];
+            printf("rsh 0: %08x %08x %08x %08x\n", z.i[0],  z.i[1], z.i[2], z.i[3]); 
             return u.val256;
         } else if(n==16){
             u.val128[1] = u.val128[0]; u.val128[0]=zeroes128();
@@ -424,10 +434,10 @@ static really_inline m256 lshift_byte_m256(m256 v, u8 n){
             z.val128=c;
             printf("lsh c: %08x %08x %08x %08x\n", z.i[0],  z.i[1], z.i[2], z.i[3]); 
             u.val128[0] = lshiftbyte_m128_notconst(u.val128[0], n);
-            z.val128=u.val128[0];
+            z.val128=u.val128[1];
             printf("lsh 1: %08x %08x %08x %08x\n", z.i[0],  z.i[1], z.i[2], z.i[3]); 
             u.val128[1] = or128(c, lshiftbyte_m128_notconst(u.val128[1], n));
-            z.val128=u.val128[1];
+            z.val128=u.val128[0];
             printf("lsh 0: %08x %08x %08x %08x\n", z.i[0],  z.i[1], z.i[2], z.i[3]); 
             return u.val256;
         } else if(n==16){
