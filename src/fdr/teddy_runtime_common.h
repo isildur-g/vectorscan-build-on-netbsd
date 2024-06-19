@@ -383,7 +383,7 @@ void copyRuntBlock256(u8 *dst, const u8 *src, size_t len) {
  * here because avx2 does not have a full m256 shift. 
  * note that the shift is in byte units, not bits. */
 
-static really_inline m256 lshiftbyte_m256(m256 v, u8 n){
+static really_inline m256 rshiftbyte_m256(m256 v, u8 n){
     if(n==0)return v;
     else {
         union {
@@ -408,7 +408,7 @@ static really_inline m256 lshiftbyte_m256(m256 v, u8 n){
     }
 }
 
-static really_inline m256 rshiftbyte_m256(m256 v, u8 n){
+static really_inline m256 lshiftbyte_m256(m256 v, u8 n){
     if(n==0)return v;
     else {
         union {
@@ -441,14 +441,18 @@ m256 fat_pmask_gen(u8 m, u8 n){
     m256 b=ones256();
     m%=33; n%=33;
     m+=(32-n); m%=33;
-    a = rshiftbyte_m256(a, n);
-    b = lshiftbyte_m256(b, m);
-    // return or256(a, b);
     union {
         u32 i[8];    
         m128 val128[2];
         m256 val256;
     } u;
+    a = rshiftbyte_m256(a, n);
+    u.val256=a;
+    printf("a: %d %0x %0x %0x %0x %0x %0x %0x %0x\n", n, u.i[0],  u.i[1], u.i[2], u.i[3], u.i[4], u.i[5], u.i[6], u.i[7]); 
+    b = lshiftbyte_m256(b, m);
+    u.val256=b;
+    printf("b: %d %0x %0x %0x %0x %0x %0x %0x %0x\n", m, u.i[0],  u.i[1], u.i[2], u.i[3], u.i[4], u.i[5], u.i[6], u.i[7]); 
+    // return or256(a, b);
     u.val256 = or256(a, b);
     printf("fpg: %0x %0x %0x %0x %0x %0x %0x %0x\n", u.i[0],  u.i[1], u.i[2], u.i[3], u.i[4], u.i[5], u.i[6], u.i[7]); 
 
