@@ -41,6 +41,8 @@
 #include "util/intrinsics.h"
 
 #include <string.h> // for memcpy
+#include <stdio.h> // for printf
+
 
 #define ZEROES_8 0, 0, 0, 0, 0, 0, 0, 0
 #define ZEROES_31 ZEROES_8, ZEROES_8, ZEROES_8, 0, 0, 0, 0, 0, 0, 0
@@ -178,13 +180,11 @@ m128 load_m128_from_u64a(const u64a *p) {
 
 #define CASE_RSHIFT_VECTOR(a, count)  case count: return _mm_srli_si128((m128)(a), (count)); break;
 
+// we encounter cases where an argument slips past __builtin_constant_p but 
+// still fails to meet the (stricter) criteria demanded by the underlying 
+// intrinsic. in those cases we want to explicitly avoid the optimization.
 static really_inline
-m128 rshiftbyte_m128(const m128 a, int count_immed) {
-#if defined(HAVE__BUILTIN_CONSTANT_P) && !defined(VS_SIMDE_BACKEND)
-    if (__builtin_constant_p(count_immed)) {
-        return _mm_srli_si128(a, count_immed);
-    }
-#endif
+m128 rshiftbyte_m128_notconst(const m128 a, int count_immed) {
     switch (count_immed) {
     case 0: return a; break;
     CASE_RSHIFT_VECTOR(a, 1);
@@ -205,17 +205,26 @@ m128 rshiftbyte_m128(const m128 a, int count_immed) {
     default: return zeroes128(); break;
     }
 }
+
+static really_inline
+m128 rshiftbyte_m128(const m128 a, int count_immed) {
+#if defined(HAVE__BUILTIN_CONSTANT_P) && !defined(VS_SIMDE_BACKEND)
+    if (__builtin_constant_p(count_immed)) {
+        return _mm_srli_si128(a, count_immed);
+    }
+#endif
+    return rshiftbyte_m128_notconst(a, count_immed);
+}
+
 #undef CASE_RSHIFT_VECTOR
 
 #define CASE_LSHIFT_VECTOR(a, count)  case count: return _mm_slli_si128((m128)(a), (count)); break;
 
+// we encounter cases where an argument slips past __builtin_constant_p but 
+// still fails to meet the (stricter) criteria demanded by the underlying 
+// intrinsic. in those cases we want to explicitly avoid the optimization.
 static really_inline
-m128 lshiftbyte_m128(const m128 a, int count_immed) {
-#if defined(HAVE__BUILTIN_CONSTANT_P) && !defined(VS_SIMDE_BACKEND)
-    if (__builtin_constant_p(count_immed)) {
-        return _mm_slli_si128(a, count_immed);
-    }
-#endif
+m128 lshiftbyte_m128_notconst(const m128 a, int count_immed) {
     switch (count_immed) {
     case 0: return a; break;
     CASE_LSHIFT_VECTOR(a, 1);
@@ -235,6 +244,16 @@ m128 lshiftbyte_m128(const m128 a, int count_immed) {
     CASE_LSHIFT_VECTOR(a, 15);
     default: return zeroes128(); break;
     }
+}
+
+static really_inline
+m128 lshiftbyte_m128(const m128 a, int count_immed) {
+#if defined(HAVE__BUILTIN_CONSTANT_P) && !defined(VS_SIMDE_BACKEND)
+    if (__builtin_constant_p(count_immed)) {
+        return _mm_slli_si128(a, count_immed);
+    }
+#endif
+    return lshiftbyte_m128_notconst(a, count_immed);
 }
 #undef CASE_LSHIFT_VECTOR
 

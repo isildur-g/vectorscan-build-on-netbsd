@@ -383,51 +383,59 @@ void copyRuntBlock256(u8 *dst, const u8 *src, size_t len) {
  * here because avx2 does not have a full m256 shift. 
  * note that the shift is in byte units, not bits. */
 
-static really_inline m256 rshiftbyte_m256(m256 v, u8 n){
+static really_inline m256 rshift_byte_m256(m256 v, u8 n){
     if(n==0)return v;
     else {
         union {
-            u8 val8[32];
             m128 val128[2];
             m256 val256;
         } u;
         u.val256=v; 
         if(n < 16){
-            m128 c = lshiftbyte_m128(u.val128[1], 16-n);
-            u.val128[1] = rshiftbyte_m128(u.val128[1], n);
-            u.val128[0] = or128(c, rshiftbyte_m128(u.val128[0], n));
+            m128 c = lshiftbyte_m128_notconst(u.val128[1], 16-n);
+            u.val128[1] = rshiftbyte_m128_notconst(u.val128[1], n);
+            u.val128[0] = or128(c, rshiftbyte_m128_notconst(u.val128[0], n));
             return u.val256;
         } else if(n==16){
             u.val128[1] = u.val128[0]; u.val128[0]=zeroes128();
             return u.val256;
         } else if(n<32){
-            u.val128[1] = rshiftbyte_m128(u.val128[1], n);
+            u.val128[1] = rshiftbyte_m128_notconst(u.val128[1], n-16);
             u.val128[0]=zeroes128();
             return u.val256;
         } else return zeroes256();
     }
 }
 
-static really_inline m256 lshiftbyte_m256(m256 v, u8 n){
+static really_inline m256 lshift_byte_m256(m256 v, u8 n){
     if(n==0)return v;
     else {
         union {
-            u32 i[8];
             m128 val128[2];
             m256 val256;
         } u;
         u.val256=v; 
         if(n < 16){
-            m128 c = rshiftbyte_m128(u.val128[0], 16-n);
-            u.val128[0] = lshiftbyte_m128(u.val128[0], n);
-            u.val128[1] = or128(c, lshiftbyte_m128(u.val128[1], n));
+            m128 c = rshiftbyte_m128_notconst(u.val128[0], 16-n);
+            union {
+                u32 i[4];    
+                m128 val128;
+            } z;
+            z.val128=c;
+            printf("lsh c: %08x %08x %08x %08x\n", z.i[0],  z.i[1], z.i[2], z.i[3]); 
+            u.val128[0] = lshiftbyte_m128_notconst(u.val128[0], n);
+            z.val128=u.val128[0];
+            printf("lsh 1: %08x %08x %08x %08x\n", z.i[0],  z.i[1], z.i[2], z.i[3]); 
+            u.val128[1] = or128(c, lshiftbyte_m128_notconst(u.val128[1], n));
+            z.val128=u.val128[1];
+            printf("lsh 0: %08x %08x %08x %08x\n", z.i[0],  z.i[1], z.i[2], z.i[3]); 
             return u.val256;
         } else if(n==16){
             u.val128[0] = u.val128[1]; u.val128[1]=zeroes128();
             return u.val256;
         } else if(n<32){
-            u.val128[0] = lshiftbyte_m128(u.val128[0], n);
-            u.val128[1]=zeroes128();
+            u.val128[1] = lshiftbyte_m128_notconst(u.val128[1], n-16);
+            u.val128[0]=zeroes128();
             return u.val256;
         } else return zeroes256();
     }
@@ -440,26 +448,26 @@ m256 fat_pmask_gen(u8 m, u8 n){
     m256 a=ones256();
     m256 b=ones256();
     printf("fpg m, n %d %d\n", m, n);
-    m%=33; n%=33;
-    m+=(32-n); m%=33;
     union {
         u32 i[8];    
         m128 val128[2];
         m256 val256;
     } u;
-    a = rshiftbyte_m256(a, n);
+    u.val256 = loadu256(p_mask_arr256[m] + n);
+    printf("f l: %08x %08x %08x %08x %08x %08x %08x %08x\n", u.i[0],  u.i[1], u.i[2], u.i[3], u.i[4], u.i[5], u.i[6], u.i[7]); 
+    m+=(32-n); m%=33;
+    // n+=32; n%=32;
+    a = rshift_byte_m256(a, m);
     u.val256=a;
-    printf("a: %d %0x %0x %0x %0x %0x %0x %0x %0x\n", n, u.i[0],  u.i[1], u.i[2], u.i[3], u.i[4], u.i[5], u.i[6], u.i[7]); 
-    b = lshiftbyte_m256(b, m);
+    printf("a: %d %08x %08x %08x %08x %08x %08x %08x %08x\n", m, u.i[0],  u.i[1], u.i[2], u.i[3], u.i[4], u.i[5], u.i[6], u.i[7]); 
+    b = lshift_byte_m256(b, n);
     u.val256=b;
-    printf("b: %d %0x %0x %0x %0x %0x %0x %0x %0x\n", m, u.i[0],  u.i[1], u.i[2], u.i[3], u.i[4], u.i[5], u.i[6], u.i[7]); 
+    printf("b: %d %08x %08x %08x %08x %08x %08x %08x %08x\n", n, u.i[0],  u.i[1], u.i[2], u.i[3], u.i[4], u.i[5], u.i[6], u.i[7]); 
     // return or256(a, b);
     u.val256 = or256(a, b);
-    printf("fpg: %0x %0x %0x %0x %0x %0x %0x %0x\n", u.i[0],  u.i[1], u.i[2], u.i[3], u.i[4], u.i[5], u.i[6], u.i[7]); 
+    printf("fpg: %08x %08x %08x %08x %08x %08x %08x %08x\n", u.i[0],  u.i[1], u.i[2], u.i[3], u.i[4], u.i[5], u.i[6], u.i[7]); 
 
     // return loadu256(p_mask_arr256[m] + n);
-    u.val256 = loadu256(p_mask_arr256[m] + n);
-    printf("f l: %0x %0x %0x %0x %0x %0x %0x %0x\n", u.i[0],  u.i[1], u.i[2], u.i[3], u.i[4], u.i[5], u.i[6], u.i[7]); 
     return or256(a, b);
 /*
 */
