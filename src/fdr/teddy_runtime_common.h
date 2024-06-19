@@ -393,7 +393,7 @@ static really_inline m256 rshiftbyte_m256(m256 v, u8 n){
         } u;
         u.val256=v; 
         if(n < 16){
-            m128 c = lshiftbyte_m128(u.val128[1], 32-n);
+            m128 c = lshiftbyte_m128(u.val128[1], 16-n);
             u.val128[1] = rshiftbyte_m128(u.val128[1], n);
             u.val128[0] = or128(c, rshiftbyte_m128(u.val128[0], n));
             return u.val256;
@@ -418,7 +418,7 @@ static really_inline m256 lshiftbyte_m256(m256 v, u8 n){
         } u;
         u.val256=v; 
         if(n < 16){
-            m128 c = rshiftbyte_m128(u.val128[0], 32-n);
+            m128 c = rshiftbyte_m128(u.val128[0], 16-n);
             u.val128[0] = lshiftbyte_m128(u.val128[0], n);
             u.val128[1] = or128(c, lshiftbyte_m128(u.val128[1], n));
             return u.val256;
@@ -439,6 +439,7 @@ static really_inline
 m256 fat_pmask_gen(u8 m, u8 n){
     m256 a=ones256();
     m256 b=ones256();
+    printf("fpg m, n %d %d\n", m, n);
     m%=33; n%=33;
     m+=(32-n); m%=33;
     union {
