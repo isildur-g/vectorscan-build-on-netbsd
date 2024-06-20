@@ -1033,7 +1033,7 @@ hwlm_error_t fdr_exec_fat_teddy_256_templ(const struct FDR *fdr,
     return HWLM_SUCCESS;
 }
 
-// this check is because it is possible to build with both AVX512VBMI and AVX2 defined, 
+// this check is because it is possible to build with both AVX512VBMI and AVX2 defined,
 // to replicate the behaviour of the original flow of control we give preference
 // to the former. If we're building for both then this will be compiled multiple times
 // with the desired variant defined by itself.
