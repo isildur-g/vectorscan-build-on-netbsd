@@ -383,6 +383,32 @@ void copyRuntBlock256(u8 *dst, const u8 *src, size_t len) {
  * here because avx2 does not have a full m256 shift. 
  * note that the shift is in byte units, not bits. */
 
+static really_inline m256 lshift_byte_m256(m256 v, u8 n){
+    if(n==0)return v;
+    else {
+        union {
+            u8 c[32];
+            m128 val128[2];
+            m256 val256;
+        } u;
+        u.val256=v; 
+
+        if(n < 16){
+            m128 c = lshiftbyte_m128_notconst(u.val128[1], 16-n);
+            u.val128[1] = rshiftbyte_m128_notconst(u.val128[1], n);
+            u.val128[0] = or128(c, rshiftbyte_m128_notconst(u.val128[0], n));
+            return u.val256;
+        } else if(n==16){
+            u.val128[0] = u.val128[1]; u.val128[1]=zeroes128();
+            return u.val256;
+        } else if(n<32){
+            u.val128[0] = rshiftbyte_m128_notconst(u.val128[0], n-16);
+            u.val128[1]=zeroes128();
+            return u.val256;
+        } else return zeroes256();
+    }
+}
+
 static really_inline m256 rshift_byte_m256(m256 v, u8 n){
     if(n==0)return v;
     else {
@@ -392,56 +418,12 @@ static really_inline m256 rshift_byte_m256(m256 v, u8 n){
         } u;
         u.val256=v; 
         if(n < 16){
-            m128 c = lshiftbyte_m128_notconst(u.val128[1], 16-n);
-            union {
-                u32 i[4];    
-                m128 val128;
-            } z;
-            z.val128=c;
-            printf("rsh c: %08x %08x %08x %08x\n", z.i[0],  z.i[1], z.i[2], z.i[3]); 
-            u.val128[1] = rshiftbyte_m128_notconst(u.val128[1], n);
-            z.val128=u.val128[1];
-            printf("rsh 1: %08x %08x %08x %08x\n", z.i[0],  z.i[1], z.i[2], z.i[3]); 
-            u.val128[0] = or128(c, rshiftbyte_m128_notconst(u.val128[0], n));
-            z.val128=u.val128[0];
-            printf("rsh 0: %08x %08x %08x %08x\n", z.i[0],  z.i[1], z.i[2], z.i[3]); 
+            m128 c = rshiftbyte_m128_notconst(u.val128[0], 16-n);
+            u.val128[0] = lshiftbyte_m128_notconst(u.val128[0], n);
+            u.val128[1] = or128(c, lshiftbyte_m128_notconst(u.val128[1], n));
             return u.val256;
         } else if(n==16){
             u.val128[1] = u.val128[0]; u.val128[0]=zeroes128();
-            return u.val256;
-        } else if(n<32){
-            u.val128[1] = rshiftbyte_m128_notconst(u.val128[1], n-16);
-            u.val128[0]=zeroes128();
-            return u.val256;
-        } else return zeroes256();
-    }
-}
-
-static really_inline m256 lshift_byte_m256(m256 v, u8 n){
-    if(n==0)return v;
-    else {
-        union {
-            m128 val128[2];
-            m256 val256;
-        } u;
-        u.val256=v; 
-        if(n < 16){
-            m128 c = rshiftbyte_m128_notconst(u.val128[0], 16-n);
-            union {
-                u32 i[4];    
-                m128 val128;
-            } z;
-            z.val128=c;
-            printf("lsh c: %08x %08x %08x %08x\n", z.i[0],  z.i[1], z.i[2], z.i[3]); 
-            u.val128[0] = lshiftbyte_m128_notconst(u.val128[0], n);
-            z.val128=u.val128[1];
-            printf("lsh 1: %08x %08x %08x %08x\n", z.i[0],  z.i[1], z.i[2], z.i[3]); 
-            u.val128[1] = or128(c, lshiftbyte_m128_notconst(u.val128[1], n));
-            z.val128=u.val128[0];
-            printf("lsh 0: %08x %08x %08x %08x\n", z.i[0],  z.i[1], z.i[2], z.i[3]); 
-            return u.val256;
-        } else if(n==16){
-            u.val128[0] = u.val128[1]; u.val128[1]=zeroes128();
             return u.val256;
         } else if(n<32){
             u.val128[1] = lshiftbyte_m128_notconst(u.val128[1], n-16);
@@ -457,30 +439,12 @@ static really_inline
 m256 fat_pmask_gen(u8 m, u8 n){
     m256 a=ones256();
     m256 b=ones256();
-    printf("fpg m, n %d %d\n", m, n);
-    union {
-        u32 i[8];    
-        m128 val128[2];
-        m256 val256;
-    } u;
-    u.val256 = loadu256(p_mask_arr256[m] + n);
-    printf("f l: %08x %08x %08x %08x %08x %08x %08x %08x\n", u.i[0],  u.i[1], u.i[2], u.i[3], u.i[4], u.i[5], u.i[6], u.i[7]); 
+    m%=33; n%=33;
     m+=(32-n); m%=33;
-    // n+=32; n%=32;
-    a = rshift_byte_m256(a, m);
-    u.val256=a;
-    printf("a: %d %08x %08x %08x %08x %08x %08x %08x %08x\n", m, u.i[0],  u.i[1], u.i[2], u.i[3], u.i[4], u.i[5], u.i[6], u.i[7]); 
-    b = lshift_byte_m256(b, n);
-    u.val256=b;
-    printf("b: %d %08x %08x %08x %08x %08x %08x %08x %08x\n", n, u.i[0],  u.i[1], u.i[2], u.i[3], u.i[4], u.i[5], u.i[6], u.i[7]); 
-    // return or256(a, b);
-    u.val256 = or256(a, b);
-    printf("fpg: %08x %08x %08x %08x %08x %08x %08x %08x\n", u.i[0],  u.i[1], u.i[2], u.i[3], u.i[4], u.i[5], u.i[6], u.i[7]); 
 
-    // return loadu256(p_mask_arr256[m] + n);
+    a = rshift_byte_m256(a, m);
+    b = lshift_byte_m256(b, n);
     return or256(a, b);
-/*
-*/
 }
 
 static really_inline
@@ -503,14 +467,10 @@ m256 vectoredLoad256(m256 *p_mask, const u8 *ptr, const size_t start_offset,
         if (avail >= 32) {
             assert(start_offset - start <= 32);
             *p_mask = fat_pmask_gen(32 - start_offset + start, 32 - start_offset + start);
-            // *p_mask = loadu256(p_mask_arr256[32 - start_offset + start]
-            //                    + 32 - start_offset + start);
             return loadu256(ptr);
         }
         assert(start_offset - start <= avail);
         *p_mask = fat_pmask_gen(avail - start_offset + start, 32 - start_offset + start);
-        // *p_mask = loadu256(p_mask_arr256[avail - start_offset + start]
-        //                    + 32 - start_offset + start);
         copy_start = 0;
         copy_len = avail;
     } else { //start zone
@@ -524,8 +484,6 @@ m256 vectoredLoad256(m256 *p_mask, const u8 *ptr, const size_t start_offset,
         uintptr_t end = MIN(32, (uintptr_t)(hi - ptr));
         assert(start + start_offset <= end);
         *p_mask = fat_pmask_gen(end - start - start_offset, 32 - start - start_offset);
-        // *p_mask = loadu256(p_mask_arr256[end - start - start_offset]
-        //                    + 32 - start - start_offset);
         copy_start = start;
         copy_len = end - start;
     }
