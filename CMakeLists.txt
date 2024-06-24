@@ -278,10 +278,6 @@ set (hs_exec_common_SRCS
     src/util/arch/ppc64el/cpuid_flags.c)
 endif ()
 
-set (teddy_cpp_SRCS
-    src/fdr/teddy.cpp
-    )
-
 set (hs_exec_SRCS
     ${hs_HEADERS}
     src/hs_version.h.in
@@ -301,7 +297,7 @@ set (hs_exec_SRCS
     src/fdr/fdr_confirm_runtime.h
     src/fdr/flood_runtime.h
     src/fdr/fdr_loadval.h
-    ${teddy_cpp_SRCS}
+    src/fdr/teddy.cpp
     src/fdr/teddy.h
     src/fdr/teddy_internal.h
     src/fdr/teddy_runtime_common.h
@@ -448,7 +444,8 @@ endif()
 
 if (ARCH_IA32 OR ARCH_X86_64)
     set (hs_exec_avx2_SRCS
-        ${teddy_cpp_SRCS}
+        src/fdr/teddy.cpp
+        src/fdr/teddy_fat.cpp
         src/util/arch/x86/masked_move.c
         src/util/arch/x86/masked_move.h
     )
