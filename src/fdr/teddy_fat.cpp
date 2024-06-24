@@ -60,15 +60,6 @@ hwlm_error_t conf_chunk_64(u64a chunk, u8 bucket, u8 offset,
     return HWLM_SUCCESS;
 }
 
-/*
-extern hwlm_error_t conf_chunk_64(u64a chunk, u8 bucket, u8 offset,
-                           CautionReason reason, const u8 *pt,
-                           const u32* confBase,
-                           const struct FDR_Runtime_Args *a,
-                           hwlm_group_t *control,
-                           u32 *last_match);
-*/
-
 #define CONF_FAT_CHUNK_64(chunk, bucket, off, reason, pt, confBase, a, control, last_match) \
  if(conf_chunk_64(chunk, bucket, off, reason, pt, confBase, a, control, last_match) == HWLM_TERMINATED)return HWLM_TERMINATED;
 #else
@@ -91,14 +82,6 @@ hwlm_error_t conf_chunk_32(u32 chunk, u8 bucket, u8 offset,
     return HWLM_SUCCESS;
 }
 
-/*
-extern hwlm_error_t conf_chunk_32(u32 chunk, u8 bucket, u8 offset,
-                           CautionReason reason, const u8 *pt,
-                           const u32* confBase,
-                           const struct FDR_Runtime_Args *a,
-                           hwlm_group_t *control,
-                           u32 *last_match);
-*/
 
 #define CONF_FAT_CHUNK_32(chunk, bucket, off, reason, pt, confBase, a, control, last_match) \
  if(conf_chunk_32(chunk, bucket, off, reason, pt, confBase, a, control, last_match) == HWLM_TERMINATED)return HWLM_TERMINATED;
@@ -336,7 +319,6 @@ hwlm_error_t fdr_exec_fat_teddy_512vbmi_templ(const struct FDR *fdr,
 
 #elif defined(HAVE_AVX2) // not HAVE_AVX512 but HAVE_AVX2 reinforced teddy
 
-int foobar;
 
 #ifdef ARCH_64_BIT
 extern "C" {
