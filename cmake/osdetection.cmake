@@ -5,6 +5,8 @@ endif(CMAKE_SYSTEM_NAME MATCHES "Linux")
 if(CMAKE_SYSTEM_NAME MATCHES "FreeBSD")
     set(FREEBSD true)
     set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
+    set(CMAKE_BUILD_WITH_INSTALL_RPATH TRUE)
+    set(BUILD_WITH_INSTALL_RPATH TRUE)
     #FIXME: find a nicer and more general way of doing this
     if(CMAKE_C_COMPILER MATCHES "/usr/local/bin/gcc13")
         set(CMAKE_BUILD_RPATH "/usr/local/lib/gcc13")
