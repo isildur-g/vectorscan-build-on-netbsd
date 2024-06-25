@@ -90,11 +90,7 @@ hwlm_error_t conf_chunk_32(u32 chunk, u8 bucket, u8 offset,
 
 #endif
 
-#define CONF_FAT_CHUNK_64 CONF_CHUNK_64
-#define CONF_FAT_CHUNK_32 CONF_CHUNK_32
-
 #if defined(HAVE_AVX512VBMI) || defined(HAVE_AVX512) // common to both 512b's
-
 
 static really_inline
 const m512 *getDupMaskBase(const struct Teddy *teddy, u8 numMask) {
