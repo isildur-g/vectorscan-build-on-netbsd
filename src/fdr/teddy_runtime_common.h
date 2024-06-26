@@ -40,7 +40,6 @@
 #include "util/bitutils.h"
 #include "util/simd_utils.h"
 #include "util/uniform_ops.h"
-#include <stdio.h>
 
 
 #if defined(HAVE_AVX512VBMI)
@@ -166,11 +165,15 @@ m128 p_mask_gen(u8 m, u8 n){
     m128 b = ones128();
     m%=17; n%=17;
     m+=(16-n); m%=17;
+#if defined(ARCH_AARCH64)
     // this ==16 check is necessary as shifting by 16 is not allowed on arm
-    if(n==16)a=zeroes128();
-    else a = rshiftbyte_m128(a, n);
-    if(m==16)b=zeroes128();
-    else b = lshiftbyte_m128(b, m);
+    if(n==16)a=zeroes128(); else
+#endif
+    a = rshiftbyte_m128(a, n);
+#if defined(ARCH_AARCH64)
+    if(m==16)b=zeroes128(); else
+#endif
+    b = lshiftbyte_m128(b, m);
     return or128(a, b);
 }
 
@@ -299,61 +302,6 @@ void copyRuntBlock256(u8 *dst, const u8 *src, size_t len) {
 //          |----------|-------|----------------|............|
 //          0          start   start+offset     end(<=32)
 // p_mask   ffff.....ffffff..ff0000...........00ffff..........
-
-/* there ought to be a better place for this, but we are emulating an m256 shift
- * here because avx2 does not have a full m256 shift.
- * note that the shift is in byte units, not bits. */
-
-static really_inline m256 lshift_byte_m256(m256 v, u8 n){
-    if(n==0)return v;
-    else {
-        union {
-            u8 c[32];
-            m128 val128[2];
-            m256 val256;
-        } u;
-        u.val256=v;
-
-        if(n < 16){
-            m128 c = lshiftbyte_m128_notconst(u.val128[1], 16-n);
-            u.val128[1] = rshiftbyte_m128_notconst(u.val128[1], n);
-            u.val128[0] = or128(c, rshiftbyte_m128_notconst(u.val128[0], n));
-            return u.val256;
-        } else if(n==16){
-            u.val128[0] = u.val128[1]; u.val128[1]=zeroes128();
-            return u.val256;
-        } else if(n<32){
-            u.val128[0] = rshiftbyte_m128_notconst(u.val128[0], n-16);
-            u.val128[1]=zeroes128();
-            return u.val256;
-        } else return zeroes256();
-    }
-}
-
-static really_inline m256 rshift_byte_m256(m256 v, u8 n){
-    if(n==0)return v;
-    else {
-        union {
-            m128 val128[2];
-            m256 val256;
-        } u;
-        u.val256=v;
-        if(n < 16){
-            m128 c = rshiftbyte_m128_notconst(u.val128[0], 16-n);
-            u.val128[0] = lshiftbyte_m128_notconst(u.val128[0], n);
-            u.val128[1] = or128(c, lshiftbyte_m128_notconst(u.val128[1], n));
-            return u.val256;
-        } else if(n==16){
-            u.val128[1] = u.val128[0]; u.val128[0]=zeroes128();
-            return u.val256;
-        } else if(n<32){
-            u.val128[1] = lshiftbyte_m128_notconst(u.val128[1], n-16);
-            u.val128[0]=zeroes128();
-            return u.val256;
-        } else return zeroes256();
-    }
-}
-
 
 // like the pmask gen above this replaces the large array.
 static really_inline
