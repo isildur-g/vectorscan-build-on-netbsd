@@ -164,18 +164,20 @@ bool removeCyclicPathRedundancy(Graph &g, typename Graph::vertex_descriptor v,
 
     typedef typename Graph::vertex_descriptor vertex_descriptor;
 
+    // Colour map used for depth_first_visit().
+    auto colours = make_small_color_map(g);
+#if defined(ARCH_PPC64EL) && defined(__FreeBSD__) &&  defined(__clang__)
+    // a safety buffer between this and succ_v below
+    char padding[512];
+    asm volatile("" : "+r,m"(padding) : : "memory");
+#endif
     // precalc successors of v.
     flat_set<vertex_descriptor> succ_v;
     insert(&succ_v, adjacent_vertices(v, g));
 
-    // Colour map used for depth_first_visit().
-    auto colours = make_small_color_map(g);
-
-    //printf("175 svl %p col %p \n", &succ_v, &colours); 
 
     flat_set<vertex_descriptor> s;
 
-    //printf("cds 177 "); colours.dcheck();
     for (const auto &e : in_edges_range(v, g)) {
         vertex_descriptor u = source(e, g);
         if (u == v) {
@@ -187,7 +189,6 @@ bool removeCyclicPathRedundancy(Graph &g, typename Graph::vertex_descriptor v,
 
         DEBUG_PRINTF("- checking u %zu\n", g[u].index);
 
-        //printf("cds 189 "); colours.dcheck();
         // let s be intersection(succ(u), succ(v))
         s.clear();
         for (auto b : adjacent_vertices_range(u, g)) {
@@ -196,7 +197,6 @@ bool removeCyclicPathRedundancy(Graph &g, typename Graph::vertex_descriptor v,
             }
         }
 
-        //printf("cds 196 "); colours.dcheck();
         for (const auto &e_u : make_vector_from(out_edges(u, g))) {
             vertex_descriptor w = target(e_u, g);
             if (is_special(w, g) || contains(s, w)) {
@@ -209,7 +209,6 @@ bool removeCyclicPathRedundancy(Graph &g, typename Graph::vertex_descriptor v,
             }
 
             DEBUG_PRINTF("  - checking w %zu\n", g[w].index);
-            //printf("cds 208 "); colours.dcheck();
 
             if (!searchForward(g, reach, colours, succ_v, w)) {
                 continue;

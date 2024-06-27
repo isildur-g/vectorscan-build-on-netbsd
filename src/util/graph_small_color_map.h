@@ -102,23 +102,15 @@ public:
     using category = boost::read_write_property_map_tag;
 
     small_color_map(size_t n_in, const IndexMap &index_map_in)
-    : n(n_in), 
+    : n(n_in),
       index_map(index_map_in),
       data(std::make_shared<std::vector<unsigned char>>((n_in + entries_per_byte - 1) / entries_per_byte)) {
     fill(small_color::white);
     }
 
-    //void dcheck() {
-    //    printf("check, data size is %zu\n", data->size());
-    //}
-
     void fill(small_color color) {
         assert(static_cast<u8>(color) < sizeof(fill_lut));
         u8 val = fill_lut[static_cast<u8>(color)];
-        //if(data->size()>100000){
-        //    printf("yikes, data size is %zu\n", data->size());
-        //    printf("n %zu final size %zu \n", n, (n + entries_per_byte - 1) / entries_per_byte);
-        //}
         std::memset(data->data(), val, data->size());
     }
 
