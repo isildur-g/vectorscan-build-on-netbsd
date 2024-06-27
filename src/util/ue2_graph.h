@@ -796,7 +796,7 @@ public:
         explicit prop_map(value_type P_of::*m_in) : member(m_in) { }
 
         reference operator[](key_type k) const {
-            return k.raw()->props.*member;
+            return k.raw()->props.*member;      //NOLINT (clang-analyzer-core.uninitialized.UndefReturn)
         }
         reference operator()(key_type k) const { return (*this)[k]; }
 
@@ -1003,7 +1003,7 @@ public:
 
     ue2_graph() = default;
 
-    ue2_graph(ue2_graph &&old)
+    ue2_graph(ue2_graph &&old) noexcept
     : next_vertex_index(old.next_vertex_index),
       next_edge_index(old.next_edge_index),
       graph_edge_count(old.graph_edge_count),
@@ -1012,7 +1012,7 @@ public:
         swap(vertices_list, old.vertices_list);
     }
 
-    ue2_graph &operator=(ue2_graph &&old) {
+    ue2_graph &operator=(ue2_graph &&old) noexcept {
         next_vertex_index = old.next_vertex_index;
         next_edge_index = old.next_edge_index;
         graph_edge_count = old.graph_edge_count;

@@ -788,7 +788,7 @@ int roseCheckMask32(const struct core_info *ci, const u8 *and_mask,
     DEBUG_PRINTF("h_len %d c_len %d\n", h_len, c_len);
     // we use valid_data_mask to blind bytes before history/in the future.
     u32 valid_data_mask;
-    valid_data_mask = (~0u) << (h_shift + c_shift) >> (c_shift);
+    valid_data_mask = (~0u) << (h_shift + c_shift) >> (c_shift); //NOLINT (clang-analyzer-core.UndefinedBinaryOperatorResult)
 
     m256 and_mask_m256 = loadu256(and_mask);
     m256 cmp_mask_m256 = loadu256(cmp_mask);
@@ -2991,7 +2991,7 @@ hwlmcb_rv_t roseRunProgram(const struct RoseEngine *t,
 
                     pc = getByOffset(t, ri->child_offset);
                     pc_base = pc;
-                    programOffset = (const u8 *)pc_base -(const u8 *)t;
+                    programOffset = (const u8 *)pc_base -(const u8 *)t;         //NOLINT (clang-analyzer-deadcode.DeadStores)
                     DEBUG_PRINTF("pc_base %p pc %p child_offset %u squash %u\n",
                                  pc_base, pc, ri->child_offset, ri->squash);
                     work_done = 0;
@@ -3428,7 +3428,7 @@ hwlmcb_rv_t roseRunProgram_l(const struct RoseEngine *t,
 
                     pc = getByOffset(t, ri->child_offset);
                     pc_base = pc;
-                    programOffset = (const u8 *)pc_base -(const u8 *)t;
+                    programOffset = (const u8 *)pc_base -(const u8 *)t;         //NOLINT (clang-analyzer-deadcode.DeadStores)
                     DEBUG_PRINTF("pc_base %p pc %p child_offset %u squash %u\n",
                                  pc_base, pc, ri->child_offset, ri->squash);
                     work_done = 0;
