@@ -145,8 +145,8 @@ export CC="/usr/pkg/gcc12/bin/cc"
 export CXX="/usr/pkg/gcc12/bin/g++"
 ```
 
-In FreeBSD similarly, you might want to install a different compiler.
-If you want to use gcc, it is recommended to use gcc12.
+In FreeBSD the default compiler is clang. If you want to use gcc, it is recommended
+to use gcc12 and avoid gcc13, especially in FreeBSD/ppc. 
 You will also, as in NetBSD, need to install cmake, sqlite, boost and ragel packages.
 Using the example of gcc12 from pkg:
 installing the desired compiler: 
