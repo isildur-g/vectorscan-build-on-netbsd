@@ -258,7 +258,11 @@ set (hs_exec_common_SRCS
     src/util/arch/common/cpuid_flags.h
     src/util/multibit.c
     )
+#if ((ARCH_IA32 OR ARCH_X86_64) AND (NOT (BUILD_AVX2 OR BUILD_AVX512 OR BUILD_AVX512VBMI)))
+#    set(SIMDE_BACKEND True)
+#endif()
 if (SIMDE_BACKEND)
+#include (${CMAKE_MODULE_PATH}/simde.cmake)
 set (hs_exec_common_SRCS
     ${hs_exec_common_SRCS}
     src/util/arch/simde/cpuid_flags.c)
@@ -953,8 +957,9 @@ else ()
         if (BUILD_STATIC_LIBS)
             add_library(hs_exec_core2 OBJECT ${hs_exec_SRCS})
             list(APPEND RUNTIME_LIBS $<TARGET_OBJECTS:hs_exec_core2>)
+            include (${CMAKE_MODULE_PATH}/simde.cmake)
             set_target_properties(hs_exec_core2 PROPERTIES
-                COMPILE_FLAGS "-march=core2 -msse4.2"
+                COMPILE_FLAGS "-DVS_SIMDE_BACKEND -march=core2 -msse2"
                 RULE_LAUNCH_COMPILE "${BUILD_WRAPPER} core2 ${CMAKE_MODULE_PATH}/keep.syms.in"
                 )
 
@@ -1015,13 +1020,16 @@ else ()
             # build shared libs
             add_library(hs_compile_shared OBJECT ${hs_compile_SRCS})
             set_target_properties(hs_compile_shared PROPERTIES POSITION_INDEPENDENT_CODE TRUE)
+
             add_library(hs_exec_shared_core2 OBJECT ${hs_exec_SRCS})
             list(APPEND RUNTIME_SHLIBS $<TARGET_OBJECTS:hs_exec_shared_core2>)
+            include (${CMAKE_MODULE_PATH}/simde.cmake)
             set_target_properties(hs_exec_shared_core2 PROPERTIES
-                COMPILE_FLAGS "-march=core2 -msse4.2"
+                COMPILE_FLAGS "-DVS_SIMDE_BACKEND -march=core2 -msse2"
                 POSITION_INDEPENDENT_CODE TRUE
                 RULE_LAUNCH_COMPILE "${BUILD_WRAPPER} core2 ${CMAKE_MODULE_PATH}/keep.syms.in"
                 )
+
             add_library(hs_exec_shared_corei7 OBJECT ${hs_exec_SRCS})
             list(APPEND RUNTIME_SHLIBS $<TARGET_OBJECTS:hs_exec_shared_corei7>)
             set_target_properties(hs_exec_shared_corei7 PROPERTIES
