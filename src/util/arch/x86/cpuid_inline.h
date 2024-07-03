@@ -207,6 +207,12 @@ int check_avx512vbmi(void) {
 
     return 0;
 }
+static inline
+int check_ssse2(void) {
+    unsigned int eax, ebx, ecx, edx;
+    cpuid(1, 0, &eax, &ebx, &ecx, &edx);
+    return !!(ecx & CPUID_SSE2);
+}
 
 static inline
 int check_ssse3(void) {
