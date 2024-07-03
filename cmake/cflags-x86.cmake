@@ -28,11 +28,7 @@ if (NOT FAT_RUNTIME)
     else()
         set(ARCH_C_FLAGS "-msse4.2")
         set(ARCH_CXX_FLAGS "-msse4.2")
-        #set(ARCH_C_FLAGS "-msse2")
-        #set(ARCH_CXX_FLAGS "-msse2")
         set(X86_ARCH "x86-64-v2")
-        # also enable simde
-        #set(SIMDE_BACKEND ON)
     endif()
 else()
     set(BUILD_AVX512VBMI ON)
@@ -43,10 +39,12 @@ else()
     set(ARCH_C_FLAGS "-msse2")
     set(ARCH_CXX_FLAGS "-msse2")
     set(X86_ARCH "x86-64-v2")
+    # also enable simde
     set(SIMDE_BACKEND ON)
 endif()
 
 include(cmake/simde.cmake)
+
 set(CMAKE_REQUIRED_FLAGS "${ARCH_C_FLAGS}")
 CHECK_INCLUDE_FILES(intrin.h HAVE_C_INTRIN_H)
 CHECK_INCLUDE_FILE_CXX(intrin.h HAVE_CXX_INTRIN_H)
@@ -89,7 +87,7 @@ int main() {
     __m128i a = _mm_set1_epi8(1);
     (void)simde_mm_shuffle_epi8(a, a);
 }" HAVE_SSE42)
-message("simde emulation found " ${SIMDE_SSE42_H_FOUND} ${HAVE_SSE42})
+message("simde emulation found " ${SIMDE_SSE42_H_FOUND} ", " ${HAVE_SSE42})
 if (SIMDE_SSE42_H_FOUND)
     set(HAVE_SSE42 1)
 endif()
