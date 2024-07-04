@@ -959,10 +959,6 @@ else ()
               set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -DSIMDE_NO_CHECK_IMMEDIATE_CONSTANT")
               set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DSIMDE_NO_CHECK_IMMEDIATE_CONSTANT")
             endif()
-            if (SIMDE_NATIVE)
-              set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -DVS_SIMDE_NATIVE -DSIMDE_ENABLE_OPENMP -fopenmp-simd")
-              set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DVS_SIMDE_NATIVE -DSIMDE_ENABLE_OPENMP -fopenmp-simd")
-            endif()
 
             set_target_properties(hs_exec_core2 PROPERTIES
                 COMPILE_FLAGS "-DVS_SIMDE_BACKEND -DVS_SIMDE_NATIVE -march=core2 -msse2"
@@ -1034,10 +1030,6 @@ else ()
             if (CMAKE_COMPILER_IS_CLANG)
               set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -DSIMDE_NO_CHECK_IMMEDIATE_CONSTANT")
               set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DSIMDE_NO_CHECK_IMMEDIATE_CONSTANT")
-            endif()
-            if (SIMDE_NATIVE)
-              set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -DVS_SIMDE_NATIVE -DSIMDE_ENABLE_OPENMP -fopenmp-simd")
-              set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DVS_SIMDE_NATIVE -DSIMDE_ENABLE_OPENMP -fopenmp-simd")
             endif()
             set_target_properties(hs_exec_shared_core2 PROPERTIES
                 COMPILE_FLAGS "-DVS_SIMDE_BACKEND -DVS_SIMDE_NATIVE -march=core2 -msse2"
