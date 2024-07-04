@@ -979,7 +979,7 @@ else ()
             endif()
 
             set_target_properties(hs_exec_core2 PROPERTIES
-                COMPILE_FLAGS "-DVS_SIMDE_BACKEND -march=core2 -msse2"
+                COMPILE_FLAGS "-DVS_SIMDE_BACKEND -DVS_SIMDE_NATIVE -march=core2 -msse2"
                 RULE_LAUNCH_COMPILE "${BUILD_WRAPPER} core2 ${CMAKE_MODULE_PATH}/keep.syms.in"
                 )
 
@@ -1048,21 +1048,13 @@ else ()
             if (CMAKE_COMPILER_IS_CLANG)
               set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -DSIMDE_NO_CHECK_IMMEDIATE_CONSTANT")
               set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DSIMDE_NO_CHECK_IMMEDIATE_CONSTANT")
-              if (ARCH_PPC64EL)
-                  set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wno-deprecated-altivec-src-compat")
-                  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-deprecated-altivec-src-compat")
-                  if (CLANG_MAJOR_VERSION EQUAL 15)
-                      set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wno-deprecate-lax-vec-conv-all")
-                      set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-deprecate-lax-vec-conv-all")
-                  endif ()
-              endif()
             endif()
             if (SIMDE_NATIVE)
               set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -DVS_SIMDE_NATIVE -DSIMDE_ENABLE_OPENMP -fopenmp-simd")
               set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DVS_SIMDE_NATIVE -DSIMDE_ENABLE_OPENMP -fopenmp-simd")
             endif()
             set_target_properties(hs_exec_shared_core2 PROPERTIES
-                COMPILE_FLAGS "-DVS_SIMDE_BACKEND -march=core2 -msse2"
+                COMPILE_FLAGS "-DVS_SIMDE_BACKEND -DVS_SIMDE_NATIVE -march=core2 -msse2"
                 POSITION_INDEPENDENT_CODE TRUE
                 RULE_LAUNCH_COMPILE "${BUILD_WRAPPER} core2 ${CMAKE_MODULE_PATH}/keep.syms.in"
                 )
