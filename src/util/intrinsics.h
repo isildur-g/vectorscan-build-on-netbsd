@@ -65,7 +65,6 @@
 
 #if defined(USE_X86INTRIN_H)
 #include <x86intrin.h>
-#endif
 #elif defined(USE_INTRIN_H)
 #include <intrin.h>
 #elif defined(USE_ARM_NEON_H)
