@@ -71,6 +71,10 @@
 #include <x86intrin.h>
 #if defined(VS_SIMDE_BACKEND)
 #undef __m128i
+#undef _MM_FLUSH_ZERO_MASK
+#undef _MM_FLUSH_ZERO_ON
+#undef _MM_FLUSH_ZERO_OFF
+#undef _MM_ROUND_MASK
 #endif
 #elif defined(USE_INTRIN_H)
 #include <intrin.h>

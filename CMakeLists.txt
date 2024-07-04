@@ -130,6 +130,7 @@ include (${CMAKE_MODULE_PATH}/platform.cmake)
 include (${CMAKE_MODULE_PATH}/osdetection.cmake)
 
 if(SIMDE_BACKEND)
+    message("---> Including simde")
     include (${CMAKE_MODULE_PATH}/simde.cmake)
 elseif (ARCH_IA32 OR ARCH_X86_64)
     include (${CMAKE_MODULE_PATH}/cflags-x86.cmake)
@@ -262,6 +263,7 @@ set (hs_exec_common_SRCS
 #    set(SIMDE_BACKEND True)
 #endif()
 if (SIMDE_BACKEND)
+message("---> Including simde")
 #include (${CMAKE_MODULE_PATH}/simde.cmake)
 set (hs_exec_common_SRCS
     ${hs_exec_common_SRCS}
@@ -957,7 +959,25 @@ else ()
         if (BUILD_STATIC_LIBS)
             add_library(hs_exec_core2 OBJECT ${hs_exec_SRCS})
             list(APPEND RUNTIME_LIBS $<TARGET_OBJECTS:hs_exec_core2>)
-            include (${CMAKE_MODULE_PATH}/simde.cmake)
+
+            include_directories(${PROJECT_SOURCE_DIR}/simde)
+            if (CMAKE_COMPILER_IS_CLANG)
+              set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -DSIMDE_NO_CHECK_IMMEDIATE_CONSTANT")
+              set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DSIMDE_NO_CHECK_IMMEDIATE_CONSTANT")
+              if (ARCH_PPC64EL)
+                  set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wno-deprecated-altivec-src-compat")
+                  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-deprecated-altivec-src-compat")
+                  if (CLANG_MAJOR_VERSION EQUAL 15)
+                      set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wno-deprecate-lax-vec-conv-all")
+                      set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-deprecate-lax-vec-conv-all")
+                  endif ()
+              endif()
+            endif()
+            if (SIMDE_NATIVE)
+              set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -DVS_SIMDE_NATIVE -DSIMDE_ENABLE_OPENMP -fopenmp-simd")
+              set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DVS_SIMDE_NATIVE -DSIMDE_ENABLE_OPENMP -fopenmp-simd")
+            endif()
+
             set_target_properties(hs_exec_core2 PROPERTIES
                 COMPILE_FLAGS "-DVS_SIMDE_BACKEND -march=core2 -msse2"
                 RULE_LAUNCH_COMPILE "${BUILD_WRAPPER} core2 ${CMAKE_MODULE_PATH}/keep.syms.in"
@@ -1023,7 +1043,24 @@ else ()
 
             add_library(hs_exec_shared_core2 OBJECT ${hs_exec_SRCS})
             list(APPEND RUNTIME_SHLIBS $<TARGET_OBJECTS:hs_exec_shared_core2>)
-            include (${CMAKE_MODULE_PATH}/simde.cmake)
+
+            include_directories(${PROJECT_SOURCE_DIR}/simde)
+            if (CMAKE_COMPILER_IS_CLANG)
+              set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -DSIMDE_NO_CHECK_IMMEDIATE_CONSTANT")
+              set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DSIMDE_NO_CHECK_IMMEDIATE_CONSTANT")
+              if (ARCH_PPC64EL)
+                  set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wno-deprecated-altivec-src-compat")
+                  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-deprecated-altivec-src-compat")
+                  if (CLANG_MAJOR_VERSION EQUAL 15)
+                      set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wno-deprecate-lax-vec-conv-all")
+                      set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-deprecate-lax-vec-conv-all")
+                  endif ()
+              endif()
+            endif()
+            if (SIMDE_NATIVE)
+              set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -DVS_SIMDE_NATIVE -DSIMDE_ENABLE_OPENMP -fopenmp-simd")
+              set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DVS_SIMDE_NATIVE -DSIMDE_ENABLE_OPENMP -fopenmp-simd")
+            endif()
             set_target_properties(hs_exec_shared_core2 PROPERTIES
                 COMPILE_FLAGS "-DVS_SIMDE_BACKEND -march=core2 -msse2"
                 POSITION_INDEPENDENT_CODE TRUE
