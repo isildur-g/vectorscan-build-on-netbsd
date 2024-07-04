@@ -954,16 +954,26 @@ else ()
             add_library(hs_exec_core2 OBJECT ${hs_exec_SRCS})
             list(APPEND RUNTIME_LIBS $<TARGET_OBJECTS:hs_exec_core2>)
 
-            include_directories(${PROJECT_SOURCE_DIR}/simde)
-            if (CMAKE_COMPILER_IS_CLANG)
-              set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -DSIMDE_NO_CHECK_IMMEDIATE_CONSTANT")
-              set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DSIMDE_NO_CHECK_IMMEDIATE_CONSTANT")
-            endif()
+            if (BUILD_SSE2_SIMDE)
+              message("Building SIMDE SSE2 version..")
+              include_directories(${PROJECT_SOURCE_DIR}/simde)
+              if (CMAKE_COMPILER_IS_CLANG)
+                set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -DSIMDE_NO_CHECK_IMMEDIATE_CONSTANT")
+                set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DSIMDE_NO_CHECK_IMMEDIATE_CONSTANT")
+              endif()
 
-            set_target_properties(hs_exec_core2 PROPERTIES
-                COMPILE_FLAGS "-DVS_SIMDE_BACKEND -DVS_SIMDE_NATIVE -march=core2 -msse2"
-                RULE_LAUNCH_COMPILE "${BUILD_WRAPPER} core2 ${CMAKE_MODULE_PATH}/keep.syms.in"
-                )
+              set_target_properties(hs_exec_core2 PROPERTIES
+                  COMPILE_FLAGS "-DVS_SIMDE_BACKEND -DVS_SIMDE_NATIVE -march=core2 -msse2"
+                  RULE_LAUNCH_COMPILE "${BUILD_WRAPPER} core2 ${CMAKE_MODULE_PATH}/keep.syms.in"
+                  )
+            else()
+              add_library(hs_exec_core2 OBJECT ${hs_exec_SRCS})
+              list(APPEND RUNTIME_LIBS $<TARGET_OBJECTS:hs_exec_core2>)
+              set_target_properties(hs_exec_core2 PROPERTIES
+                  COMPILE_FLAGS "-march=core2 -msse4.2"
+                  RULE_LAUNCH_COMPILE "${BUILD_WRAPPER} core2 ${CMAKE_MODULE_PATH}/keep.syms.in"
+                  )
+	    endif(BUILD_SSE2_SIMDE)
 
             add_library(hs_exec_corei7 OBJECT ${hs_exec_SRCS})
             list(APPEND RUNTIME_LIBS $<TARGET_OBJECTS:hs_exec_corei7>)
@@ -1023,19 +1033,30 @@ else ()
             add_library(hs_compile_shared OBJECT ${hs_compile_SRCS})
             set_target_properties(hs_compile_shared PROPERTIES POSITION_INDEPENDENT_CODE TRUE)
 
-            add_library(hs_exec_shared_core2 OBJECT ${hs_exec_SRCS})
-            list(APPEND RUNTIME_SHLIBS $<TARGET_OBJECTS:hs_exec_shared_core2>)
-
-            include_directories(${PROJECT_SOURCE_DIR}/simde)
-            if (CMAKE_COMPILER_IS_CLANG)
-              set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -DSIMDE_NO_CHECK_IMMEDIATE_CONSTANT")
-              set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DSIMDE_NO_CHECK_IMMEDIATE_CONSTANT")
-            endif()
-            set_target_properties(hs_exec_shared_core2 PROPERTIES
-                COMPILE_FLAGS "-DVS_SIMDE_BACKEND -DVS_SIMDE_NATIVE -march=core2 -msse2"
-                POSITION_INDEPENDENT_CODE TRUE
-                RULE_LAUNCH_COMPILE "${BUILD_WRAPPER} core2 ${CMAKE_MODULE_PATH}/keep.syms.in"
-                )
+            if (BUILD_SSE2_SIMDE)
+              message("Building SIMDE SSE2 version..")
+              add_library(hs_exec_shared_core2 OBJECT ${hs_exec_SRCS})
+              list(APPEND RUNTIME_SHLIBS $<TARGET_OBJECTS:hs_exec_shared_core2>)
+  
+              include_directories(${PROJECT_SOURCE_DIR}/simde)
+              if (CMAKE_COMPILER_IS_CLANG)
+                set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -DSIMDE_NO_CHECK_IMMEDIATE_CONSTANT")
+                set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DSIMDE_NO_CHECK_IMMEDIATE_CONSTANT")
+              endif()
+              set_target_properties(hs_exec_shared_core2 PROPERTIES
+                  COMPILE_FLAGS "-DVS_SIMDE_BACKEND -DVS_SIMDE_NATIVE -march=core2 -msse2"
+                  POSITION_INDEPENDENT_CODE TRUE
+                  RULE_LAUNCH_COMPILE "${BUILD_WRAPPER} core2 ${CMAKE_MODULE_PATH}/keep.syms.in"
+                  )
+            else()
+              add_library(hs_exec_shared_core2 OBJECT ${hs_exec_SRCS})
+              list(APPEND RUNTIME_SHLIBS $<TARGET_OBJECTS:hs_exec_shared_core2>)
+              set_target_properties(hs_exec_shared_core2 PROPERTIES
+                  COMPILE_FLAGS "-march=core2 -msse4.2"
+                  POSITION_INDEPENDENT_CODE TRUE
+                  RULE_LAUNCH_COMPILE "${BUILD_WRAPPER} core2 ${CMAKE_MODULE_PATH}/keep.syms.in"
+                  )
+            endif (BUILD_SSE2_SIMDE)
 
             add_library(hs_exec_shared_corei7 OBJECT ${hs_exec_SRCS})
             list(APPEND RUNTIME_SHLIBS $<TARGET_OBJECTS:hs_exec_shared_corei7>)
