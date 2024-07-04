@@ -64,20 +64,7 @@
 #endif
 
 #if defined(USE_X86INTRIN_H)
-#if defined(VS_SIMDE_BACKEND)
-// XXX the def in simde conflicts with the one in intrinsics.h 
-//#define __m128i __m128i_intrinsics_h
-#endif
 #include <x86intrin.h>
-#if defined(VS_SIMDE_BACKEND)
-//#undef __m128i
-/*
-#undef _MM_FLUSH_ZERO_MASK
-#undef _MM_FLUSH_ZERO_ON
-#undef _MM_FLUSH_ZERO_OFF
-#undef _MM_ROUND_MASK
-#define SIMDE_ENABLE_NATIVE_ALIASES
-*/
 #endif
 #elif defined(USE_INTRIN_H)
 #include <intrin.h>
