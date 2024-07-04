@@ -955,10 +955,10 @@ else ()
             COMPILE_FLAGS "-Wno-unused-parameter -Wno-unused-function ${DISPATCHER_DEFINE}")
 
         if (BUILD_STATIC_LIBS)
-            add_library(hs_exec_core2 OBJECT ${hs_exec_SRCS})
-            list(APPEND RUNTIME_LIBS $<TARGET_OBJECTS:hs_exec_core2>)
 
             if (BUILD_SSE2_SIMDE)
+              add_library(hs_exec_core2 OBJECT ${hs_exec_SRCS})
+              list(APPEND RUNTIME_LIBS $<TARGET_OBJECTS:hs_exec_core2>)
               message("Building SIMDE SSE2 version..")
               include_directories(${PROJECT_SOURCE_DIR}/simde)
               if (CMAKE_COMPILER_IS_CLANG)
