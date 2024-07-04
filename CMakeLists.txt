@@ -951,12 +951,21 @@ else ()
             COMPILE_FLAGS "-Wno-unused-parameter -Wno-unused-function ${DISPATCHER_DEFINE}")
 
         if (BUILD_STATIC_LIBS)
-            add_library(hs_exec_core2 OBJECT ${hs_exec_SRCS})
-            list(APPEND RUNTIME_LIBS $<TARGET_OBJECTS:hs_exec_core2>)
-            set_target_properties(hs_exec_core2 PROPERTIES
-                COMPILE_FLAGS "-march=core2 -msse4.2"
-                RULE_LAUNCH_COMPILE "${BUILD_WRAPPER} core2 ${CMAKE_MODULE_PATH}/keep.syms.in"
-                )
+            if (BUILD_SSE2_SIMDE)
+              add_library(hs_exec_core2 OBJECT ${hs_exec_SRCS})
+              list(APPEND RUNTIME_LIBS $<TARGET_OBJECTS:hs_exec_core2>)
+              include_directories(${PROJECT_SOURCE_DIR}/simde)
+
+              if (CMAKE_COMPILER_IS_CLANG)
+                set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -DSIMDE_NO_CHECK_IMMEDIATE_CONSTANT")
+                set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DSIMDE_NO_CHECK_IMMEDIATE_CONSTANT")
+	      endif()
+
+              set_target_properties(hs_exec_core2 PROPERTIES
+                  COMPILE_FLAGS "-march=core2 -msse2 -DVS_SIMDE_BACKEND -DVS_SIMDE_NATIVE -DSIMDE_NO_CHECK_IMMEDIATE_CONSTANT"
+                  RULE_LAUNCH_COMPILE "${BUILD_WRAPPER} core2 ${CMAKE_MODULE_PATH}/keep.syms.in"
+                  )
+	    endif(BUILD_SSE2_SIMDE)
 
             add_library(hs_exec_corei7 OBJECT ${hs_exec_SRCS})
             list(APPEND RUNTIME_LIBS $<TARGET_OBJECTS:hs_exec_corei7>)
