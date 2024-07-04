@@ -130,7 +130,6 @@ include (${CMAKE_MODULE_PATH}/platform.cmake)
 include (${CMAKE_MODULE_PATH}/osdetection.cmake)
 
 if(SIMDE_BACKEND)
-    message("---> Including simde")
     include (${CMAKE_MODULE_PATH}/simde.cmake)
 elseif (ARCH_IA32 OR ARCH_X86_64)
     include (${CMAKE_MODULE_PATH}/cflags-x86.cmake)
@@ -259,12 +258,7 @@ set (hs_exec_common_SRCS
     src/util/arch/common/cpuid_flags.h
     src/util/multibit.c
     )
-#if ((ARCH_IA32 OR ARCH_X86_64) AND (NOT (BUILD_AVX2 OR BUILD_AVX512 OR BUILD_AVX512VBMI)))
-#    set(SIMDE_BACKEND True)
-#endif()
 if (SIMDE_BACKEND)
-message("---> Including simde")
-#include (${CMAKE_MODULE_PATH}/simde.cmake)
 set (hs_exec_common_SRCS
     ${hs_exec_common_SRCS}
     src/util/arch/simde/cpuid_flags.c)
