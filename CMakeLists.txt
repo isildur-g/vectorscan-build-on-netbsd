@@ -129,6 +129,10 @@ include (${CMAKE_MODULE_PATH}/platform.cmake)
 # Detect OS and if Fat Runtime is available
 include (${CMAKE_MODULE_PATH}/osdetection.cmake)
 
+if(BUILD_SSE2_SIMDE)
+    set(SIMDE_BACKEND True)
+endif()
+
 if(SIMDE_BACKEND)
     include (${CMAKE_MODULE_PATH}/simde.cmake)
 elseif (ARCH_IA32 OR ARCH_X86_64)

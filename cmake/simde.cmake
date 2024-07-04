@@ -24,6 +24,13 @@ if (SIMDE_SSE42_H_FOUND)
     set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -DVS_SIMDE_NATIVE -DSIMDE_ENABLE_OPENMP -fopenmp-simd")
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DVS_SIMDE_NATIVE -DSIMDE_ENABLE_OPENMP -fopenmp-simd")
   endif()
+
+  if (BUILD_SSE2_SIMDE)
+      set(ARCH_C_FLAGS "-msse2")
+      set(ARCH_CXX_FLAGS "-msse2")
+      set(X86_ARCH "x86-64")
+  endif()
+
 else()
   message(FATAL_ERROR "SIMDe backend requested but SIMDe is not available on the system")
 endif()
