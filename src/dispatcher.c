@@ -78,6 +78,12 @@
 #define check_avx512vbmi() (0)
 #endif
 
+#if defined(BUILD_SSE2_SIMDE)
+#define CHECK_SSE_LAST check_ssse2
+#else
+#define CHECK_SSE_LAST check_ssse3
+#endif
+
 #define CREATE_DISPATCH(RTYPE, NAME, ...)                                      \
     /* create defns */                                                         \
     RTYPE JOIN(avx512vbmi_, NAME)(__VA_ARGS__);                                \
@@ -111,7 +117,7 @@
         else if (check_sse42() && check_popcnt()) {                            \
             fat_dispatch_ ## NAME = &JOIN(corei7_, NAME);                      \
         }                                                                      \
-        else if (check_ssse3()) {                                              \
+        else if (CHECK_SSE_LAST()) {                                           \
             fat_dispatch_ ## NAME = &JOIN(core2_, NAME);                       \
         } else {                                                               \
             /* anything else is fail */                                        \
