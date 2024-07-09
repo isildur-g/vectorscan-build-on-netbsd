@@ -79,7 +79,11 @@
 #endif
 
 #if defined(BUILD_SSE2_SIMDE)
-#define CHECK_SSE_LAST check_ssse2
+#if defined(HAVE_SSE2)
+#define CHECK_SSE_LAST (1)
+#else
+#define CHECK_SSE_LAST (0)
+#endif
 #else
 #define CHECK_SSE_LAST check_ssse3
 #endif
