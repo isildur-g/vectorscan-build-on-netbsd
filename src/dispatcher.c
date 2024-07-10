@@ -78,14 +78,10 @@
 #define check_avx512vbmi() (0)
 #endif
 
-#if defined(BUILD_SSE2_SIMDE)
-#if defined(HAVE_SSE2)
-#define CHECK_SSE_LAST (1)
+#if defined(VS_SIMDE_BACKEND)
+#define CHECK_SSE_LAST() (1)
 #else
-#define CHECK_SSE_LAST (0)
-#endif
-#else
-#define CHECK_SSE_LAST check_ssse3
+#define CHECK_SSE_LAST() check_ssse3()
 #endif
 
 #define CREATE_DISPATCH(RTYPE, NAME, ...)                                      \
