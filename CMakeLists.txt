@@ -953,8 +953,6 @@ else ()
         endif (NOT BUILD_AVX512VBMI)
         if(BUILD_SSE2_SIMDE)
             set (DISPATCHER_DEFINE "${DISPATCHER_DEFINE} -DVS_SIMDE_BACKEND -DVS_SIMDE_NATIVE -march=core2 -msse2")
-            set_source_files_properties(src/hs.cpp PROPERTIES
-                COMPILE_FLAGS "-DVS_SIMDE_BACKEND -DVS_SIMDE_NATIVE -march=core2 -msse2")
         endif(BUILD_SSE2_SIMDE)
         set_source_files_properties(src/dispatcher.c PROPERTIES
             COMPILE_FLAGS "-Wno-unused-parameter -Wno-unused-function ${DISPATCHER_DEFINE}")

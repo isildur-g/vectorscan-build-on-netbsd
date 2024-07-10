@@ -198,15 +198,9 @@ hs_compile_multi_int(const char *const *expressions, const unsigned *flags,
         return HS_COMPILER_ERROR;
     }
 
-#if defined(VS_SIMDE_NATIVE) && (defined(ARCH_IA32) || defined(ARCH_X86_64))
-#define CHECK_SSE_FUNC() (1)
-#else
-#define CHECK_SSE_FUNC() check_ssse3()
-#endif
-
 #if defined(FAT_RUNTIME)
 #if defined(ARCH_IA32) || defined(ARCH_X86_64)
-    if (!CHECK_SSE_FUNC()) {
+    if (!check_ssse3()) {
         *db = nullptr;
         *comp_error = generateCompileError("Unsupported architecture", -1);
         return HS_ARCH_ERROR;
@@ -330,7 +324,7 @@ hs_compile_lit_multi_int(const char *const *expressions, const unsigned *flags,
     }
 #if defined(FAT_RUNTIME)
 #if defined(ARCH_IA32) || defined(ARCH_X86_64)
-    if (!CHECK_SSE_FUNC()) {
+    if (!check_ssse3()) {
         *db = nullptr;
         *comp_error = generateCompileError("Unsupported architecture", -1);
         return HS_ARCH_ERROR;
@@ -510,7 +504,7 @@ hs_error_t hs_expression_info_int(const char *expression, unsigned int flags,
 
 #if defined(FAT_RUNTIME)
 #if defined(ARCH_IA32) || defined(ARCH_X86_64)
-    if (!CHECK_SSE_FUNC()) {
+    if (!check_ssse3()) {
         *error = generateCompileError("Unsupported architecture", -1);
         return HS_ARCH_ERROR;
     }
@@ -643,7 +637,7 @@ extern "C" HS_PUBLIC_API
 hs_error_t HS_CDECL hs_free_compile_error(hs_compile_error_t *error) {
 #if defined(FAT_RUNTIME)
 #if defined(ARCH_IA32) || defined(ARCH_X86_64)
-    if (!CHECK_SSE_FUNC()) {
+    if (!check_ssse3()) {
         return HS_ARCH_ERROR;
     }
 #endif
