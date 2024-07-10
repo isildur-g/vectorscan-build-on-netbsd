@@ -205,8 +205,8 @@ hs_compile_multi_int(const char *const *expressions, const unsigned *flags,
         *comp_error = generateCompileError("Unsupported architecture", -1);
         return HS_ARCH_ERROR;
     }
-#endif // arch
-#endif // FAT_RUNTIME
+#endif
+#endif
 
     if (!checkMode(mode, comp_error)) {
         *db = nullptr;
