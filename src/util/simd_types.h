@@ -56,7 +56,6 @@ typedef simde__m128i m128;
 
 
 #if !defined(m256) && !defined(HAVE_SIMD_256_BITS)
-blorf
 typedef struct ALIGN_AVX_DIRECTIVE {m128 lo; m128 hi;} m256;
 #endif
 
