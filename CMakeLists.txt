@@ -956,6 +956,15 @@ else ()
         endif(BUILD_SSE2_SIMDE)
         set_source_files_properties(src/dispatcher.c PROPERTIES
             COMPILE_FLAGS "-Wno-unused-parameter -Wno-unused-function ${DISPATCHER_DEFINE}")
+        if(BUILD_SSE2_SIMDE AND NOT BUILD_AVX2 AND NOT BUILD_AVX512 AND NOT BUILD_AVX512VBMI)
+            set_source_files_properties(src/crc32.c PROPERTIES
+                COMPILE_FLAGS "-DVS_SIMDE_BACKEND -DVS_SIMDE_NATIVE -march=core2 -msse2")
+            set_source_files_properties(src/hs.cpp PROPERTIES
+                COMPILE_FLAGS "-DVS_SIMDE_BACKEND -DVS_SIMDE_NATIVE -march=core2 -msse2")
+
+            string(REGEX REPLACE "-msse4.2" "-DVS_SIMDE_BACKEND -DVS_SIMDE_NATIVE -march=core2 -msse2" CMAKE_C_FLAGS "${CMAKE_C_FLAGS}")
+            string(REGEX REPLACE "-msse4.2" "-DVS_SIMDE_BACKEND -DVS_SIMDE_NATIVE -march=core2 -msse2" CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
+        endif()
 
         if (BUILD_STATIC_LIBS)
 
@@ -970,6 +979,8 @@ else ()
               endif()
 
               set_target_properties(hs_exec_core2 PROPERTIES
+                  string(REGEX REPLACE "-msse4.2" "-msse2" CMAKE_C_FLAGS "${CMAKE_C_FLAGS}")
+                  string(REGEX REPLACE "-msse4.2" "-msse2" CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
                   COMPILE_FLAGS "-DVS_SIMDE_BACKEND -DVS_SIMDE_NATIVE -march=core2 -msse2"
                   RULE_LAUNCH_COMPILE "${BUILD_WRAPPER} core2 ${CMAKE_MODULE_PATH}/keep.syms.in"
                   )
@@ -1027,6 +1038,13 @@ else ()
                 ${RUNTIME_LIBS})
             set_target_properties(hs_runtime PROPERTIES LINKER_LANGUAGE C)
             add_library(hs_compile OBJECT ${hs_compile_SRCS})
+            if (BUILD_SSE2_SIMDE)
+                set_target_properties(hs_compile PROPERTIES
+                  string(REGEX REPLACE "-msse4.2" "-msse2" CMAKE_C_FLAGS "${CMAKE_C_FLAGS}")
+                  string(REGEX REPLACE "-msse4.2" "-msse2" CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
+                  COMPILE_FLAGS "-DVS_SIMDE_BACKEND -DVS_SIMDE_NATIVE -march=core2 -msse2"
+                )
+            endif (BUILD_SSE2_SIMDE)
 
             # we want the static lib for testing
             add_library(hs STATIC src/hs_version.c src/hs_valid_platform.c
@@ -1044,16 +1062,23 @@ else ()
               message("Building SIMDE SSE2 version..")
               add_library(hs_exec_shared_core2 OBJECT ${hs_exec_SRCS})
               list(APPEND RUNTIME_SHLIBS $<TARGET_OBJECTS:hs_exec_shared_core2>)
-  
+
               include_directories(${PROJECT_SOURCE_DIR}/simde)
               if (CMAKE_COMPILER_IS_CLANG)
                 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -DSIMDE_NO_CHECK_IMMEDIATE_CONSTANT")
                 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DSIMDE_NO_CHECK_IMMEDIATE_CONSTANT")
               endif()
               set_target_properties(hs_exec_shared_core2 PROPERTIES
+                  string(REGEX REPLACE "-msse4.2" "-msse2" CMAKE_C_FLAGS "${CMAKE_C_FLAGS}")
+                  string(REGEX REPLACE "-msse4.2" "-msse2" CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
                   COMPILE_FLAGS "-DVS_SIMDE_BACKEND -DVS_SIMDE_NATIVE -march=core2 -msse2"
                   POSITION_INDEPENDENT_CODE TRUE
                   RULE_LAUNCH_COMPILE "${BUILD_WRAPPER} core2 ${CMAKE_MODULE_PATH}/keep.syms.in"
+                  )
+              set_target_properties(hs_compile_shared PROPERTIES
+                  string(REGEX REPLACE "-msse4.2" "-msse2" CMAKE_C_FLAGS "${CMAKE_C_FLAGS}")
+                  string(REGEX REPLACE "-msse4.2" "-msse2" CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
+                  COMPILE_FLAGS "-DVS_SIMDE_BACKEND -DVS_SIMDE_NATIVE -march=core2 -msse2"
                   )
             else()
               add_library(hs_exec_shared_core2 OBJECT ${hs_exec_SRCS})
