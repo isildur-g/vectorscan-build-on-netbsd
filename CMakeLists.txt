@@ -1038,19 +1038,26 @@ else ()
                 ${RUNTIME_LIBS})
             set_target_properties(hs_runtime PROPERTIES LINKER_LANGUAGE C)
             add_library(hs_compile OBJECT ${hs_compile_SRCS})
-            if (BUILD_SSE2_SIMDE)
-                set_target_properties(hs_compile PROPERTIES
-                  string(REGEX REPLACE "-msse4.2" "-msse2" CMAKE_C_FLAGS "${CMAKE_C_FLAGS}")
-                  string(REGEX REPLACE "-msse4.2" "-msse2" CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
-                  COMPILE_FLAGS "-DVS_SIMDE_BACKEND -DVS_SIMDE_NATIVE -march=core2 -msse2"
-                )
-            endif (BUILD_SSE2_SIMDE)
 
             # we want the static lib for testing
             add_library(hs STATIC src/hs_version.c src/hs_valid_platform.c
                 $<TARGET_OBJECTS:hs_compile>
                 $<TARGET_OBJECTS:hs_exec_common>
                 ${RUNTIME_LIBS})
+
+            if (BUILD_SSE2_SIMDE)
+                set_target_properties(hs_compile PROPERTIES
+                  string(REGEX REPLACE "-msse4.2" "-msse2" CMAKE_C_FLAGS "${CMAKE_C_FLAGS}")
+                  string(REGEX REPLACE "-msse4.2" "-msse2" CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
+                  COMPILE_FLAGS "-DVS_SIMDE_BACKEND -DVS_SIMDE_NATIVE -march=core2 -msse2"
+                )
+                set_target_properties(hs PROPERTIES
+                  string(REGEX REPLACE "-msse4.2" "-msse2" CMAKE_C_FLAGS "${CMAKE_C_FLAGS}")
+                  string(REGEX REPLACE "-msse4.2" "-msse2" CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
+                  COMPILE_FLAGS "-DVS_SIMDE_BACKEND -DVS_SIMDE_NATIVE -march=core2 -msse2"
+                )
+            endif (BUILD_SSE2_SIMDE)
+
         endif (BUILD_STATIC_LIBS)
 
         if (BUILD_SHARED_LIBS)
