@@ -39,7 +39,10 @@
 #ifndef VECTORSIZE
 #define VECTORSIZE 16
 #endif
+
+#ifndef SIMDE_ENABLE_NATIVE_ALIASES
 #define SIMDE_ENABLE_NATIVE_ALIASES
+#endif
 #if !defined(VS_SIMDE_NATIVE)
 #define SIMDE_NO_NATIVE
 #endif

@@ -30,8 +30,12 @@
 #ifndef UTIL_ARCH_X86_CRC32_H_
 #define UTIL_ARCH_X86_CRC32_H_
 
+#if defined(VS_SIMDE_BACKEN)
+#include "util/simd_types.h"
+#else
 #include "util/arch/x86/x86.h"
 #include "util/intrinsics.h"
+#endif
 
 #ifdef ARCH_64_BIT
 #define CRC_WORD 8
