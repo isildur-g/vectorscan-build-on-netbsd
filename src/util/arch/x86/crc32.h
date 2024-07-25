@@ -30,7 +30,7 @@
 #ifndef UTIL_ARCH_X86_CRC32_H_
 #define UTIL_ARCH_X86_CRC32_H_
 
-#if defined(VS_SIMDE_BACKEN)
+#if defined(VS_SIMDE_BACKEND)
 #include "util/simd_types.h"
 #else
 #include "util/arch/x86/x86.h"
